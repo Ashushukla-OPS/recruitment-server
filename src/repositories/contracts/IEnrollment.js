@@ -10,6 +10,9 @@ class IEnrollment{
   async findEnrollmentsByUser(email) {
     throw new Error("Method not implemented");
   }
+  async bulkCreateEnrollment (testId , emails ) {
+      throw new Error("Method not implemented")
+  }
 }
 
 export default IEnrollment ; 

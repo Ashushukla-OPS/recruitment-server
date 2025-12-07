@@ -57,6 +57,39 @@ class TestEnrollmentService {
   async getAssignedTests(email) {
     return await this.testEnrollmentRepository.findEnrollmentsByUser(email);
   }
+
+  async enrollUsersBulk(testId, emails) {
+    const result = await this.testEnrollmentRepository.bulkCreateEnrollment(testId, emails);
+    try {
+      const jobs = emails.map(email => ({
+        name: "enroll-candidate",
+        data: { 
+          to: email.toLowerCase().trim(),
+          name: "Candidate",
+          testId: testId.toString(),
+        },
+        opts: {
+          attempts: 3,
+          backoff: { type: "exponential", delay: 5000 },
+          removeOnComplete: true,
+          removeOnFail: false,
+        },
+      }));
+
+      await emailQueue.addBulk(jobs);
+      logger.info(`Queued ${jobs.length} bulk enrollment emails`, { testId });
+    } catch (error) {
+      logger.warn("Failed to queue bulk emails", { testId, error: error.message });
+    }
+
+    return {
+      success: true,
+      insertedCount: result.insertedCount || result.nInserted || emails.length,
+      totalProvided: emails.length,
+    };
+  }
+
+
 }
 
 export default TestEnrollmentService;

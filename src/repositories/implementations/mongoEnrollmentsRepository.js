@@ -47,11 +47,36 @@ class MongoEnrollmentsRespository extends IEnrollment {
         },
       ]);
 
-      // console.log(enrollments);
       return enrollments;
     } catch (error) {
       throw new AppError(
         `Failed to find user enrollments: ${error.message}`,
+        500,
+        error
+      );
+    }
+  }
+
+  async bulkCreateEnrollment(testId, emails) {
+    try {
+      const operations = emails.map((email) => ({
+        insertOne: {
+          document: {
+            testId,
+            email: email.toLowerCase().trim(),
+            enrolledAt: new Date(),
+          },
+        },
+      }));
+
+      const result = await TestEnrollments.bulkWrite(operations, {
+        ordered: false,
+      });
+
+      return result;
+    } catch (error) {
+      throw new AppError(
+        `Failed to enroll user in test: ${error.message}`,
         500,
         error
       );

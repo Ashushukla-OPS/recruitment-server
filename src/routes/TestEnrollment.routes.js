@@ -19,4 +19,6 @@ router.get(
   enrollmentController.getAssignedTests
 );
 
+router.post("/bulk-enroll" , authenticateJWT , enrollmentController.enrollUsersBulk)
+
 export default router;
