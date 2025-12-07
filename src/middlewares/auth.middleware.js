@@ -11,7 +11,7 @@ export const authenticateJWT = async (req, res, next) => {
     if (!token) {
       throw new AppError("Access denied. No token provided.", 401);
     }
-    console.log(token);
+    
     
     const isBlacklisted = await redisClient.get(`bl_${token}`);
   
@@ -20,7 +20,7 @@ export const authenticateJWT = async (req, res, next) => {
     }
     
     const decoded = authService.verifyToken(token);
-    console.log(decoded,"abc")
+    console.log(decoded)
     if( !decoded.isVerified || decoded.isVerified===false) {
        throw new AppError("User is not verified", 401);
     } 
