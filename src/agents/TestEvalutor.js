@@ -1,7 +1,7 @@
 import { llm } from "../services/ai.service.js";
 import { safeParseLLMJSON } from "../lib/cleanCode.js";
 
-export async function evaluateTest({ questions, answers, passingScore = 40 }) {
+export async function evaluateTest({ questions, answers }) {
   const prompt = `
 You are not a teacher — You are a strict AI exam evaluator.
 
