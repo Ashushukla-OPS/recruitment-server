@@ -77,9 +77,9 @@ class MongoSkillRepository extends ISkillRepository {
     if (!query) {
       throw new AppError("Query parameter 'name' is required", 400);
     }
-   return Skill.find({ name: { $regex: query, $options: "i" } });
-
-    // return await skillRepo.searchSkillsByName(query);
+    return Skill.find(
+      { name: { $regex: query, $options: "i" } }
+    );
   }
 }
 
