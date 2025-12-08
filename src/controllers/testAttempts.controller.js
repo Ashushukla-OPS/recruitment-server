@@ -49,17 +49,26 @@ class TestAttemptsController {
   async submitTest(req, res, next) {
     try {
       const attemptId = req.params.attemptId;
+      const { testId, answers } = req.body;
 
-      const { questions, answers } = req.body;
+      if (!testId) {
+        return res
+          .status(400)
+          .json({ success: false, message: "testId is required" });
+      }
+
+      const test = await this.testService.getTestById(testId);
 
       const evaluation = await evaluateTest({
-        questions,
+        questions: test.questions,
         answers,
+        passingScore: test.passingScore,
       });
 
       const updatedAttempt = await this.testAttemptsService.submitTest(
         attemptId,
         {
+          testId,
           answers,
           score: evaluation.totalScore,
           percentage: evaluation.percentage,
@@ -70,9 +79,9 @@ class TestAttemptsController {
 
       return res.status(200).json({
         success: true,
-        message: "Test evaluated successfully",
+        message: "Test submitted & evaluated successfully",
         evaluation,
-        data: updatedAttempt,
+        attempt: updatedAttempt,
       });
     } catch (error) {
       next(error);

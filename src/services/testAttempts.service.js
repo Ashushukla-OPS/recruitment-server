@@ -38,8 +38,20 @@ class TestAttemptsService {
 
     const updatedAttempt = await this.testAttemptsRepogitory.updateTestAttempt(
       attemptId,
-      testResults
+      {
+        testId: testResults.testId,
+        answers: testResults.answers,
+        score: testResults.score,
+        percentage: testResults.percentage,
+        isPassed: testResults.isPassed,
+        status: testResults.status,
+        endTime: new Date(),
+      }
     );
+
+    if (!updatedAttempt) {
+      throw new AppError("Test attempt not found", 404);
+    }
 
     return updatedAttempt;
   }

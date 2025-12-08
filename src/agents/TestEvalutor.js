@@ -1,33 +1,9 @@
 import { llm } from "../services/ai.service.js";
 import { safeParseLLMJSON } from "../lib/cleanCode.js";
+import evaluationPrompt from "../lib/prompt/answerEvaluatorPrompt.js";
 
-export async function evaluateTest({ questions, answers }) {
-  const prompt = `
-You are not a teacher — You are a strict AI exam evaluator.
-
-Rules:
-1. Return ONLY JSON (no explanation outside JSON).
-2. Score question between 0–1 unless stated otherwise.
-3. If answer is partially correct → score = 0.5
-4. If completely wrong → score = 0
-5. You MUST respond in this structure:
-
-{
-  "totalScore": Number,
-  "percentage": Number,
-  "passed": Boolean,
-  "results": [
-    {
-      "question": String,
-      "expectedAnswer": String,
-      "userAnswer": String,
-      "score": Number,
-      "feedback": String
-    }
-  ]
-}
-
-Evaluate Now ⬇️
+export async function evaluateTest({ questions, answers, passingScore }) {
+  const prompt = `${evaluationPrompt}
 
 QUESTIONS:
 ${JSON.stringify(questions, null, 2)}
@@ -37,5 +13,46 @@ ${JSON.stringify(answers, null, 2)}
 `;
 
   const aiResponse = await llm.invoke(prompt);
-  return safeParseLLMJSON(aiResponse.content);
+  const parsed = safeParseLLMJSON(aiResponse.content) || {};
+
+  let { results = [], totalScore, percentage, passed } = parsed;
+
+  if (!Array.isArray(results)) results = [];
+  let computedScore =
+    typeof totalScore === "number" && !Number.isNaN(totalScore)
+      ? totalScore
+      : 0;
+
+  if ((!computedScore || computedScore === 0) && results.length > 0) {
+    computedScore = results.reduce(
+      (sum, r) => sum + (typeof r.score === "number" ? r.score : 0),
+      0
+    );
+  }
+
+  const totalQuestions =
+    results.length ||
+    (Array.isArray(questions) ? questions.length : 0) ||
+    (Array.isArray(answers) ? answers.length : 0);
+
+  let computedPercentage =
+    typeof percentage === "number" && percentage >= 0
+      ? percentage
+      : totalQuestions > 0
+      ? (computedScore / totalQuestions) * 100
+      : 0;
+
+  let computedPassed =
+    typeof passed === "boolean"
+      ? passed
+      : typeof passingScore === "number"
+      ? computedPercentage >= passingScore
+      : false;
+
+  return {
+    totalScore: computedScore,
+    percentage: Number(computedPercentage.toFixed(2)),
+    passed: computedPassed,
+    results,
+  };
 }
