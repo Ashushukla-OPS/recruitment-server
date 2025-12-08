@@ -22,6 +22,15 @@ const testEnrollmentsSchema = joi.object({
     .default("Assigned"),
 });
 
+const testEnrollmentsBulkSchema = joi.object({
+  testId: objectId.required(),
+  emails: joi.array()
+    .items(joi.string().email().required())
+    .min(1)
+    .required()
+
+})
+
 const testAttemptSchema = joi.object({
   testId: objectId.required(),
 
@@ -47,4 +56,4 @@ const testAttemptSchema = joi.object({
   answers: joi.array().items(joi.any()).required(),
 });
 
-export { testSchema, testAttemptSchema, testEnrollmentsSchema };
+export { testSchema, testAttemptSchema, testEnrollmentsSchema  , testEnrollmentsBulkSchema };
