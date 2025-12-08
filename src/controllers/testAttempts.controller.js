@@ -1,13 +1,11 @@
 import { testGenerator } from "../agents/TestGenerator.js";
+import { evaluateTest } from "../agents/TestEvalutor.js";
 import TestAttemptsService from "../services/testAttempts.service.js";
 import TestService from "../services/tests.service.js";
-
-
 
 class TestAttemptsController {
   constructor() {
     this.testAttemptsService = new TestAttemptsService();
-
 
     this.startTest = this.startTest.bind(this);
     this.submitTest = this.submitTest.bind(this);
@@ -32,13 +30,17 @@ class TestAttemptsController {
         duration: testSummary.duration,
         passingScore: testSummary.passingScore,
         prompt: testSummary.prompt,
-      }
+      };
 
       const resfromAI = await testGenerator({ prompt: data });
 
       const attempt = await this.testAttemptsService.startTest(testId, email);
 
-      return res.status(201).json({ success: true, data: attempt, questions: resfromAI });
+      return res.status(201).json({
+        success: true,
+        data: attempt,
+        questions: resfromAI,
+      });
     } catch (error) {
       next(error);
     }
@@ -47,14 +49,31 @@ class TestAttemptsController {
   async submitTest(req, res, next) {
     try {
       const attemptId = req.params.attemptId;
-      const testResults = req.body;
+
+      const { questions, answers } = req.body;
+
+      const evaluation = await evaluateTest({
+        questions,
+        answers,
+      });
 
       const updatedAttempt = await this.testAttemptsService.submitTest(
         attemptId,
-        testResults
+        {
+          answers,
+          score: evaluation.totalScore,
+          percentage: evaluation.percentage,
+          isPassed: evaluation.passed,
+          status: "Graded",
+        }
       );
 
-      return res.status(200).json({ success: true, data: updatedAttempt });
+      return res.status(200).json({
+        success: true,
+        message: "Test evaluated successfully",
+        evaluation,
+        data: updatedAttempt,
+      });
     } catch (error) {
       next(error);
     }
