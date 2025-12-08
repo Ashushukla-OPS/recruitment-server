@@ -352,6 +352,11 @@ class UserService {
 
     return true;
   }
+
+  async findUser (query){ 
+     const users =  await this.userRepository.findUser(query); 
+     return users ; 
+  }
 }
 
 export default UserService;

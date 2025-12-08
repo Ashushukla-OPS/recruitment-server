@@ -5,7 +5,7 @@ class TestEnrollmentController {
     this.enrollmentService = new TestEnrollmentService();
     this.enrollUser = this.enrollUser.bind(this);
     this.getAssignedTests = this.getAssignedTests.bind(this);
-    this.enrollUsersBulk = this.enrollUsersBulk.bind(this); 
+    this.enrollUsersBulk = this.enrollUsersBulk.bind(this);
   }
 
   async enrollUser(req, res, next) {
@@ -40,9 +40,9 @@ class TestEnrollmentController {
     }
   }
 
-  async enrollUsersBulk(req , res , next ) {
+  async enrollUsersBulk(req, res, next) {
     try {
-       const {testId , emails } = req.body ; 
+      const { testId, emails } = req.body;
       const enrolledUsers = await this.enrollmentService.enrollUsersBulk(
         testId,
         emails

@@ -15,5 +15,5 @@ router.patch(
   updateUserValidator,
   userController.updateMe
 );
-
+router.get("/search", authenticateJWT, userController.searchUser);
 export default router;

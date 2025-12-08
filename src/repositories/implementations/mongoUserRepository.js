@@ -53,7 +53,7 @@ class MongoUserRepository extends IUserRepository {
             phoneNumber: 1,
             password: 1,
             googleId: 1,
-            isVerified:1,
+            isVerified: 1,
             role: {
               _id: "$role._id",
               name: "$role.name",
@@ -63,7 +63,7 @@ class MongoUserRepository extends IUserRepository {
         },
         { $limit: 1 },
       ]);
-      console.log(user , "this is from the UserRepo")
+      console.log(user, "this is from the UserRepo");
       return user || null;
     } catch (error) {
       throw new AppError(
@@ -74,70 +74,134 @@ class MongoUserRepository extends IUserRepository {
     }
   }
 
-async findUserById(id) {
-  const isValid = mongoose.Types.ObjectId.isValid(id);
+  async findUserById(id) {
+    const isValid = mongoose.Types.ObjectId.isValid(id);
 
-  if (!isValid) {
-    console.log("ERROR: Invalid ObjectId format:", id);
-    return null;
-  }
+    if (!isValid) {
+      console.log("ERROR: Invalid ObjectId format:", id);
+      return null;
+    }
 
-  const objectId = new mongoose.Types.ObjectId(id);
+    const objectId = new mongoose.Types.ObjectId(id);
 
-  const [user] = await User.aggregate([
-    { $match: { _id: objectId } },
+    const [user] = await User.aggregate([
+      { $match: { _id: objectId } },
 
-    {
-      $lookup: {
-        from: "roles",
-        localField: "roleId",
-        foreignField: "_id",
-        as: "role",
-      },
-    },
-
-    {
-      $unwind: {
-        path: "$role",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-
-    {
-      $project: {
-        _id: 1,
-        email: 1,
-        password: 1,
-        firstName: 1,
-        lastName: 1,
-        phoneNumber: 1,
-        googleId: 1,
-        isVerified:1,
-        role: {
-          $cond: [
-            { $ifNull: ["$role", false] },
-            {
-              _id: "$role._id",
-              name: "$role.name",
-              description: "$role.description",
-            },
-            null,
-          ],
+      {
+        $lookup: {
+          from: "roles",
+          localField: "roleId",
+          foreignField: "_id",
+          as: "role",
         },
       },
-    },
 
-    { $limit: 1 },
-  ]);
+      {
+        $unwind: {
+          path: "$role",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
-  return user || null;
-}
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          password: 1,
+          firstName: 1,
+          lastName: 1,
+          phoneNumber: 1,
+          googleId: 1,
+          isVerified: 1,
+          role: {
+            $cond: [
+              { $ifNull: ["$role", false] },
+              {
+                _id: "$role._id",
+                name: "$role.name",
+                description: "$role.description",
+              },
+              null,
+            ],
+          },
+        },
+      },
+
+      { $limit: 1 },
+    ]);
+
+    return user || null;
+  }
 
   async updateUser(id, userData) {
     try {
       return await User.findByIdAndUpdate(id, userData, { new: true });
     } catch (error) {
       throw new AppError("Failed to update user", 500, error);
+    }
+  }
+
+  async findUser(query) {
+    const searchQuery = query.trim();
+    const regex = new RegExp(searchQuery, "i");
+    try {
+      const users = await User.aggregate([
+        {
+          $match: {
+            $or: [
+              { email: regex },
+              { firstName: regex },
+              { lastName: regex },
+              {
+                $expr: {
+                  $regexMatch: {
+                    input: { $concat: ["$firstName", " ", "$lastName"] },
+                    regex: searchQuery,
+                    options: "i",
+                  },
+                },
+              },
+            ],
+          },
+        },
+        {
+          $lookup: {
+            from: "roles",
+            localField: "roleId",
+            foreignField: "_id",
+            as: "role",
+          },
+        },
+        {
+          $unwind: {
+            path: "$role",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            email: 1,
+            firstName: 1,
+            lastName: 1,
+            phoneNumber: 1,
+            googleId: 1,
+            isVerified: 1,
+            role: {
+              _id: "$role._id",
+              name: "$role.name",
+              description: "$role.description",
+            },
+            fullName: { $concat: ["$firstName", " ", "$lastName"] },
+          },
+        },
+        { $limit: 20 },
+      ]);
+
+      return users;
+    } catch (error) {
+      console.error("Error searching users:", error);
+      throw new AppError("Failed to search users", 500, error);
     }
   }
 }
