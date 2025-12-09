@@ -74,6 +74,7 @@ class MongoSkillRepository extends ISkillRepository {
 
   async searchSkillsByName(name) {
     const query = (name || "").trim();
+    console.log(query)
     if (!query) {
       throw new AppError("Query parameter 'name' is required", 400);
     }
