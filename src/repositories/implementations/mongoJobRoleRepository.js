@@ -64,7 +64,7 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           $unwind: { path: "$category", preserveNullAndEmptyArrays: true }
         }
       ]);
-      
+
       return result.length > 0 ? result[0] : null;
     } catch (error) {
       throw new AppError("Failed to find job role", 500);
@@ -83,7 +83,7 @@ class MongoJobRoleRepository extends IJobRoleRepository {
       }
       if (filter.title) {
         matchStage.title = { $regex: filter.title, $options: 'i' };
-        console.log("matchTitle",matchStage);
+        console.log("matchTitle", matchStage);
       }
       if (filter.expiry) {
         if (filter.expiry === 'active') {
@@ -93,10 +93,23 @@ class MongoJobRoleRepository extends IJobRoleRepository {
         }
       }
 
-      console.log("this is matchStage " , matchStage)
+      console.log("this is matchStage ", matchStage)
 
-      const jobs= await JobRole.aggregate([
+      const jobs = await JobRole.aggregate([
         { $match: matchStage },
+        {
+          $lookup: {
+            from: "jobapplications",
+            localField: "_id",
+            foreignField: "jobId",
+            as: "applications"
+          }
+        },
+        {
+          $addFields: {
+            applicantsCount: { $size: "$applications" }
+          }
+        },
         {
           $lookup: {
             from: "users",
