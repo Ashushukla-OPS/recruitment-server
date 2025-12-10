@@ -17,19 +17,55 @@ class MongoTestAttampsRepository extends IAttempts {
     }
   }
 
-  async findAttemptsByUser(testId, email) {
-    try {
-      return await TestAttempts.find({ testId, email })
-        .sort({ startTime: -1 })
-        .lean();
-    } catch (error) {
-      throw new AppError(
-        `Failed to find user attempts: ${error.message}`,
-        500,
-        error
-      );
-    }
+  async findAttemptsByUser(testId) {
+  try {
+    const attempts = await TestAttempts.aggregate([
+      {
+        $match: {
+          testId: new mongoose.Types.ObjectId(testId) 
+        }
+      },
+      {
+        $lookup: {
+          from: "users",           
+          localField: "email",     
+          foreignField: "email",   
+          as: "userInfo"
+        }
+      },
+      {
+        $unwind: {
+          path: "$userInfo",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          firstName: "$userInfo.firstName",  
+          lastName: "$userInfo.lastName"
+        }
+      },
+      {
+        $project: {
+          userInfo: 0
+        }
+      },
+      {
+        $sort: { startTime: -1 }
+      }
+    ]);
+
+    return attempts;
+
+  } catch (error) {
+    throw new AppError(
+      `Failed to find user attempts: ${error.message}`,
+      500,
+      error
+    );
   }
+}
+
 
   async updateTestAttempt(id, updateData) {
     try {
