@@ -3,7 +3,7 @@ import express from "express";
 import { authorize } from "../middlewares/role.middleware.js";
 import { authenticateJWT } from "../middlewares/auth.middleware.js";
 import jobApplicationController from "../controllers/jobApplication.controller.js";
-import { createJobValidator, updateJobStatus } from "../middlewares/validators/jobApplication.validator.js";
+import { bulkUpdateJobStatus, createJobValidator, updateJobStatus } from "../middlewares/validators/jobApplication.validator.js";
 
 
 const router = express.Router();
@@ -22,6 +22,14 @@ router.get(
  
   jobApplicationController.getAllApplications
 );
+
+router.patch(
+  "/bulk-update",
+  authenticateJWT,
+  authorize("admin"),
+  bulkUpdateJobStatus,
+  jobApplicationController.bulkUpdateApplicationStatus
+)
 
 router.patch(
   "/:status",

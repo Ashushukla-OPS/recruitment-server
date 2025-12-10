@@ -107,6 +107,10 @@ try {
     return await this.jobAppRepo.getAllApplications();
   }
 
+  async bulkUpdateApplicationStatus(applicationIds, status){
+    return await this.jobAppRepo.bulkUpdateApplicationStatus(applicationIds,status);
+  }
+
   async updateApplicationStatus(applicationId, status) {
     return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
   }
