@@ -71,7 +71,7 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-async findAllJobRoles(filter = {}) {
+async findAllJobRoles(filter = {} , userId ) {
   try {
     const matchStage = {};
 
@@ -106,6 +106,33 @@ async findAllJobRoles(filter = {}) {
       { $match: matchStage },
       {
         $lookup: {
+          from: "jobapplications",
+          localField: "_id",
+          foreignField: "jobId",
+          as: "applications",
+        }
+      },
+
+      {
+        $addFields: {
+          applied: {
+            $cond: {
+              if: userId
+                ? {
+                    $in: [
+                      new mongoose.Types.ObjectId(userId),
+                      "$applications.candidateId"
+                    ]
+                  }
+                : false,
+              then: true,
+              else: false
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
           from: "users",
           localField: "createdBy",
           foreignField: "_id",
@@ -138,14 +165,19 @@ async findAllJobRoles(filter = {}) {
           as: "skills"
         }
       },
+      {
+         $project:{
+             applications:0
+         }
+      },
       { $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
       { $sort: { createdAt: -1 } }
     ]);
-
     return jobs;
   } catch (error) {
+    console.error(error);
     throw new AppError("Failed to fetch job roles", 500);
   }
 }
