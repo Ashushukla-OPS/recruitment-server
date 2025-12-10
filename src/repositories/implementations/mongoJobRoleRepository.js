@@ -71,83 +71,105 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-  async findAllJobRoles(filter = {}) {
-
-    try {
-      const matchStage = {};
-      if (filter.clientId) {
-        matchStage.clientId = new mongoose.Types.ObjectId(filter.clientId);
-      }
-      if (filter.category) {
-        matchStage.category = new mongoose.Types.ObjectId(filter.category);
-      }
-      if (filter.title) {
-        matchStage.title = { $regex: filter.title, $options: 'i' };
-        console.log("matchTitle",matchStage);
-      }
-      if (filter.expiry) {
-        if (filter.expiry === 'active') {
-          matchStage.expiry = { $gte: new Date() };
-        } else if (filter.expiry === 'expired') {
-          matchStage.expiry = { $lt: new Date() };
-        }
-      }
-
-      console.log("this is matchStage " , matchStage)
-
-      const jobs= await JobRole.aggregate([
-        { $match: matchStage },
-        {
-          $lookup: {
-            from: "users",
-            localField: "createdBy",
-            foreignField: "_id",
-            as: "createdBy",
-            pipeline: [{ $project: { name: 1, email: 1 } }]
-          }
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "clientId",
-            foreignField: "_id",
-            as: "client",
-            pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
-          }
-        },
-        {
-          $lookup: {
-            from: "jobcategories",
-            localField: "category",
-            foreignField: "_id",
-            as: "category"
-          }
-        },
-        {
-          $lookup: {
-            from: "skills",
-            localField: "skills",
-            foreignField: "_id",
-            as: "skills"
-          }
-        },
-        {
-          $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true }
-        },
-        {
-          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
-        },
-        {
-          $unwind: { path: "$category", preserveNullAndEmptyArrays: true }
-        },
-        { $sort: { createdAt: -1 } }
-      ]);
-      console.log(jobs);
-      return jobs;
-    } catch (error) {
-      throw new AppError("Failed to fetch job roles", 500);
+async findAllJobRoles(filter = {}, userId) {
+  try {
+    const matchStage = {};
+    if (filter.clientId) {
+      matchStage.clientId = new mongoose.Types.ObjectId(filter.clientId);
     }
+    if (filter.category) {
+      matchStage.category = new mongoose.Types.ObjectId(filter.category);
+    }
+    if (filter.title) {
+      matchStage.title = { $regex: filter.title, $options: "i" };
+    }
+    if (filter.expiry) {
+      if (filter.expiry === "active") {
+        matchStage.expiry = { $gte: new Date() };
+      } else if (filter.expiry === "expired") {
+        matchStage.expiry = { $lt: new Date() };
+      }
+    }
+
+    const jobs = await JobRole.aggregate([
+      { $match: matchStage },
+      {
+        $lookup: {
+          from: "jobapplications",
+          localField: "_id",
+          foreignField: "jobId",
+          as: "applications",
+        }
+      },
+
+      {
+        $addFields: {
+          applied: {
+            $cond: {
+              if: userId
+                ? {
+                    $in: [
+                      new mongoose.Types.ObjectId(userId),
+                      "$applications.candidateId"
+                    ]
+                  }
+                : false,
+              then: true,
+              else: false
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "createdBy",
+          foreignField: "_id",
+          as: "createdBy",
+          pipeline: [{ $project: { name: 1, email: 1 } }]
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "client",
+          pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
+        }
+      },
+      {
+        $lookup: {
+          from: "jobcategories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category"
+        }
+      },
+      {
+        $lookup: {
+          from: "skills",
+          localField: "skills",
+          foreignField: "_id",
+          as: "skills"
+        }
+      },
+      {
+         $project:{
+             applications:0
+         }
+      },
+      { $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+      { $sort: { createdAt: -1 } }
+    ]);
+    return jobs;
+  } catch (error) {
+    console.error(error);
+    throw new AppError("Failed to fetch job roles", 500);
   }
+}
 
   async updateJobRole(id, jobRoleData) {
     try {

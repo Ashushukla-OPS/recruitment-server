@@ -29,9 +29,8 @@ class JobRoleService {
     return await this.jobRoleRepository.createJobRole(jobRoleData);
   }
 
-  async getAllJobRoles(filter = {}) {
-    
-    return await this.jobRoleRepository.findAllJobRoles(filter);
+  async getAllJobRoles(filter = {} , userId ) {
+    return await this.jobRoleRepository.findAllJobRoles(filter , userId);
   }
 
   async getJobRoleById(id) {

@@ -22,6 +22,7 @@ router.post(
 
 router.get(
   "/",
+  authenticateJWT,
   filterJobRolesValidator,
   jobRoleController.getAllJobRoles
 );
