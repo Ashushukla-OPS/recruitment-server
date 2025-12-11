@@ -1,35 +1,35 @@
 import jobApplicationService from "../services/jobApplication.service.js";
-import { asyncHandler } from "../utils/asyncHandler.js"; 
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { AppError } from "../utils/errors.js";
 
 class JobApplicationController {
-    
-   applyForJob = asyncHandler(async (req, res, next) => {
-  const { jobId, message, resumeUrl } = req.body;
-  const candidateId = req.userId;
 
-  if (!resumeUrl) throw new AppError("Resume URL is required", 400);
+    applyForJob = asyncHandler(async (req, res, next) => {
+        const { jobId, message, resumeUrl } = req.body;
+        const candidateId = req.userId;
+
+        if (!resumeUrl) throw new AppError("Resume URL is required", 400);
 
 
-  const response = await jobApplicationService.applyForJob({
-    jobId,
-    candidateId,
-    message,
-    resumeUrl,
-  });
+        const response = await jobApplicationService.applyForJob({
+            jobId,
+            candidateId,
+            message,
+            resumeUrl,
+        });
 
- 
-  res.status(201).json(response);
-});
+
+        res.status(201).json(response);
+    });
 
 
     getAllApplications = asyncHandler(async (req, res) => {
         const applications = await jobApplicationService.getAllApplications();
-        
+
         res.status(200).json({
             success: true,
-            total: applications.length, 
-            data: applications,         
+            total: applications.length,
+            data: applications,
         });
     });
 
@@ -56,13 +56,19 @@ class JobApplicationController {
     filterApplications = asyncHandler(async (req, res) => {
         const { status } = req.params;
         const applications = await jobApplicationService.filterApplications(status);
-        
+
         res.status(200).json({
             success: true,
             total: applications.length,
             data: applications,
         });
     });
+
+    async getApplicantsByJobId(req, res) {
+        const id = req.params.id;
+        const applicants = await jobApplicationService.getApplicantsByJobId(id);
+        res.status(200).json({ success: true, applicants });
+    }
 }
 
 export default new JobApplicationController();

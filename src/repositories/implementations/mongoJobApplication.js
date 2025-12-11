@@ -1,22 +1,22 @@
 import jobAppModel from "../../models/jobApplication.model.js";
 import { AppError } from "../../utils/errors.js";
 import IJobApplicationRepository from "../contracts/IJobApplicationRepository.js";
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 class MongoApplicationRespository extends IJobApplicationRepository {
 
- 
- async createJobApplication(jobAppData) {
-  try {
-    const jobApplication = new jobAppModel(jobAppData);
-    const savedApplication = await jobApplication.save();
-    return savedApplication;
-  } catch (error) {
-    console.error("Error creating job application:", error);
-    throw new AppError(`Failed to create job application: ${error.message}`, 500, error);
+
+  async createJobApplication(jobAppData) {
+    try {
+      const jobApplication = new jobAppModel(jobAppData);
+      const savedApplication = await jobApplication.save();
+      return savedApplication;
+    } catch (error) {
+      console.error("Error creating job application:", error);
+      throw new AppError(`Failed to create job application: ${error.message}`, 500, error);
+    }
   }
-}
- 
+
   async findByUserAndJob(candidateId, jobId) {
     const result = await jobAppModel.aggregate([
       {
@@ -82,7 +82,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
     }
   }
 
- 
+
   async getAllApplications() {
     return await jobAppModel.aggregate([
       {
@@ -112,6 +112,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           coverletter: 1,
           status: 1,
           createdAt: 1,
+          appliedAt: 1,
 
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
@@ -143,6 +144,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       },
       { $unwind: "$candidateDetails" },
 
+      // JOIN JOB DETAILS
       {
         $lookup: {
           from: "jobroles",
@@ -153,16 +155,185 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       },
       { $unwind: "$jobDetails" },
 
+      // JOIN EXPERIENCE MODEL
+      {
+        $lookup: {
+          from: "experiences",
+          localField: "candidateId",
+          foreignField: "candidateId",
+          as: "experienceList"
+        }
+      },
+
+      // CALCULATE TOTAL EXPERIENCE IN YEARS
+      {
+        $addFields: {
+          totalExperienceYears: {
+            $sum: {
+              $map: {
+                input: "$experienceList",
+                as: "exp",
+                in: {
+                  $divide: [
+                    {
+                      $subtract: [
+                        {
+                          $ifNull: [
+                            "$$exp.endDate",
+                            {
+                              $cond: [
+                                { $eq: ["$$exp.isCurrent", true] },
+                                new Date(),          // IF CURRENTLY WORKING
+                                "$$exp.startDate"    // fallback
+                              ]
+                            }
+                          ]
+                        },
+                        "$$exp.startDate"
+                      ]
+                    },
+                    1000 * 60 * 60 * 24 * 365
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+
+      // ROUND EXPERIENCE
+      {
+        $addFields: {
+          totalExperienceYears: { $round: ["$totalExperienceYears", 1] }
+        }
+      },
+
+      // FINAL OUTPUT
       {
         $project: {
           _id: 1,
+          resumeUrl: 1,
+          coverletter: 1,
           status: 1,
           createdAt: 1,
+          appliedAt: 1,
 
           "candidateDetails.firstName": 1,
+          "candidateDetails.lastName": 1,
           "candidateDetails.email": 1,
 
-          "jobDetails.title": 1
+          "jobDetails.title": 1,
+          "jobDetails.description": 1,
+          "jobDetails.requiredExperience": 1,
+
+          totalExperienceYears: 1
+        }
+      }
+
+    ]);
+  }
+
+  async getApplicantsByJobId(jobId) {
+    return jobAppModel.aggregate([
+      {
+        $match: {
+          jobId: new mongoose.Types.ObjectId(jobId)
+        }
+      },
+
+      // JOIN USERS
+      {
+        $lookup: {
+          from: "users",
+          localField: "candidateId",
+          foreignField: "_id",
+          as: "candidateDetails"
+        }
+      },
+      { $unwind: "$candidateDetails" },
+
+      // JOIN JOB DETAILS
+      {
+        $lookup: {
+          from: "jobroles",
+          localField: "jobId",
+          foreignField: "_id",
+          as: "jobDetails"
+        }
+      },
+      { $unwind: "$jobDetails" },
+
+      // JOIN EXPERIENCE MODEL
+      {
+        $lookup: {
+          from: "experiences",
+          localField: "candidateId",
+          foreignField: "candidateId",
+          as: "experienceList"
+        }
+      },
+
+      // CALCULATE total experience in YEARS
+      {
+        $addFields: {
+          totalExperienceYears: {
+            $sum: {
+              $map: {
+                input: "$experienceList",
+                as: "exp",
+                in: {
+                  $divide: [
+                    {
+                      $subtract: [
+                        {
+                          $ifNull: [
+                            "$$exp.endDate",
+                            {
+                              $cond: [
+                                { $eq: ["$$exp.isCurrent", true] },
+                                new Date(),         // currently working
+                                "$$exp.startDate"   // fallback (never happens but safe)
+                              ]
+                            }
+                          ]
+                        },
+                        "$$exp.startDate"
+                      ]
+                    },
+                    1000 * 60 * 60 * 24 * 365
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      // ROUND EXPERIENCE TO 1 DECIMAL
+      {
+        $addFields: {
+          totalExperienceYears: { $round: ["$totalExperienceYears", 1] }
+        }
+      },
+
+      // FINAL OUTPUT
+      {
+        $project: {
+          _id: 1,
+          resumeUrl: 1,
+          coverletter: 1,
+          status: 1,
+          createdAt: 1,
+          appliedAt: 1,
+
+          "candidateDetails.firstName": 1,
+          "candidateDetails.lastName": 1,
+          "candidateDetails.email": 1,
+
+          "jobDetails.title": 1,
+          "jobDetails.description": 1,
+          "jobDetails.requiredExperience": 1,
+
+          totalExperienceYears: 1
         }
       }
     ]);
