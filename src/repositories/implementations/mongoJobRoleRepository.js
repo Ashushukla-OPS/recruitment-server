@@ -93,7 +93,6 @@ class MongoJobRoleRepository extends IJobRoleRepository {
         }
       }
 
-      console.log("this is matchStage ", matchStage)
 
       const jobs = await JobRole.aggregate([
         { $match: matchStage },
