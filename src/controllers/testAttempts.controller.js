@@ -49,7 +49,7 @@ class TestAttemptsController {
   async submitTest(req, res, next) {
     try {
       const attemptId = req.params.attemptId;
-      const { testId, answers } = req.body;
+      const { testId, questions ,answers } = req.body;
 
       if (!testId) {
         return res
@@ -60,7 +60,7 @@ class TestAttemptsController {
       const test = await this.testService.getTestById(testId);
 
       const evaluation = await evaluateTest({
-        questions: test.questions,
+        questions: questions,
         answers,
         passingScore: test.passingScore,
       });

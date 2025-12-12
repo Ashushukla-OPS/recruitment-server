@@ -53,6 +53,7 @@ const testAttemptSchema = joi.object({
 
   durationTaken: joi.number().optional(),
 
+  questions: joi.array().items(joi.any()).required(),
   answers: joi.array().items(joi.any()).required(),
 });
 
