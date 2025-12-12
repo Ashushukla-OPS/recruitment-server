@@ -22,6 +22,27 @@ class JobApplicationController {
         res.status(201).json(response);
     });
 
+    bulkUpdateApplicationStatus = asyncHandler(async (req,res)=>{
+        const {applicationIds, status} = req.body;
+
+        if(!status){
+            throw new AppError("Status is required", 400);
+        }
+        
+        if (!applicationIds || applicationIds.length === 0) {
+        throw new AppError("Application IDs are required", 400);
+        }
+
+        const bulkUpdate = await jobApplicationService.bulkUpdateApplicationStatus(
+            applicationIds,
+            status
+        );
+        res.status(200).json({
+            success: true,
+            message:"Bulk Application Status updated successfully",
+            data: bulkUpdate,
+        });
+    });
 
     getAllApplications = asyncHandler(async (req, res) => {
         const applications = await jobApplicationService.getAllApplications();

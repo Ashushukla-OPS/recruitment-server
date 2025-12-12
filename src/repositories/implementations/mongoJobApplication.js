@@ -82,7 +82,37 @@ class MongoApplicationRespository extends IJobApplicationRepository {
     }
   }
 
+  async bulkUpdateApplicationStatus(applicationIds, status){
+    try {
+      if(!applicationIds || applicationIds.length === 0){
+        throw new AppError("No Application IDs provided", 400)
+      }
+      const ObjectIds = applicationIds.map(id=>{
+        if(!mongoose.Types.ObjectId.isValid(id)){
+          throw new AppError(`Invalid application id: ${id}`, 400)
+        }
+        return new mongoose.Types.ObjectId(id);
+      });
+      const result = await jobAppModel.updateMany(
+        {_id:{$in: ObjectIds}, status:{$ne: status}},
+        {$set: {status}},
+        {runValidators: true}
+      );
+      if(result.matchedCount===0){
+        throw new AppError("No application found for given IDs", 404)
+      }
+      return {
+        matched: result.matchedCount,
+        modified: result.modifiedCount
+      }
+    } catch (error) {
+      console.error(error)
+      if(error instanceof AppError) throw error;
+      throw new AppError("Failed to bulk update application statuses", 500);
+    }
+  }
 
+ 
   async getAllApplications() {
     return await jobAppModel.aggregate([
       {
