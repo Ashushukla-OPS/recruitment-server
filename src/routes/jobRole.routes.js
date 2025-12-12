@@ -29,6 +29,7 @@ router.get(
 
 router.get(
   "/:id",
+  authenticateJWT,
   jobRoleController.getJobRoleById
 );
 
