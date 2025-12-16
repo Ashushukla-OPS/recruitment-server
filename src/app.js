@@ -19,6 +19,10 @@ import { authenticateJWT } from "./middlewares/auth.middleware.js";
 import testRoutes from "./routes/test.routes.js";
 import testEnrollmentRoutes from "./routes/TestEnrollment.routes.js";
 import testAttemptRoutes from "./routes/testAttempts.routes.js";
+import awsRouter from './routes/aws.route.js'
+import resendMailRoutes from "./routes/resendMail.routes.js";
+import { sendWelcomeEmail } from "./services/sendMail.js";
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -33,9 +37,27 @@ app.use("/api/job-apply", jobapply);
 app.use("/api/skills", skillRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/experience", expereniceRoutes);
-app.use("/api/candidate-profile", candidateProfileRoutes);
 app.use("/api/tests", testRoutes);
 app.use("/api/enrollments", testEnrollmentRoutes);
 app.use("/api/test-attempts", testAttemptRoutes);
+app.use('/api/candidate-profile', candidateProfileRoutes);
+app.use('/api/aws' , awsRouter)
+app.use("/api/auth", resendMailRoutes);
+// await sendWelcomeEmail({
+//   to: "agr.rbih@gmail.com",
+//   name: "Rohan",
+//   jobTitle: "Frontend Developer",
+//   appliedAt: new Date()
+// });
+
 app.use(errorHandler);
 export default app;
+
+
+
+
+
+
+
+
+

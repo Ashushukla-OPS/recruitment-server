@@ -7,8 +7,8 @@ class MongoUserRepository extends IUserRepository {
   async createUser(userData) {
     try {
       const user = new User(userData);
-      const saveUser = await user.save();
-      return saveUser;
+      const savedUser = await user.save();
+      return savedUser;
     } catch (error) {
       console.error("Error creating user:", error);
       throw new AppError(`Failed to create user: ${error.message}`, 500, error);
@@ -18,9 +18,7 @@ class MongoUserRepository extends IUserRepository {
   async findUserByEmail(email) {
     try {
       const [user] = await User.aggregate([
-        {
-          $match: { email: email },
-        },
+        { $match: { email } },
         {
           $lookup: {
             from: "roles",
@@ -35,15 +33,6 @@ class MongoUserRepository extends IUserRepository {
             preserveNullAndEmptyArrays: true,
           },
         },
-        {
-          $lookup: {
-            from: "permissions",
-            localField: "role._id",
-            foreignField: "roleId",
-            as: "permissions",
-          },
-        },
-
         {
           $project: {
             _id: 1,
@@ -63,20 +52,58 @@ class MongoUserRepository extends IUserRepository {
         },
         { $limit: 1 },
       ]);
-      console.log(user, "this is from the UserRepo");
+
       return user || null;
     } catch (error) {
-      throw new AppError(
-        "Failed to find user with role and permissions",
-        500,
-        error
-      );
+      throw new AppError("Failed to find user with role", 500, error);
     }
   }
 
+  // New method from dev branch: Get all users with role info
+  async findAllUsers() {
+    try {
+      const users = await User.aggregate([
+        {
+          $lookup: {
+            from: "roles",
+            localField: "roleId",
+            foreignField: "_id",
+            as: "role",
+          },
+        },
+        {
+          $unwind: {
+            path: "$role",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            email: 1,
+            firstName: 1,
+            lastName: 1,
+            phoneNumber: 1,
+            googleId: 1,
+            isVerified: 1,
+            role: {
+              _id: "$role._id",
+              name: "$role.name",
+              description: "$role.description",
+            },
+          },
+        },
+      ]);
+
+      return users;
+    } catch (error) {
+      throw new AppError("Failed to fetch all users with roles", 500, error);
+    }
+  }
+
+  // Improved findUserById (combining best from both branches)
   async findUserById(id) {
     const isValid = mongoose.Types.ObjectId.isValid(id);
-
     if (!isValid) {
       console.log("ERROR: Invalid ObjectId format:", id);
       return null;
@@ -84,66 +111,83 @@ class MongoUserRepository extends IUserRepository {
 
     const objectId = new mongoose.Types.ObjectId(id);
 
-    const [user] = await User.aggregate([
-      { $match: { _id: objectId } },
-
-      {
-        $lookup: {
-          from: "roles",
-          localField: "roleId",
-          foreignField: "_id",
-          as: "role",
-        },
-      },
-
-      {
-        $unwind: {
-          path: "$role",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-
-      {
-        $project: {
-          _id: 1,
-          email: 1,
-          password: 1,
-          firstName: 1,
-          lastName: 1,
-          phoneNumber: 1,
-          googleId: 1,
-          isVerified: 1,
-          role: {
-            $cond: [
-              { $ifNull: ["$role", false] },
-              {
-                _id: "$role._id",
-                name: "$role.name",
-                description: "$role.description",
-              },
-              null,
-            ],
+    try {
+      const [user] = await User.aggregate([
+        { $match: { _id: objectId } },
+        {
+          $lookup: {
+            from: "roles",
+            localField: "roleId",
+            foreignField: "_id",
+            as: "role",
           },
         },
-      },
+        {
+          $unwind: {
+            path: "$role",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            email: 1,
+            password: 1,
+            firstName: 1,
+            lastName: 1,
+            phoneNumber: 1,
+            googleId: 1,
+            isVerified: 1,
+            role: {
+              $cond: [
+                { $ifNull: ["$role", false] },
+                {
+                  _id: "$role._id",
+                  name: "$role.name",
+                  description: "$role.description", // kept full description like in HEAD
+                },
+                null,
+              ],
+            },
+          },
+        },
+        { $limit: 1 },
+      ]);
 
-      { $limit: 1 },
-    ]);
-
-    return user || null;
+      return user || null;
+    } catch (error) {
+      console.error("Error finding user by ID:", error);
+      throw new AppError("Failed to find user by ID", 500, error);
+    }
   }
 
-  async updateUser(id, userData) {
+  async updateUser(userId, updateObj) {
     try {
-      return await User.findByIdAndUpdate(id, userData, { new: true });
+      return await User.findByIdAndUpdate(userId, updateObj, { new: true });
     } catch (error) {
       throw new AppError("Failed to update user", 500, error);
     }
   }
 
+  // Optional: populate role if needed (kept as is)
+  async getUserById(userId, populateRole = false) {
+    try {
+      let query = User.findById(userId);
+      if (populateRole) {
+        query = query.populate("roleId");
+      }
+      return await query;
+    } catch (error) {
+      throw new AppError("Failed to get user by ID", 500, error);
+    }
+  }
+
   async findUser(query) {
     const searchQuery = query.trim();
+    if (!searchQuery) return [];
+
     const regex = new RegExp(searchQuery, "i");
+
     try {
       const users = await User.aggregate([
         {
