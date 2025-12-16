@@ -24,7 +24,7 @@ router.get(
 );
 
 router.patch(
-  "/:status",
+  "/status",
   authenticateJWT,
   authorize("admin"),
   updateJobStatus,
@@ -35,10 +35,9 @@ router.get(
   "/filter/:status",
   authenticateJWT,
   authorize("admin"),
-
   jobApplicationController.filterApplications
 );
 
-router.get("/my-applications", authenticateJWT, authorize("candidate"), jobApplicationController.getCandidateAllApplications);
+router.get("/my-applications", authenticateJWT, jobApplicationController.getCandidateAllApplications);
 
 export default router;
