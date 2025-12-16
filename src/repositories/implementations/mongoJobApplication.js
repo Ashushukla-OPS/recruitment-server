@@ -175,7 +175,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           candidateId: new mongoose.Types.ObjectId(candidateId),
         },
       },
-
       {
         $lookup: {
           from: "jobroles",
@@ -190,37 +189,13 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-
-      {
-        $lookup: {
-          from: "users",
-          localField: "job.createdBy",
-          foreignField: "_id",
-          as: "client",
-        },
-      },
-      {
-        $unwind: {
-          path: "$client",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-
       {
         $project: {
           _id: 1,
           status: 1,
           createdAt: 1,
-
           jobTitle: { $ifNull: ["$job.title", "Job Deleted"] },
-
-          clientName: {
-            $cond: {
-              if: { $and: ["$client.firstName", "$client.lastName"] },
-              then: { $concat: ["$client.firstName", " ", "$client.lastName"] },
-              else: "Client Removed",
-            },
-          },
+          jobDescription: { $ifNull: ["$job.description", "Job Deleted"] },
         },
       },
 
