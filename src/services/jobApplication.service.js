@@ -18,9 +18,9 @@ class JobApplicationService {
     const candidateDetails = await this.candidateRepo.findProfileByUserId(
       candidateId
     );
-    
+
     if (!candidateDetails) {
-       throw new AppError("Please create your profile first", 401);
+      throw new AppError("Please create your profile first", 401);
     }
     const job = await JobRole.findById(jobId);
     if (!job) throw new AppError("Job not found", 404);
@@ -43,56 +43,56 @@ class JobApplicationService {
     //   candidateId
     // );
     const jobDetails = await this.jobRoleReop.findJobRoleById(jobId);
-      console.log(candidateDetails , "this is candidate details ")
-//    try {
-//   await sendWelcomeEmail({
-//     to: candidateDetails?.user?.email,
-//     name: candidateDetails?.user?.firstName,
-//     jobTitle: jobDetails.title,
-//     appliedAt: application.createdAt,
-//     applicationId: application._id,
-//   });
-// } catch (error) {
-//   // Fail silently — don't break the application flow
-//   logger.warn("Welcome email failed but application was created successfully", {
-//     email: candidateDetails?.user?.email,
-//     applicationId: application._id,
-//   });
-// }
+    console.log(candidateDetails, "this is candidate details ")
+    //    try {
+    //   await sendWelcomeEmail({
+    //     to: candidateDetails?.user?.email,
+    //     name: candidateDetails?.user?.firstName,
+    //     jobTitle: jobDetails.title,
+    //     appliedAt: application.createdAt,
+    //     applicationId: application._id,
+    //   });
+    // } catch (error) {
+    //   // Fail silently — don't break the application flow
+    //   logger.warn("Welcome email failed but application was created successfully", {
+    //     email: candidateDetails?.user?.email,
+    //     applicationId: application._id,
+    //   });
+    // }
 
-try {
-  // ADD JOB TO BULLMQ QUEUE — NOT SEND EMAIL DIRECTLY
-  await emailQueue.add(
-    "welcome-candidate",  
-    {
-      to: candidateDetails?.user?.email,
-      name: candidateDetails?.user?.firstName || "Candidate",
-      jobTitle: jobDetails.title,
-      appliedAt: application.createdAt,
-      applicationId: application._id.toString(),
-    },
-    {
-      attempts: 3,
-      backoff: {
-        type: "exponential",
-        delay: 5000,
-      },
-      removeOnComplete: true,
-      removeOnFail: false,
+    try {
+      // ADD JOB TO BULLMQ QUEUE — NOT SEND EMAIL DIRECTLY
+      await emailQueue.add(
+        "welcome-candidate",
+        {
+          to: candidateDetails?.user?.email,
+          name: candidateDetails?.user?.firstName || "Candidate",
+          jobTitle: jobDetails.title,
+          appliedAt: application.createdAt,
+          applicationId: application._id.toString(),
+        },
+        {
+          attempts: 3,
+          backoff: {
+            type: "exponential",
+            delay: 5000,
+          },
+          removeOnComplete: true,
+          removeOnFail: false,
+        }
+      );
+
+      logger.info(`Welcome email job queued for ${candidateDetails?.user?.email}`, {
+        applicationId: application._id,
+      });
+    } catch (error) {
+      logger.warn("Failed to queue welcome email", {
+        email: candidateDetails?.user?.email,
+        applicationId: application._id,
+        error: error.message,
+      });
     }
-  );
 
-  logger.info(`Welcome email job queued for ${candidateDetails?.user?.email}`, {
-    applicationId: application._id,
-  });
-} catch (error) {
-  logger.warn("Failed to queue welcome email", {
-    email: candidateDetails?.user?.email,
-    applicationId: application._id,
-    error: error.message,
-  });
-}
-    
     return {
       success: true,
       message: "Application submitted successfully!",
@@ -113,6 +113,10 @@ try {
 
   async filterApplications(status) {
     return await this.jobAppRepo.filterApplications(status);
+  }
+
+  async getCandidateAllApplications(candidateId) {
+    return await this.jobAppRepo.getCandidateAllApplications(candidateId);
   }
 }
 

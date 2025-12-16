@@ -11,32 +11,34 @@ const router = express.Router();
 router.post(
   "/",
   authenticateJWT,
-  createJobValidator ,
+  createJobValidator,
   jobApplicationController.applyForJob
 );
 
 router.get(
   "/",
   authenticateJWT,
- authorize("admin") , 
- 
+  authorize("admin"),
+
   jobApplicationController.getAllApplications
 );
 
 router.patch(
   "/:status",
   authenticateJWT,
-authorize("admin") , 
-updateJobStatus,
+  authorize("admin"),
+  updateJobStatus,
   jobApplicationController.updateApplicationStatus
 );
 
 router.get(
   "/filter/:status",
   authenticateJWT,
- authorize("admin") , 
+  authorize("admin"),
 
   jobApplicationController.filterApplications
 );
+
+router.get("/my-applications", authenticateJWT, authorize("candidate"), jobApplicationController.getCandidateAllApplications);
 
 export default router;
