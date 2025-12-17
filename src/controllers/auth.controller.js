@@ -72,7 +72,7 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const result = await this.userService.login({ email, password });
-      console.log(...this.cookieOptions , "this is cookies options")
+      console.log(this.cookieOptions , "this is cookies options")
       res.cookie("token", result.token, {
         ...this.cookieOptions,
         maxAge: 60 * 60 * 1000,
