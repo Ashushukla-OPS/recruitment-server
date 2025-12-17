@@ -6,19 +6,17 @@ import { updateUserValidator } from "../middlewares/validators/user.validator.js
 
 const router = express.Router();
 
-// Self-access
+// Self-access routes (available to authenticated users)
 router.get("/me", authenticateJWT, userController.getMe);
 router.patch("/me", authenticateJWT, updateUserValidator, userController.updateMe);
 
-// Admin routes
+// User search (useful for authenticated users, e.g., in UI)
+router.get("/search", authenticateJWT, userController.searchUser);
+
+// Admin-only routes
 router.get("/allUser", authenticateJWT, authorize("admin"), userController.getAllUsers);
 
-router.put(
-  "/:id/role",
-  authenticateJWT,
-  authorize("admin"),
-  userController.updateUserRole
-);
+router.put("/:id/role", authenticateJWT, authorize("admin"), userController.updateUserRole);
 
 router.delete("/:id", authenticateJWT, authorize("admin"), userController.deleteUser);
 

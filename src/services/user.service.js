@@ -364,6 +364,10 @@ class UserService {
     return true;
   }
 
+  async findUser (query){ 
+     const users =  await this.userRepository.findUser(query); 
+     return users ; 
+  }
 async updateUserRole(userId, newRoleId) {
   // 1️⃣ Update the role
   await this.userRepository.updateUser(userId, { roleId: newRoleId });
