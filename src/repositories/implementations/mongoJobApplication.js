@@ -57,7 +57,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           "candidate.email": 1,
 
           "job.title": 1,
-          "job.description": 1
+          "job.description": 1,
+          "job.location": 1
         }
       }
     ]);
@@ -119,7 +120,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
 
           "jobDetails.title": 1,
           "jobDetails.description": 1,
-          "jobDetails.requiredExperience": 1
+          "jobDetails.requiredExperience": 1,
+          "jobDetails.location": 1
         }
       }
     ]);
@@ -162,7 +164,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           "candidateDetails.firstName": 1,
           "candidateDetails.email": 1,
 
-          "jobDetails.title": 1
+          "jobDetails.title": 1,
+          "jobDetails.location": 1,
         }
       }
     ]);
@@ -194,8 +197,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           _id: 1,
           status: 1,
           createdAt: 1,
-          jobTitle: { $ifNull: ["$job.title", "Job Deleted"] },
-          jobDescription: { $ifNull: ["$job.description", "Job Deleted"] },
+          jobTitle: "$job.title",
+          location: "$job.location",
         },
       },
 
