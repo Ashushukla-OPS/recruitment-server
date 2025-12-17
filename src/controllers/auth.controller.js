@@ -11,6 +11,7 @@ class AuthController {
 
   get cookieOptions() {
     const isProd = process.env.NODE_ENV === "production";
+    console.log(process.env.NODE_ENV)
     return {
       httpOnly: true,
       secure: isProd,

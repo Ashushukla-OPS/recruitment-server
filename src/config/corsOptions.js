@@ -1,19 +1,37 @@
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
-  "https://recruitment-client-anshu-pandeys-projects.vercel.app",
-  "https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app"
+  "https://recruitment-client-anshu-pandeys-projects.vercel.app", // main prod
 ];
 
 export const corsOptions = {
   origin: (origin, callback) => {
-    // allow server-to-server / Postman
+    // Allow requests with no origin (like server-to-server, Postman, mobile apps)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
+    // Local development
+    if (origin.startsWith("http://localhost:")) {
       return callback(null, true);
     }
 
+    // Main production domain (exact match, with or without trailing slash)
+    if (
+      origin === "https://recruitment-client-anshu-pandeys-projects.vercel.app" ||
+      origin === "https://recruitment-client-anshu-pandeys-projects.vercel.app/"
+    ) {
+      return callback(null, true);
+    }
+
+    // Allow all Vercel preview deployments
+    // They follow pattern: https://recruitment-client-git-*.vercel.app
+    if (
+      origin.endsWith(".vercel.app") &&
+      origin.includes("recruitment-client")
+    ) {
+      return callback(null, true);
+    }
+
+    // Block everything else
     return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
