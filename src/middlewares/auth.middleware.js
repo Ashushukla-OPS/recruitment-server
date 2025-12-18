@@ -12,16 +12,30 @@ export const authenticateJWT = async (req, res, next) => {
       throw new AppError("Access denied. No token provided.", 401);
     }
     
+    
     const isBlacklisted = await redisClient.get(`bl_${token}`);
+
     if (isBlacklisted) {
       throw new AppError("Token has been logged out.", 401);
     }
 
     const decoded = authService.verifyToken(token);
+    console.log(decoded);
+    if (!decoded.isVerified || decoded.isVerified === false) {
+      throw new AppError("User is not verified", 401);
+    }
     req.userId = decoded.id;
-    req.roleId = decoded.role._id;
+    req.role = decoded.role;
+
+    req.user = {
+      _id: decoded.id,
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+    };
     next();
   } catch (error) {
-    next(new AppError("Invalid or expired token.", 401));
+    console.log(error);
+    next(new AppError(error || "Invalid or expired token.", 401));
   }
 };

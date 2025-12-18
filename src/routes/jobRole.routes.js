@@ -23,7 +23,6 @@ router.post(
 router.get(
   "/",
   authenticateJWT,
-  authorize("admin"),
   filterJobRolesValidator,
   jobRoleController.getAllJobRoles
 );
@@ -31,7 +30,6 @@ router.get(
 router.get(
   "/:id",
   authenticateJWT,
-  authorize("admin"),
   jobRoleController.getJobRoleById
 );
 
@@ -60,22 +58,16 @@ router.get(
 
 router.get(
   "/category/:categoryId",
-  authenticateJWT,
-  authorize("admin"),
   jobRoleController.getJobRolesByCategory
 );
 
 router.get(
   "/status/active",
-  authenticateJWT,
-  authorize("admin"),
   jobRoleController.getActiveJobRoles
 );
 
 router.get(
   "/status/expired",
-  authenticateJWT,
-  authorize("admin"),
   jobRoleController.getExpiredJobRoles
 ); // it won't work , as response is not what we expect  ,there is some missing error handling case/edge cases to handle , while fetching expired roles
 

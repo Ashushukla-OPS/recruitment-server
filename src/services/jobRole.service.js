@@ -29,13 +29,12 @@ class JobRoleService {
     return await this.jobRoleRepository.createJobRole(jobRoleData);
   }
 
-  async getAllJobRoles(filter = {}) {
-    
-    return await this.jobRoleRepository.findAllJobRoles(filter);
+  async getAllJobRoles(filter = {} , userId ) {
+    return await this.jobRoleRepository.findAllJobRoles(filter , userId);
   }
 
-  async getJobRoleById(id) {
-    const jobRole = await this.jobRoleRepository.findJobRoleById(id);
+  async getJobRoleById(id , userId) {
+    const jobRole = await this.jobRoleRepository.findJobRoleById(id , userId);
     if (!jobRole) {
       throw new AppError("Job role not found", 404);
     }
