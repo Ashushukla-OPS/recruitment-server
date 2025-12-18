@@ -16,6 +16,9 @@ class IJobApplicationRepository {
   async filterApplications(status) {
     throw new Error("Method not implemented");
   }
+  async getCandidateAllApplications(candidateId) {
+    throw new Error("Method not implemented");
+  }
 }
 
 export default IJobApplicationRepository;

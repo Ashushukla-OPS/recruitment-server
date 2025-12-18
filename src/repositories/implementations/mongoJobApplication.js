@@ -5,18 +5,18 @@ import mongoose from "mongoose";
 
 class MongoApplicationRespository extends IJobApplicationRepository {
 
- 
- async createJobApplication(jobAppData) {
-  try {
-    const jobApplication = new jobAppModel(jobAppData);
-    const savedApplication = await jobApplication.save();
-    return savedApplication;
-  } catch (error) {
-    console.error("Error creating job application:", error);
-    throw new AppError(`Failed to create job application: ${error.message}`, 500, error);
+
+  async createJobApplication(jobAppData) {
+    try {
+      const jobApplication = new jobAppModel(jobAppData);
+      const savedApplication = await jobApplication.save();
+      return savedApplication;
+    } catch (error) {
+      console.error("Error creating job application:", error);
+      throw new AppError(`Failed to create job application: ${error.message}`, 500, error);
+    }
   }
-}
- 
+
   async findByUserAndJob(candidateId, jobId) {
     const result = await jobAppModel.aggregate([
       {
@@ -57,7 +57,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           "candidate.email": 1,
 
           "job.title": 1,
-          "job.description": 1
+          "job.description": 1,
+          "job.location": 1
         }
       }
     ]);
@@ -82,7 +83,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
     }
   }
 
- 
+
   async getAllApplications() {
     return await jobAppModel.aggregate([
       {
@@ -119,7 +120,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
 
           "jobDetails.title": 1,
           "jobDetails.description": 1,
-          "jobDetails.requiredExperience": 1
+          "jobDetails.requiredExperience": 1,
+          "jobDetails.location": 1
         }
       }
     ]);
@@ -162,9 +164,45 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           "candidateDetails.firstName": 1,
           "candidateDetails.email": 1,
 
-          "jobDetails.title": 1
+          "jobDetails.title": 1,
+          "jobDetails.location": 1,
         }
       }
+    ]);
+  }
+
+  async getCandidateAllApplications(candidateId) {
+    return await jobAppModel.aggregate([
+      {
+        $match: {
+          candidateId: new mongoose.Types.ObjectId(candidateId),
+        },
+      },
+      {
+        $lookup: {
+          from: "jobroles",
+          localField: "jobId",
+          foreignField: "_id",
+          as: "job",
+        },
+      },
+      {
+        $unwind: {
+          path: "$job",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          status: 1,
+          createdAt: 1,
+          jobTitle: "$job.title",
+          location: "$job.location",
+        },
+      },
+
+      { $sort: { createdAt: -1 } },
     ]);
   }
 }

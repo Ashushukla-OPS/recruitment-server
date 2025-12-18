@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+
+const locationSchema = new mongoose.Schema({
+  city: String,
+  state: String,
+  country: String,
+  pincode: String
+})
 const jobRoleSchema = new mongoose.Schema(
   {
     createdBy: {
@@ -52,6 +59,10 @@ const jobRoleSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    location: {
+      type: locationSchema,
+      required: true,
+    }
   },
   {
     timestamps: true,
