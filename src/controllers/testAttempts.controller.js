@@ -63,6 +63,7 @@ class TestAttemptsController {
         questions: questions,
         answers,
         passingScore: test.passingScore,
+        testPrompt:test.prompt
       });
 
       const updatedAttempt = await this.testAttemptsService.submitTest(
