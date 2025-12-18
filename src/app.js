@@ -23,6 +23,9 @@ import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
 import { sendWelcomeEmail } from "./services/sendMail.js";
 
+import savedJobRoutes from "./routes/savedJob.routes.js";
+
+
 const app = express();
 app.set("trust proxy", 1);  
 app.use(express.json());
@@ -50,6 +53,9 @@ app.use("/api/auth", resendMailRoutes);
 //   jobTitle: "Frontend Developer",
 //   appliedAt: new Date()
 // });
+
+app.use("/api/saved-jobs", savedJobRoutes);
+
 
 app.use(errorHandler);
 export default app;
