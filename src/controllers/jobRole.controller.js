@@ -124,6 +124,21 @@ class JobRoleController {
       next(error);
     }
   };
+
+  searchJobsJobRoles = async (req,res,next)=>{
+    try {
+       const { q,location } = req.query;
+      console.log("serarch query string in controller file==>",q,location)
+      const jobRoles  = await this.jobRoleService.searchJobRoles(q,location)
+         res.status(200).json({ 
+        success: true, 
+        count: jobRoles.length,
+        data: jobRoles 
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 
 export default new JobRoleController();
