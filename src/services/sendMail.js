@@ -109,7 +109,7 @@ export async function sendEnrollEmail(data) {
           
           <p><strong>Test Title:</strong> ${data.testTitle || "Assessment Test"}</p>
 
-          <a href="${data.testLink}"
+          <a href="https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}"
             style="background:#1a73e8;color:white;padding:12px 25px;
                    text-decoration:none;border-radius:6px;display:inline-block;margin:20px 0;">
             Attempt Test
@@ -117,7 +117,7 @@ export async function sendEnrollEmail(data) {
 
           <p>If the button doesn’t work, copy this link:</p>
           <p style="word-break: break-all; color: #1a73e8;">
-            ${data.testLink}
+            https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}
           </p>
 
           <hr />
