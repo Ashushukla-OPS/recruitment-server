@@ -11,6 +11,12 @@ import {
 
 const router = express.Router();
 
+
+// job search 
+router.get("/search",jobRoleController.searchJobsJobRoles)
+
+
+
 // Main CRUD routes
 router.post(
   "/",

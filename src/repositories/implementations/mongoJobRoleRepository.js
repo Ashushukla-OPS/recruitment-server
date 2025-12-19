@@ -296,6 +296,97 @@ async findAllJobRoles(filter = {} , userId ) {
       throw new AppError("Failed to fetch category job roles", 500);
     }
   }
+//  async findJobRolesBySearch(q, location) {
+//   try {
+//     const filter = {};
+
+//     //  Title search
+//     if (q) {
+//       filter.title = { $regex: q, $options: "i" };
+//     }
+
+//     // Location search (city / state / country)
+//     if (location) {
+//       filter.$or = [
+//         { "location.city": { $regex: location, $options: "i" } },
+//         { "location.state": { $regex: location, $options: "i" } },
+//         { "location.country": { $regex: location, $options: "i" } },
+//       ];
+//     }
+
+//     const jobs = await JobRole.find(filter)
+//       .populate("skills")
+//       .populate("category")
+//       .lean();
+
+//     return jobs;
+//   } catch (error) {
+//     throw new AppError("Failed to fetch jobs.", 500);
+//   }
+// }
+
+async findJobRolesBySearch(q, location) {
+  try {
+    const pipeline = [];
+
+    const matchStage = {};
+
+    // Title search
+    if (q) {
+      matchStage.title = { $regex: q, $options: "i" };
+    }
+
+    // Location search (city / state / country)
+    if (location) {
+      matchStage.$or = [
+        { "location.city": { $regex: location, $options: "i" } },
+        { "location.state": { $regex: location, $options: "i" } },
+        { "location.country": { $regex: location, $options: "i" } },
+      ];
+    }
+
+    // Apply match only if filters exist
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
+    }
+
+    // Populate skills
+    pipeline.push({
+      $lookup: {
+        from: "skills", // collection name
+        localField: "skills",
+        foreignField: "_id",
+        as: "skills",
+      },
+    });
+
+    // Populate category
+    pipeline.push({
+      $lookup: {
+        from: "categories", // collection name
+        localField: "category",
+        foreignField: "_id",
+        as: "category",
+      },
+    });
+
+    // Convert category array to object (optional but common)
+    pipeline.push({
+      $unwind: {
+        path: "$category",
+        preserveNullAndEmptyArrays: true,
+      },
+    });
+
+    const jobs = await JobRole.aggregate(pipeline);
+
+    return jobs;
+  } catch (error) {
+    throw new AppError("Failed to fetch jobs.", 500);
+  }
+}
+
+
 }
 
 export default MongoJobRoleRepository;
