@@ -16,14 +16,9 @@ class SavedJobService {
     }
 
     // Get all saved jobs of a specific user
-    async getSavedJobs(userId) {
-        const jobs = await this.savedJobRepo.getSavedJob(userId);
-
-        if (!jobs || jobs.length === 0) {
-            return []; // return empty list instead of error
-        }
-
-        return jobs;
+    async getSavedJobs(userId, page = 1, limit = 10) {
+        const result = await this.savedJobRepo.getSavedJob(userId, page, limit);
+        return result;
     }
 
     // Remove a saved job

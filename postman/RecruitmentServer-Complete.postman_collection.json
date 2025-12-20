@@ -1,13 +1,13 @@
 {
     "info": {
-        "name": "Recruitment Server APIs",
+        "name": "Recruitment Server APIs - Complete",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-        "description": "Complete collection for recruitment-server with pagination examples. Set {{baseUrl}} (e.g., http://localhost:3000) and {{accessToken}} from login/register response."
+        "description": "Complete collection for recruitment-server with all CRUD operations and pagination. Set {{baseUrl}} (e.g., http://localhost:3000) and {{accessToken}} from login/register response."
     },
     "variable": [
         {
             "key": "baseUrl",
-            "value": "http://localhost:3000"
+            "value": "http://localhost:9000"
         },
         {
             "key": "accessToken",
@@ -78,23 +78,7 @@
                                 "value": "application/json"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/auth/update?id={{sampleObjectId}}",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "auth",
-                                "update"
-                            ],
-                            "query": [
-                                {
-                                    "key": "id",
-                                    "value": "{{sampleObjectId}}"
-                                }
-                            ]
-                        },
+                        "url": "{{baseUrl}}/api/auth/update?id={{sampleObjectId}}",
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Doe\"\n}"
@@ -201,35 +185,11 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/users/search?q=jane&page=1&limit=10",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "users",
-                                "search"
-                            ],
-                            "query": [
-                                {
-                                    "key": "q",
-                                    "value": "jane"
-                                },
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                }
-                            ]
-                        }
+                        "url": "{{baseUrl}}/api/users/search?q=jane&page=1&limit=10"
                     }
                 },
                 {
-                    "name": "Admin: All Users",
+                    "name": "Admin: All Users (paginated)",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -238,27 +198,7 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/users/allUser?page=1&limit=10",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "users",
-                                "allUser"
-                            ],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                }
-                            ]
-                        }
+                        "url": "{{baseUrl}}/api/users/allUser?page=1&limit=10"
                     }
                 },
                 {
@@ -278,7 +218,7 @@
                         "url": "{{baseUrl}}/api/users/{{sampleObjectId}}/role",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"role\": \"admin\"\n}"
+                            "raw": "{\n  \"roleId\": \"{{sampleObjectId}}\"\n}"
                         }
                     }
                 },
@@ -525,26 +465,7 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/job-categories?page=1&limit=10",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "job-categories"
-                            ],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                }
-                            ]
-                        }
+                        "url": "{{baseUrl}}/api/job-categories?page=1&limit=10"
                     }
                 },
                 {
@@ -630,42 +551,7 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/jobs?clientId={{sampleObjectId}}&category={{sampleObjectId}}&title=engineer&expiry=active&page=1&limit=10",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "jobs"
-                            ],
-                            "query": [
-                                {
-                                    "key": "clientId",
-                                    "value": "{{sampleObjectId}}"
-                                },
-                                {
-                                    "key": "category",
-                                    "value": "{{sampleObjectId}}"
-                                },
-                                {
-                                    "key": "title",
-                                    "value": "engineer"
-                                },
-                                {
-                                    "key": "expiry",
-                                    "value": "active"
-                                },
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                }
-                            ]
-                        }
+                        "url": "{{baseUrl}}/api/jobs?clientId={{sampleObjectId}}&category={{sampleObjectId}}&title=engineer&expiry=active&page=1&limit=10"
                     }
                 },
                 {
@@ -716,7 +602,7 @@
                     }
                 },
                 {
-                    "name": "Job Roles By Client",
+                    "name": "Job Roles By Client (paginated)",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -725,28 +611,46 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": "{{baseUrl}}/api/jobs/client/{{sampleObjectId}}"
+                        "url": "{{baseUrl}}/api/jobs/client/{{sampleObjectId}}?page=1&limit=10"
                     }
                 },
                 {
-                    "name": "Job Roles By Category",
+                    "name": "Job Roles By Category (paginated)",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/jobs/category/{{sampleObjectId}}"
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/jobs/category/{{sampleObjectId}}?page=1&limit=10"
                     }
                 },
                 {
-                    "name": "Active Job Roles",
+                    "name": "Active Job Roles (paginated)",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/jobs/status/active"
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/jobs/status/active?page=1&limit=10"
                     }
                 },
                 {
-                    "name": "Expired Job Roles",
+                    "name": "Expired Job Roles (paginated)",
                     "request": {
                         "method": "GET",
-                        "url": "{{baseUrl}}/api/jobs/status/expired"
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/jobs/status/expired?page=1&limit=10"
                     }
                 }
             ]
@@ -785,26 +689,7 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/skills?page=1&limit=20",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "skills"
-                            ],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "20"
-                                }
-                            ]
-                        }
+                        "url": "{{baseUrl}}/api/skills?page=1&limit=20"
                     }
                 },
                 {
@@ -870,7 +755,7 @@
             ]
         },
         {
-            "name": "Job Applications (paginated)",
+            "name": "Job Applications",
             "item": [
                 {
                     "name": "Apply For Job",
@@ -894,7 +779,7 @@
                     }
                 },
                 {
-                    "name": "Admin: All Applications",
+                    "name": "Admin: All Applications (paginated)",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -903,30 +788,11 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/job-apply?page=1&limit=10",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "job-apply"
-                            ],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                }
-                            ]
-                        }
+                        "url": "{{baseUrl}}/api/job-apply?page=1&limit=10"
                     }
                 },
                 {
-                    "name": "Admin: Update Status",
+                    "name": "Admin: Update Application Status",
                     "request": {
                         "method": "PATCH",
                         "header": [
@@ -947,7 +813,7 @@
                     }
                 },
                 {
-                    "name": "Admin: Filter Applications",
+                    "name": "Admin: Filter Applications (paginated)",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -956,32 +822,11 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/job-apply/filter/applied?page=1&limit=10",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "job-apply",
-                                "filter",
-                                "applied"
-                            ],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                }
-                            ]
-                        }
+                        "url": "{{baseUrl}}/api/job-apply/filter/applied?page=1&limit=10"
                     }
                 },
                 {
-                    "name": "My Applications",
+                    "name": "My Applications (paginated)",
                     "request": {
                         "method": "GET",
                         "header": [
@@ -990,27 +835,7 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": {
-                            "raw": "{{baseUrl}}/api/job-apply/my-applications?page=1&limit=10",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "api",
-                                "job-apply",
-                                "my-applications"
-                            ],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "10"
-                                }
-                            ]
-                        }
+                        "url": "{{baseUrl}}/api/job-apply/my-applications?page=1&limit=10"
                     }
                 }
             ]
@@ -1041,7 +866,28 @@
                                 "value": "Bearer {{accessToken}}"
                             }
                         ],
-                        "url": "{{baseUrl}}/api/saved-jobs"
+                        "url": {
+                            "raw": "{{baseUrl}}/api/saved-jobs?page=1&limit=10",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "saved-jobs"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page"
+                                }
+                            ]
+                        }
                     }
                 },
                 {
@@ -1114,6 +960,27 @@
                         "body": {
                             "mode": "raw",
                             "raw": "{\n  \"availability\": \"1_week\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Update Availability",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{accessToken}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": "{{baseUrl}}/api/candidate-profile/update-availability",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"availability\": \"2_weeks\"\n}"
                         }
                     }
                 },
@@ -1196,27 +1063,6 @@
                             }
                         ],
                         "url": "{{baseUrl}}/api/candidate-profile/delete-resume"
-                    }
-                },
-                {
-                    "name": "Update Availability",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{accessToken}}"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "url": "{{baseUrl}}/api/candidate-profile/update-availability",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"availability\": \"2_weeks\"\n}"
-                        }
                     }
                 }
             ]
