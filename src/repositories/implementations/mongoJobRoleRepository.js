@@ -266,101 +266,24 @@ async findAllJobRoles(filter = {} , userId ) {
     }
   }
 
-// async findJobRolesByCategory(categoryId, userId) {    
-//   try {
-//     return await JobRole.aggregate([
-//       {
-//         $match: {
-//           category: new mongoose.Types.ObjectId(categoryId)
-//         }
-//       },
-
-//       {
-//         $lookup: {
-//           from: "jobapplications",
-//           localField: "_id",
-//           foreignField: "jobId",
-//           as: "applications"
-//         }
-//       },
-
-//       {
-//         $addFields: {
-//           applied: {
-//             $cond: {
-//               if: userId
-//                 ? {
-//                     $in: [
-//                       new mongoose.Types.ObjectId(userId),
-//                       "$applications.candidateId"
-//                     ]
-//                   }
-//                 : false,
-//               then: true,
-//               else: false
-//             }
-//           }
-//         }
-//       },
-
-//       {
-//         $lookup: {
-//           from: "users",
-//           localField: "clientId",
-//           foreignField: "_id",
-//           as: "client",
-//           pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
-//         }
-//       },
-
-//       {
-//         $lookup: {
-//           from: "skills",
-//           localField: "skills",
-//           foreignField: "_id",
-//           as: "skills"
-//         }
-//       },
-
-//       {
-//         $project: {
-//           applications: 0
-//         }
-//       },
-
-//       { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
-//       { $sort: { createdAt: -1 } }
-//     ]);
-//   } catch (error) {
-//     throw new AppError("Failed to fetch category job roles", 500);
-//   }
-// }
-async findJobRolesByCategory(categoryId, userId) {  
+  async findJobRolesByCategory(categoryId, userId) {    
   try {
-    const now = new Date();
-    
     return await JobRole.aggregate([
       {
         $match: {
-          category: new mongoose.Types.ObjectId(categoryId),
-          $or: [
-            { expiry: { $exists: false } },
-            { expiry: { $gte: now } }
-          ]
+          category: new mongoose.Types.ObjectId(categoryId)
         }
       },
 
-      // 1️⃣ Get applications for this job (same as first controller)
       {
         $lookup: {
           from: "jobapplications",
           localField: "_id",
           foreignField: "jobId",
-          as: "applications",
+          as: "applications"
         }
       },
 
-      // 2️⃣ Add applied flag (identical logic from first controller)
       {
         $addFields: {
           applied: {
@@ -380,18 +303,6 @@ async findJobRolesByCategory(categoryId, userId) {
         }
       },
 
-      // 3️⃣ CreatedBy lookup (missing from your version)
-      {
-        $lookup: {
-          from: "users",
-          localField: "createdBy",
-          foreignField: "_id",
-          as: "createdBy",
-          pipeline: [{ $project: { name: 1, email: 1 } }]
-        }
-      },
-
-      // 4️⃣ Client lookup (already present)
       {
         $lookup: {
           from: "users",
@@ -402,17 +313,6 @@ async findJobRolesByCategory(categoryId, userId) {
         }
       },
 
-      // 5️⃣ Category lookup (missing from your version)
-      {
-        $lookup: {
-          from: "jobcategories",
-          localField: "category",
-          foreignField: "_id",
-          as: "category"
-        }
-      },
-
-      // 6️⃣ Skills lookup (already present)
       {
         $lookup: {
           from: "skills",
@@ -422,26 +322,20 @@ async findJobRolesByCategory(categoryId, userId) {
         }
       },
 
-      // 7️⃣ Remove applications array
       {
         $project: {
           applications: 0
         }
       },
 
-      // 8️⃣ Unwind lookups (added createdBy & category)
-      { $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
-      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
-
-      // 9️⃣ Sort by latest
       { $sort: { createdAt: -1 } }
     ]);
   } catch (error) {
-    console.error(error);
     throw new AppError("Failed to fetch category job roles", 500);
   }
 }
+
 
 
 }
