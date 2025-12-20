@@ -7,12 +7,12 @@ import { checkEnrollment } from "../middlewares/checkEnrollment.middleware.js";
 
 const router = express.Router();
 
-router.post(
-  "/start",
-  authenticateJWT,
-  checkEnrollment,
-  testAttemptsController.startTest
-);
+// router.post(
+//   "/start",
+//   authenticateJWT,
+//   checkEnrollment,
+//   testAttemptsController.startTest
+// );
 
 router.patch(
   "/submit/:attemptId",
