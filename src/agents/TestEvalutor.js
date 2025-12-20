@@ -2,7 +2,7 @@ import { llm } from "../services/ai.service.js";
 import { safeParseLLMJSON } from "../lib/cleanCode.js";
 import evaluationPrompt from "../lib/prompt/answerEvaluatorPrompt.js";
 
-export async function evaluateTest({ questions, answers, passingScore }) {
+export async function evaluateTest({ questions, answers, passingScore , testPrompt}) {
   const prompt = `${evaluationPrompt}
 
 QUESTIONS:
@@ -10,6 +10,10 @@ ${JSON.stringify(questions, null, 2)}
 
 ANSWERS:
 ${JSON.stringify(answers, null, 2)}
+
+PROMPT:
+${JSON.stringify(testPrompt, null, 2)}
+
 `;
 
   const aiResponse = await llm.invoke(prompt);

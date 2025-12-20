@@ -13,6 +13,8 @@ router.get(
   "/published/all",
   testController.getPublishedTests.bind(testController)
 );
+
+
 router.get("/:testId", testController.getTest.bind(testController));
 
 router.patch(
