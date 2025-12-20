@@ -14,6 +14,13 @@ const scheduleSchema = new mongoose.Schema(
       required: true,
     },
 
+    interviewerEmail: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true
+    },
+
     meetingLink: {
         type: String,
         required: true
