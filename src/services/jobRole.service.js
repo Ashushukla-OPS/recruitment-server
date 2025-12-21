@@ -11,7 +11,7 @@ class JobRoleService {
     // Business Logic: Ensure expiry date is valid
     const currentDate = new Date();
     const expiryDate = new Date(jobRoleData.expiry);
-    
+
     if (expiryDate <= currentDate) {
       throw new AppError("Expiry date must be in the future", 400);
     }
@@ -21,7 +21,7 @@ class JobRoleService {
     const duplicateTitle = existingJobRoles.find(
       role => role.title.toLowerCase() === jobRoleData.title.toLowerCase()
     );
-    
+
     if (duplicateTitle) {
       throw new AppError("A job role with this title already exists for this client", 409);
     }
@@ -29,12 +29,12 @@ class JobRoleService {
     return await this.jobRoleRepository.createJobRole(jobRoleData);
   }
 
-  async getAllJobRoles(filter = {} , userId ) {
-    return await this.jobRoleRepository.findAllJobRoles(filter , userId);
+  async getAllJobRoles(filter = {}, userId, page = 1, limit = 10) {
+    return await this.jobRoleRepository.findAllJobRoles(filter, userId, page, limit);
   }
 
-  async getJobRoleById(id , userId) {
-    const jobRole = await this.jobRoleRepository.findJobRoleById(id , userId);
+  async getJobRoleById(id, userId) {
+    const jobRole = await this.jobRoleRepository.findJobRoleById(id, userId);
     if (!jobRole) {
       throw new AppError("Job role not found", 404);
     }
@@ -46,7 +46,7 @@ class JobRoleService {
     if (jobRoleData.expiry) {
       const currentDate = new Date();
       const expiryDate = new Date(jobRoleData.expiry);
-      
+
       if (expiryDate <= currentDate) {
         throw new AppError("Expiry date must be in the future", 400);
       }
@@ -61,13 +61,13 @@ class JobRoleService {
 
       const titleToCheck = jobRoleData.title || existingJobRole.title;
       const clientIdToCheck = jobRoleData.clientId || existingJobRole.clientId;
-      
+
       const existingJobRoles = await this.jobRoleRepository.findJobRolesByClient(clientIdToCheck);
       const duplicateTitle = existingJobRoles.find(
-        role => role.title.toLowerCase() === titleToCheck.toLowerCase() && 
-               role._id.toString() !== id
+        role => role.title.toLowerCase() === titleToCheck.toLowerCase() &&
+          role._id.toString() !== id
       );
-      
+
       if (duplicateTitle) {
         throw new AppError("A job role with this title already exists for this client", 409);
       }
@@ -88,25 +88,25 @@ class JobRoleService {
     return jobRole;
   }
 
-  async getJobRolesByClient(clientId) {
-    return await this.jobRoleRepository.findJobRolesByClient(clientId);
+  async getJobRolesByClient(clientId, page = 1, limit = 10) {
+    return await this.jobRoleRepository.findJobRolesByClient(clientId, page, limit);
   }
 
   async getJobRolesByCategory(categoryId,userId) {
     return await this.jobRoleRepository.findJobRolesByCategory(categoryId,userId);
   }
 
-  async getActiveJobRoles() {
+  async getActiveJobRoles(page = 1, limit = 10) {
     const currentDate = new Date();
     return await this.jobRoleRepository.findAllJobRoles({
       expiry: 'active'
-    });
+    }, undefined, page, limit);
   }
 
-  async getExpiredJobRoles() {
+  async getExpiredJobRoles(page = 1, limit = 10) {
     return await this.jobRoleRepository.findAllJobRoles({
       expiry: 'expired'
-    });
+    }, undefined, page, limit);
   }
 }
 

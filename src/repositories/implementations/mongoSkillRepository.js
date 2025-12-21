@@ -1,6 +1,7 @@
 import ISkillRepository from "../contracts/ISkillRepository.js";
 import Skill from "../../models/skill.model.js";
 import { AppError } from "../../utils/errors.js";
+import { paginateAggregation } from "../../utils/pagination.util.js";
 import mongoose from "mongoose";
 
 class MongoSkillRepository extends ISkillRepository {
@@ -35,9 +36,13 @@ class MongoSkillRepository extends ISkillRepository {
     }
   }
 
-  async findAllSkills() {
+  async findAllSkills(page = 1, limit = 10) {
     try {
-      return await Skill.find({}, { name: 1 }).sort({ name: 1 }).lean();
+      const pipeline = [
+        { $project: { name: 1 } },
+        { $sort: { name: 1 } }
+      ];
+      return await paginateAggregation(Skill, pipeline, { page, limit });
     } catch (error) {
       throw new AppError("Failed to fetch skills", 500);
     }

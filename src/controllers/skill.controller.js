@@ -21,8 +21,14 @@ class SkillController {
 
     async getAllSkills(req, res, next) {
         try {
-            const skills = await skillService.getAllSkills();
-            res.status(200).json({ success: true, data: skills });
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const result = await skillService.getAllSkills(page, limit);
+            res.status(200).json({
+                success: true,
+                data: result.data,
+                pagination: result.pagination
+            });
         } catch (error) {
             next(error);
         }
@@ -49,7 +55,7 @@ class SkillController {
     async searchSkills(req, res, next) {
         try {
             const nameQuery = req.query.name;
-                const skills = await skillService.searchSkillsByName(nameQuery);
+            const skills = await skillService.searchSkillsByName(nameQuery);
             res.status(200).json({ success: true, skills: skills });
         } catch (error) {
             next(error);
