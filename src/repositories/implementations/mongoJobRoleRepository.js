@@ -268,16 +268,11 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-  async findJobRolesByCategory(categoryId, userId) {    
-  try {
-    return await JobRole.aggregate([
-      {
-        $match: {
-          category: new mongoose.Types.ObjectId(categoryId)
-        }
-      },
-
-      {
+  async findJobRolesByCategory(categoryId,page,limit,userId) {
+    try {
+      const pipeline = [
+        { $match: { category: new mongoose.Types.ObjectId(categoryId) } },
+        {
         $lookup: {
           from: "jobapplications",
           localField: "_id",
@@ -304,42 +299,37 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           }
         }
       },
-
-      {
-        $lookup: {
-          from: "users",
-          localField: "clientId",
-          foreignField: "_id",
-          as: "client",
-          pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
-        }
-      },
-
-      {
-        $lookup: {
-          from: "skills",
-          localField: "skills",
-          foreignField: "_id",
-          as: "skills"
-        }
-      },
-
-      {
+        {
+          $lookup: {
+            from: "users",
+            localField: "clientId",
+            foreignField: "_id",
+            as: "client",
+            pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
+          }
+        },
+        {
+          $lookup: {
+            from: "skills",
+            localField: "skills",
+            foreignField: "_id",
+            as: "skills"
+          }
+        },{
         $project: {
           applications: 0
         }
       },
-
-      { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
-      { $sort: { createdAt: -1 } }
-    ]);
-  } catch (error) {
-    throw new AppError("Failed to fetch category job roles", 500);
+        {
+          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
+        },
+        { $sort: { createdAt: -1 } }
+      ];
+      return await paginateAggregation(JobRole, pipeline, { page, limit });
+    } catch (error) {
+      throw new AppError("Failed to fetch category job roles", 500);
+    }
   }
-}
-
-
-
 }
 
 export default MongoJobRoleRepository;
