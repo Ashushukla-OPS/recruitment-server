@@ -298,7 +298,7 @@ async findAllJobRoles(filter = {} , userId ) {
   }
 
 
-async findJobRolesBySearch(q, location) {
+async findJobRolesBySearch(q, location,page,limit) {
   try {
     const pipeline = [];
 
@@ -317,11 +317,11 @@ async findJobRolesBySearch(q, location) {
         { "location.country": { $regex: location, $options: "i" } },
       ];
     }
+    const skip = (page - 1) * limit;
 
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
     }
-
     
     pipeline.push({
       $lookup: {
@@ -349,10 +349,34 @@ async findJobRolesBySearch(q, location) {
         preserveNullAndEmptyArrays: true,
       },
     });
+    pipeline.push({
+      $sort:{createdAt:-1}
+    })
+    pipeline.push({
+      $facet:{
+        data:[
+          { $skip: skip },
+          {$limit:limit},
+        ],  
+        totalCount:[
+          {$count:"count"}
+        ]
+      }
+    })
+    const result = await JobRole.aggregate(pipeline);
+console.log("final result ==>",result)
+ const data = result[0]?.data || [];
+  const total = result[0]?.totalCount[0]?.count || 0;
+  const totalPages = Math.ceil(total / limit);
 
-    const jobs = await JobRole.aggregate(pipeline);
-
-    return jobs;
+  // console.log("check all the data ==>",data,"total==>",total," totalPage ==>",totalPages)
+     return {
+    data,
+    page,
+    limit,
+    total,
+    totalPages,
+  };
   } catch (error) {
     throw new AppError("Failed to fetch jobs.", 500);
   }
