@@ -49,8 +49,6 @@ export async function sendWelcomeEmail(data) {
 
 
 
-
-
 export async function sendVerificationEmail(user) {
   const verificationLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/user-verification/${user.id}`;
     console.log(user)
