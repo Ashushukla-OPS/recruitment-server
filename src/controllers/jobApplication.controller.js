@@ -17,8 +17,6 @@ class JobApplicationController {
             message,
             resumeUrl,
         });
-
-
         res.status(201).json(response);
     });
 
@@ -45,12 +43,15 @@ class JobApplicationController {
     });
 
     getAllApplications = asyncHandler(async (req, res) => {
-        const applications = await jobApplicationService.getAllApplications();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.getAllApplications(page, limit);
 
         res.status(200).json({
             success: true,
-            total: applications.length,
-            data: applications,
+            pagination: result.pagination,
+            data: result.data,
         });
     });
 
@@ -76,20 +77,32 @@ class JobApplicationController {
 
     filterApplications = asyncHandler(async (req, res) => {
         const { status } = req.params;
-        const applications = await jobApplicationService.filterApplications(status);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.filterApplications(status, page, limit);
 
         res.status(200).json({
             success: true,
-            total: applications.length,
-            data: applications,
+            pagination: result.pagination,
+            data: result.data,
         });
     });
 
-    async getApplicantsByJobId(req, res) {
-        const id = req.params.id;
-        const applicants = await jobApplicationService.getApplicantsByJobId(id);
-        res.status(200).json({ success: true, applicants });
-    }
+    // Get Candidate Applied job applications
+    getCandidateAllApplications = asyncHandler(async (req, res) => {
+        const candidateId = req.userId;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.getCandidateAllApplications(candidateId, page, limit);
+
+        res.status(200).json({
+            success: true,
+            pagination: result.pagination,
+            data: result.data,
+        });
+    })
 }
 
 export default new JobApplicationController();

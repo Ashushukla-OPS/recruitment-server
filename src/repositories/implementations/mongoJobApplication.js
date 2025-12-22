@@ -1,7 +1,8 @@
 import jobAppModel from "../../models/jobApplication.model.js";
 import { AppError } from "../../utils/errors.js";
 import IJobApplicationRepository from "../contracts/IJobApplicationRepository.js";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
+import { paginateAggregation } from "../../utils/pagination.util.js";
 
 class MongoApplicationRespository extends IJobApplicationRepository {
 
@@ -34,7 +35,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "candidate"
         }
       },
-      { $unwind: "$candidate" },
+      {
+        $unwind: {
+          path: "$candidate",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $lookup: {
@@ -44,7 +50,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "job"
         }
       },
-      { $unwind: "$job" },
+      {
+        $unwind: {
+          path: "$job",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $project: {
@@ -57,7 +68,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           "candidate.email": 1,
 
           "job.title": 1,
-          "job.description": 1
+          "job.description": 1,
+          "job.location": 1
         }
       }
     ]);
@@ -112,9 +124,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
     }
   }
 
- 
-  async getAllApplications() {
-    return await jobAppModel.aggregate([
+  async getAllApplications(page = 1, limit = 10) {
+    const pipeline = [
       {
         $lookup: {
           from: "users",
@@ -123,7 +134,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "candidateDetails"
         }
       },
-      { $unwind: "$candidateDetails" },
+      {
+        $unwind: {
+          path: "$candidateDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $lookup: {
@@ -133,7 +149,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "jobDetails"
         }
       },
-      { $unwind: "$jobDetails" },
+      {
+        $unwind: {
+          path: "$jobDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $project: {
@@ -150,18 +171,23 @@ class MongoApplicationRespository extends IJobApplicationRepository {
 
           "jobDetails.title": 1,
           "jobDetails.description": 1,
-          "jobDetails.requiredExperience": 1
+          "jobDetails.requiredExperience": 1,
+          "jobDetails.location": 1
         }
       }
-    ]);
+    ];
+
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
 
 
-  async filterApplications(status) {
+  async filterApplications(status, page = 1, limit = 10) {
     const matchStage = {};
     if (status) matchStage.status = status;
 
-    return await jobAppModel.aggregate([
+    const pipeline = [
       { $match: matchStage },
 
       {
@@ -172,7 +198,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "candidateDetails"
         }
       },
-      { $unwind: "$candidateDetails" },
+      {
+        $unwind: {
+          path: "$candidateDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       // JOIN JOB DETAILS
       {
@@ -183,7 +214,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "jobDetails"
         }
       },
-      { $unwind: "$jobDetails" },
+      {
+        $unwind: {
+          path: "$jobDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       // JOIN EXPERIENCE MODEL
       {
@@ -253,120 +289,51 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           "candidateDetails.email": 1,
 
           "jobDetails.title": 1,
-          "jobDetails.description": 1,
-          "jobDetails.requiredExperience": 1,
-
-          totalExperienceYears: 1
+          "jobDetails.location": 1,
         }
       }
+    ];
 
-    ]);
+    // Add sorting before pagination
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
 
-  async getApplicantsByJobId(jobId) {
-    return jobAppModel.aggregate([
+  async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
+    const pipeline = [
       {
         $match: {
-          jobId: new mongoose.Types.ObjectId(jobId)
-        }
+          candidateId: new mongoose.Types.ObjectId(candidateId),
+        },
       },
-
-      // JOIN USERS
-      {
-        $lookup: {
-          from: "users",
-          localField: "candidateId",
-          foreignField: "_id",
-          as: "candidateDetails"
-        }
-      },
-      { $unwind: "$candidateDetails" },
-
-      // JOIN JOB DETAILS
       {
         $lookup: {
           from: "jobroles",
           localField: "jobId",
           foreignField: "_id",
-          as: "jobDetails"
-        }
+          as: "job",
+        },
       },
-      { $unwind: "$jobDetails" },
-
-      // JOIN EXPERIENCE MODEL
       {
-        $lookup: {
-          from: "experiences",
-          localField: "candidateId",
-          foreignField: "candidateId",
-          as: "experienceList"
-        }
+        $unwind: {
+          path: "$job",
+          preserveNullAndEmptyArrays: true,
+        },
       },
-
-      // CALCULATE total experience in YEARS
-      {
-        $addFields: {
-          totalExperienceYears: {
-            $sum: {
-              $map: {
-                input: "$experienceList",
-                as: "exp",
-                in: {
-                  $divide: [
-                    {
-                      $subtract: [
-                        {
-                          $ifNull: [
-                            "$$exp.endDate",
-                            {
-                              $cond: [
-                                { $eq: ["$$exp.isCurrent", true] },
-                                new Date(),         // currently working
-                                "$$exp.startDate"   // fallback (never happens but safe)
-                              ]
-                            }
-                          ]
-                        },
-                        "$$exp.startDate"
-                      ]
-                    },
-                    1000 * 60 * 60 * 24 * 365
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-      // ROUND EXPERIENCE TO 1 DECIMAL
-      {
-        $addFields: {
-          totalExperienceYears: { $round: ["$totalExperienceYears", 1] }
-        }
-      },
-
-      // FINAL OUTPUT
       {
         $project: {
           _id: 1,
-          resumeUrl: 1,
-          coverletter: 1,
           status: 1,
           createdAt: 1,
-          appliedAt: 1,
+          jobTitle: "$job.title",
+          location: "$job.location",
+        },
+      },
+      { $sort: { createdAt: -1 } },
+    ];
 
-          "candidateDetails.firstName": 1,
-          "candidateDetails.lastName": 1,
-          "candidateDetails.email": 1,
-
-          "jobDetails.title": 1,
-          "jobDetails.description": 1,
-          "jobDetails.requiredExperience": 1,
-
-          totalExperienceYears: 1
-        }
-      }
-    ]);
+    return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
 }
 

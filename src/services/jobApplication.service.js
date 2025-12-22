@@ -100,9 +100,8 @@ class JobApplicationService {
     };
   }
 
-
-  async getAllApplications() {
-    return await this.jobAppRepo.getAllApplications();
+  async getAllApplications(page = 1, limit = 10) {
+    return await this.jobAppRepo.getAllApplications(page, limit);
   }
 
   async bulkUpdateApplicationStatus(applicationIds, status){
@@ -113,8 +112,12 @@ class JobApplicationService {
     return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
   }
 
-  async filterApplications(status) {
-    return await this.jobAppRepo.filterApplications(status);
+  async filterApplications(status, page = 1, limit = 10) {
+    return await this.jobAppRepo.filterApplications(status, page, limit);
+  }
+
+  async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
+    return await this.jobAppRepo.getCandidateAllApplications(candidateId, page, limit);
   }
 
   async getApplicantsByJobId(jobId) {

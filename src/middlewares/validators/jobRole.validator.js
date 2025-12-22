@@ -1,6 +1,35 @@
 import Joi from "joi";
 import { AppError } from "../../utils/errors.js";
 
+const locationSchema = Joi.object({
+  city: Joi.string().min(2).max(100).required().messages({
+    "string.min": "City must be at least 2 characters long",
+    "string.max": "City cannot exceed 100 characters",
+    "any.required": "City is required",
+  }),
+
+  state: Joi.string().min(2).max(100).required().messages({
+    "string.min": "State must be at least 2 characters long",
+    "string.max": "State cannot exceed 100 characters",
+    "any.required": "State is required",
+  }),
+
+  country: Joi.string().min(2).max(100).required().messages({
+    "string.min": "Country must be at least 2 characters long",
+    "string.max": "Country cannot exceed 100 characters",
+    "any.required": "Country is required",
+  }),
+
+  pincode: Joi.string()
+    .pattern(/^[0-9]{4,10}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Pincode must be a valid numeric code",
+      "any.required": "Pincode is required",
+    }),
+});
+
+
 const createJobRoleSchema = Joi.object({
   title: Joi.string().min(3).max(100).required().messages({
     "string.min": "Title must be at least 3 characters long",
@@ -43,6 +72,7 @@ const createJobRoleSchema = Joi.object({
     "string.pattern.base": "Client ID must be a valid ObjectId",
     "any.required": "Client ID is required",
   }),
+  location: locationSchema.required(),
 });
 
 const updateJobRoleSchema = Joi.object({
@@ -79,6 +109,7 @@ const updateJobRoleSchema = Joi.object({
   clientId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).messages({
     "string.pattern.base": "Client ID must be a valid ObjectId",
   }),
+  location: locationSchema.required(),
 });
 
 const filterJobRolesSchema = Joi.object({
@@ -94,6 +125,17 @@ const filterJobRolesSchema = Joi.object({
   }),
   expiry: Joi.string().valid('active', 'expired').messages({
     "any.only": "Expiry filter must be either 'active' or 'expired'",
+  }),
+  page: Joi.number().integer().min(1).default(1).messages({
+    "number.base": "Page must be a number",
+    "number.integer": "Page must be an integer",
+    "number.min": "Page must be at least 1",
+  }),
+  limit: Joi.number().integer().min(1).max(100).default(10).messages({
+    "number.base": "Limit must be a number",
+    "number.integer": "Limit must be an integer",
+    "number.min": "Limit must be at least 1",
+    "number.max": "Limit cannot exceed 100",
   }),
 });
 

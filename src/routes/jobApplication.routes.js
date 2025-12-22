@@ -33,6 +33,7 @@ router.patch(
 
 router.patch(
   "/:status",
+  "/status",
   authenticateJWT,
   authorize("admin"),
   updateJobStatus,
@@ -49,4 +50,8 @@ router.get(
 
 
 router.get("/applicants/:id", authenticateJWT, authorize("admin"), jobApplicationController.getApplicantsByJobId);
+
+
+router.get("/my-applications", authenticateJWT, jobApplicationController.getCandidateAllApplications);
+
 export default router;

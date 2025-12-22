@@ -22,12 +22,14 @@ router.post(
 
 router.get(
   "/",
+  authenticateJWT,
   filterJobRolesValidator,
   jobRoleController.getAllJobRoles
 );
 
 router.get(
   "/:id",
+  authenticateJWT,
   jobRoleController.getJobRoleById
 );
 
@@ -55,7 +57,7 @@ router.get(
 );
 
 router.get(
-  "/category/:categoryId",
+  "/category/:categoryId",authenticateJWT,
   jobRoleController.getJobRolesByCategory
 );
 

@@ -11,6 +11,11 @@ class AuthController {
 
   get cookieOptions() {
     const isProd = process.env.NODE_ENV === "production";
+    console.log(process.env.NODE_ENV)
+     console.log({ httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",})
     return {
       httpOnly: true,
       secure: isProd,
@@ -67,7 +72,7 @@ class AuthController {
     try {
       const { email, password } = req.body;
       const result = await this.userService.login({ email, password });
-
+      console.log(this.cookieOptions , "this is cookies options")
       res.cookie("token", result.token, {
         ...this.cookieOptions,
         maxAge: 60 * 60 * 1000,

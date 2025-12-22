@@ -15,10 +15,13 @@ class IJobApplicationRepository {
     throw new Error("Method not implemented");
   }
 
-  async getAllApplications() {
+  async getAllApplications(page = 1, limit = 10) {
     throw new Error("Method not implemented");
   }
-  async filterApplications(status) {
+  async filterApplications(status, page = 1, limit = 10) {
+    throw new Error("Method not implemented");
+  }
+  async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
     throw new Error("Method not implemented");
   }
 }
