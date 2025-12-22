@@ -24,6 +24,9 @@ import resendMailRoutes from "./routes/resendMail.routes.js";
 import { sendWelcomeEmail } from "./services/sendMail.js";
 import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 
+import savedJobRoutes from "./routes/savedJob.routes.js";
+
+
 const app = express();
 app.set("trust proxy", 1);  
 app.use(express.json());
@@ -52,6 +55,9 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 //   jobTitle: "Frontend Developer",
 //   appliedAt: new Date()
 // });
+
+app.use("/api/saved-jobs", savedJobRoutes);
+
 
 app.use(errorHandler);
 export default app;

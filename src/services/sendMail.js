@@ -96,35 +96,53 @@ export async function sendVerificationEmail(user) {
 }
 
 export async function sendEnrollEmail(data) {
-  console.log(data)
-
   try {
+    const payload = {
+      sender: { name: "Sheriyansh Team", email: "anshur9608837@gmail.com" },
+      to: [{ email: data.to, name: data.name || "Candidate" }],
+      subject: "You Have Been Assigned a Test",
+      htmlContent: `
+        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
+          <h2 style="color: #1a73e8;">Hello ${data.name || "there"}!</h2>
+          
+          <p>You have been assigned a test on the <strong>Sheriyansh Recruitment Portal</strong>.</p>
+          
+          <p><strong>Test Title:</strong> ${data.testTitle || "Assessment Test"}</p>
 
-    const info = await transporter.sendMail({
-      from: '"Sheriyansh Team" <anshur9608837@gmail.com>',
-      to: data.to,
-      subject: `You have been assigned a Test to Attempt`,
-      html: `
-         <div style="font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-        <h1 style="color: #1a73e8;">Hiii !</h1>
-        <p>You have been assigned a test with ID: <strong></strong>.</p>
-        <p>Please log in to the portal and attempt it.</p>
-        <br>
-        <p>Best of luck!</p>
-      </div>
-      `
+          <a href="https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}"
+            style="background:#1a73e8;color:white;padding:12px 25px;
+                   text-decoration:none;border-radius:6px;display:inline-block;margin:20px 0;">
+            Attempt Test
+          </a>
+
+          <p>If the button doesn’t work, copy this link:</p>
+          <p style="word-break: break-all; color: #1a73e8;">
+            https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}
+          </p>
+
+          <hr />
+          <small>Best of luck! 🍀</small>
+        </div>
+      `,
+      textContent: `You have been assigned a test. Attempt it here: ${data.testLink}`,
+    };
+
+    const response = await axios.post(BREVO_URL, payload, {
+      headers: {
+        "api-key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
     });
 
-    console.log("EMAIL SENT SUCCESSFULLY!", info.messageId);
-    logger.info(
-      `Welcome email sent to ${data.to} | MessageId: ${info.messageId}`
-    );
-    console.log("Verification email sent:", info.messageId);
-    return info;
+    console.log("ENROLL EMAIL SENT:", response.data.messageId);
+    return response.data;
   } catch (error) {
-    console.error("FAILED TO SEND EMAIL:", error.message);
-    logger.error("Email send failed:", error);
+    console.error(
+      "Brevo enroll email failed:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 }
+
 

@@ -24,7 +24,7 @@ class TestEnrollmentService {
       await emailQueue.add(
         "enroll-candidate",
         {
-          to: email,
+          to: email.toLowerCase().trim(),
           name: "Candidate",
           testId: res?.testId.toString(),
         },
