@@ -20,6 +20,8 @@ const worker = new Worker(
       }
       else if (job.name === 'enroll-candidate') {
         await sendEnrollEmail(job.data)
+      }else if (job.name==='schedule-interview'){
+         
       }
       else {
         logger.warn(`Unknown job type: ${job.name}`);
