@@ -2,6 +2,7 @@ import jobAppModel from "../../models/jobApplication.model.js";
 import { AppError } from "../../utils/errors.js";
 import IJobApplicationRepository from "../contracts/IJobApplicationRepository.js";
 import mongoose from "mongoose";
+import { paginateAggregation } from "../../utils/pagination.util.js";
 
 class MongoApplicationRespository extends IJobApplicationRepository {
 
@@ -34,7 +35,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "candidate"
         }
       },
-      { $unwind: "$candidate" },
+      {
+        $unwind: {
+          path: "$candidate",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $lookup: {
@@ -44,7 +50,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "job"
         }
       },
-      { $unwind: "$job" },
+      {
+        $unwind: {
+          path: "$job",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $project: {
@@ -84,8 +95,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
   }
 
 
-  async getAllApplications() {
-    return await jobAppModel.aggregate([
+  async getAllApplications(page = 1, limit = 10) {
+    const pipeline = [
       {
         $lookup: {
           from: "users",
@@ -94,7 +105,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "candidateDetails"
         }
       },
-      { $unwind: "$candidateDetails" },
+      {
+        $unwind: {
+          path: "$candidateDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $lookup: {
@@ -104,7 +120,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "jobDetails"
         }
       },
-      { $unwind: "$jobDetails" },
+      {
+        $unwind: {
+          path: "$jobDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $project: {
@@ -124,15 +145,19 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           "jobDetails.location": 1
         }
       }
-    ]);
+    ];
+
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
 
 
-  async filterApplications(status) {
+  async filterApplications(status, page = 1, limit = 10) {
     const matchStage = {};
     if (status) matchStage.status = status;
 
-    return await jobAppModel.aggregate([
+    const pipeline = [
       { $match: matchStage },
 
       {
@@ -143,7 +168,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "candidateDetails"
         }
       },
-      { $unwind: "$candidateDetails" },
+      {
+        $unwind: {
+          path: "$candidateDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $lookup: {
@@ -153,7 +183,12 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           as: "jobDetails"
         }
       },
-      { $unwind: "$jobDetails" },
+      {
+        $unwind: {
+          path: "$jobDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
       {
         $project: {
@@ -168,11 +203,16 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           "jobDetails.location": 1,
         }
       }
-    ]);
+    ];
+
+    // Add sorting before pagination
+    pipeline.push({ $sort: { createdAt: -1 } });
+
+    return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
 
-  async getCandidateAllApplications(candidateId) {
-    return await jobAppModel.aggregate([
+  async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
+    const pipeline = [
       {
         $match: {
           candidateId: new mongoose.Types.ObjectId(candidateId),
@@ -201,9 +241,10 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           location: "$job.location",
         },
       },
-
       { $sort: { createdAt: -1 } },
-    ]);
+    ];
+
+    return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
 }
 
