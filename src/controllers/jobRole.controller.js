@@ -94,13 +94,16 @@ class JobRoleController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
-      const result = await this.jobRoleService.getJobRolesByCategory(req.params.categoryId, page, limit);
+      const userId = req.userId
+      const result = await this.jobRoleService.getJobRolesByCategory(req.params.categoryId,page,limit,userId);
       res.status(200).json({
         success: true,
         data: result.data,
         pagination: result.pagination
       });
     } catch (error) {
+      console.log(error);
+      
       next(error);
     }
   };
