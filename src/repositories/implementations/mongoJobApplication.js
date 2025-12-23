@@ -211,41 +211,83 @@ class MongoApplicationRespository extends IJobApplicationRepository {
     return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
 
-  async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
-    const pipeline = [
-      {
-        $match: {
-          candidateId: new mongoose.Types.ObjectId(candidateId),
+ async getCandidateAllApplications(candidateId) {
+  return await jobAppModel.aggregate([
+    {
+      $match: {
+        candidateId: new mongoose.Types.ObjectId(candidateId),
+      },
+    },
+    {
+      $lookup: {
+        from: "jobroles",
+        localField: "jobId",
+        foreignField: "_id",
+        as: "job",
+      },
+    },
+    {
+      $unwind: {
+        path: "$job",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "skills",
+        localField: "job.skills",
+        foreignField: "_id",
+        as: "job.skills",
+      },
+    },
+    {
+      $lookup: {
+        from: "jobcategories",
+        localField: "job.category",
+        foreignField: "_id",
+        as: "job.category",
+      },
+    },
+    {
+      $unwind: {
+        path: "$job.category",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $project: {
+        // :key: APPLICATION INFO
+        _id: 1,
+        jobId: "$job._id",        // :white_check_mark: MAIN FIX (DO NOT REMOVE)
+        status: 1,
+        createdAt: 1,
+        // :key: BASIC JOB INFO
+        jobTitle: "$job.title",
+        location: "$job.location",
+        // :key: EXTRA DETAILS
+        category: "$job.category.name",
+        experience: "$job.requiredExperience",
+        education: "$job.education",
+        description: "$job.description",
+        expiry: {
+          $dateToString: {
+            format: "%d/%m/%Y",
+            date: "$job.expiry",
+          },
+        },
+        // :key: SKILLS ARRAY
+        skills: {
+          $map: {
+            input: "$job.skills",
+            as: "skill",
+            in: "$$skill.name",
+          },
         },
       },
-      {
-        $lookup: {
-          from: "jobroles",
-          localField: "jobId",
-          foreignField: "_id",
-          as: "job",
-        },
-      },
-      {
-        $unwind: {
-          path: "$job",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          status: 1,
-          createdAt: 1,
-          jobTitle: "$job.title",
-          location: "$job.location",
-        },
-      },
-      { $sort: { createdAt: -1 } },
-    ];
-
-    return await paginateAggregation(jobAppModel, pipeline, { page, limit });
-  }
+    },
+    { $sort: { createdAt: -1 } },
+  ]);
+}
 }
 
 export default MongoApplicationRespository;
