@@ -249,6 +249,45 @@ class MongoUserRepository extends IUserRepository {
       throw new AppError("Failed to search users", 500, error);
     }
   }
+
+  async updateResetToken(id, token, expires) {
+    try {
+      return User.findByIdAndUpdate(id, {
+        resetPasswordToken: token,
+        resetPasswordExpires: expires,
+      })
+    } catch (error) {
+      console.error("Error in update to reset token:", error)
+      throw new AppError("Failed to update reset token", 500, error)
+    }
+  }
+
+  async findByResetToken(token) {
+    try {
+      return User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: new Date() },
+      })
+    } catch (error) {
+      console.error("Error finding reset token:", error)
+      throw new AppError("Failed to finding reset token", 500, error)
+    }
+  }
+
+  async clearResetToken(id) {
+    try {
+      return User.findByIdAndUpdate(
+        id, // ✅ FIRST ARG MUST BE USER ID
+        {
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+        }
+      )
+    } catch (error) {
+      console.error("Error clear reset token:", error)
+      throw new AppError("Failed to clear reset token", 500, error)
+    }
+  }
 }
 
 export default MongoUserRepository;
