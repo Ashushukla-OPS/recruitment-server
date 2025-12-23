@@ -330,6 +330,70 @@ class MongoJobRoleRepository extends IJobRoleRepository {
       throw new AppError("Failed to fetch category job roles", 500);
     }
   }
+
+
+async findJobRolesBySearch(q, location,page,limit) {
+  try {
+    const pipeline = [];
+
+    const matchStage = {};
+
+   
+    if (q) {
+      matchStage.title = { $regex: q, $options: "i" };
+    }
+
+   
+    if (location) {
+      matchStage.$or = [
+        { "location.city": { $regex: location, $options: "i" } },
+        { "location.state": { $regex: location, $options: "i" } },
+        { "location.country": { $regex: location, $options: "i" } },
+      ];
+    }
+    // const skip = (page - 1) * limit;
+
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
+    }
+    
+    pipeline.push({
+      $lookup: {
+        from: "skills", 
+        localField: "skills",
+        foreignField: "_id",
+        as: "skills",
+      },
+    });
+
+    
+    pipeline.push({
+      $lookup: {
+        from: "categories", 
+        localField: "category",
+        foreignField: "_id",
+        as: "category",
+      },
+    });
+
+   
+    pipeline.push({
+      $unwind: {
+        path: "$category",
+        preserveNullAndEmptyArrays: true,
+      },
+    });
+    pipeline.push({
+      $sort:{createdAt:-1}
+    })
+    
+   return await paginateAggregation(JobRole, pipeline, { page, limit });
+  } catch (error) {
+    throw new AppError("Failed to fetch jobs.", 500);
+  }
+}
+
+
 }
 
 export default MongoJobRoleRepository;
