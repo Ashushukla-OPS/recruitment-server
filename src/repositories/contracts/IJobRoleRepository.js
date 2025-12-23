@@ -26,6 +26,10 @@ class IJobRoleRepository {
     async findJobRolesByCategory(categoryId,userId) {
       throw new Error("Method not implemented");
     }
+    
+    async findJobRolesBySearch (query){
+      throw new Error("Method not implemented");
+    }
   }
   
   export default IJobRoleRepository;

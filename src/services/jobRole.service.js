@@ -108,6 +108,21 @@ class JobRoleService {
       expiry: 'expired'
     }, undefined, page, limit);
   }
+
+  async searchJobRoles(q,location,page,limit){
+console.log("search query data in service file===>",q,location,page,limit)
+// if(!q || q.trim().length== 0 )   throw new AppError("Search query is required", 400);
+ const normalizedQuery = q.trim();
+ const normalizedLocation = location.trim()
+  const jobRoles = await this.jobRoleRepository.findJobRolesBySearch(
+    normalizedQuery,normalizedLocation,page,limit
+  );
+  if (!jobRoles || jobRoles.length === 0) {
+    throw new AppError("No job roles found", 404);
+  }
+
+  return jobRoles;
+  }
 }
 
 export default JobRoleService;
