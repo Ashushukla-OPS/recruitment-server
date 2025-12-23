@@ -10,7 +10,7 @@ class TestAttemptsController {
     this.startTest = this.startTest.bind(this);
     this.submitTest = this.submitTest.bind(this);
     this.getUserAttempts = this.getUserAttempts.bind(this);
-
+    this.getCandidateAttempts = this.getCandidateAttempts.bind(this);
     this.testService = new TestService();
   }
 
@@ -155,6 +155,25 @@ class TestAttemptsController {
       next(error);
     }
   }
+
+  async getCandidateAttempts(req, res, next) {
+    try {
+      const { testId } = req.params;
+      const email = req.user.email; // 🔐 from JWT
+
+      const attempts =
+        await this.testAttemptsService.getAttemptsForCandidate(testId, email);
+
+      res.status(200).json({
+        success: true,
+        data: attempts,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  
 }
 
 export default new TestAttemptsController();
