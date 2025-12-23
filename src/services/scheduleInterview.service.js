@@ -23,9 +23,11 @@ class ScheduleInterviewService {
       "schedule-interview",
       {
         candidateEmail: candidate.email,
+        candidateName: `${candidate.firstName} ${candidate.lastName}`,
         interviewer: data.interviewerEmail,
         jobTitle: jobDetails.title,
         meetingLink: data.meetingLink,
+        Timing: data.timing
       },
       {
         attempts: 3,
