@@ -21,8 +21,8 @@ class SkillService {
         return skill;
     }
 
-    async getAllSkills() {
-        return await skillRepo.findAllSkills();
+    async getAllSkills(page = 1, limit = 10) {
+        return await skillRepo.findAllSkills(page, limit);
     }
 
     async updateSkill(id, data) {

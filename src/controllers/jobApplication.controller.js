@@ -24,12 +24,15 @@ class JobApplicationController {
 
 
     getAllApplications = asyncHandler(async (req, res) => {
-        const applications = await jobApplicationService.getAllApplications();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.getAllApplications(page, limit);
 
         res.status(200).json({
             success: true,
-            total: applications.length,
-            data: applications,
+            pagination: result.pagination,
+            data: result.data,
         });
     });
 
@@ -55,24 +58,30 @@ class JobApplicationController {
 
     filterApplications = asyncHandler(async (req, res) => {
         const { status } = req.params;
-        const applications = await jobApplicationService.filterApplications(status);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.filterApplications(status, page, limit);
 
         res.status(200).json({
             success: true,
-            total: applications.length,
-            data: applications,
+            pagination: result.pagination,
+            data: result.data,
         });
     });
 
     // Get Candidate Applied job applications
     getCandidateAllApplications = asyncHandler(async (req, res) => {
         const candidateId = req.userId;
-        const applications = await jobApplicationService.getCandidateAllApplications(candidateId);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        const result = await jobApplicationService.getCandidateAllApplications(candidateId, page, limit);
 
         res.status(200).json({
             success: true,
-            total: applications.length,
-            data: applications,
+            pagination: result.pagination,
+            data: result.data,
         });
     })
 }
