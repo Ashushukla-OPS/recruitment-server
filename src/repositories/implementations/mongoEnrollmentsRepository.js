@@ -30,33 +30,33 @@ class MongoEnrollmentsRespository extends IEnrollment {
 
 
 
-async findEnrollmentsByUser(email) {
-  try {
-    const enrollments = await TestEnrollments.aggregate([
-      {
-        $match: { email: email },
-      },
-      {
-        $lookup: {
-          from: "tests",
-          localField: "testId",
-          foreignField: "_id",
-          as: "test",
-        },
-      },
-      {
-        $unwind: {
-          path: "$test",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-    ]);
+// async findEnrollmentsByUser(email) {
+//   try {
+//     const enrollments = await TestEnrollments.aggregate([
+//       {
+//         $match: { email: email },
+//       },
+//       {
+//         $lookup: {
+//           from: "tests",
+//           localField: "testId",
+//           foreignField: "_id",
+//           as: "test",
+//         },
+//       },
+//       {
+//         $unwind: {
+//           path: "$test",
+//           preserveNullAndEmptyArrays: true,
+//         },
+//       },
+//     ]);
 
-    return enrollments;
-  } catch (error) {
-    throw error;
-  }
-}
+//     return enrollments;
+//   } catch (error) {
+//     throw error;
+//   }
+// }
 
 
   // async findEnrollmentsByUser(email) {
@@ -87,6 +87,65 @@ async findEnrollmentsByUser(email) {
   //     );
   //   }
   // }
+
+async findEnrollmentsByUser(email) {
+  try {
+    const enrollments = await TestEnrollments.aggregate([
+      {
+        $match: { email: email },
+      },
+      {
+        $lookup: {
+          from: "tests",
+          localField: "testId",
+          foreignField: "_id",
+          as: "test",
+        },
+      },
+      {
+        $unwind: {
+          path: "$test",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "testattempts",
+          let: { testId: "$test._id", email: "$email" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$testId", "$$testId"] },
+                    { $eq: ["$email", "$$email"] },
+                  ],
+                },
+              },
+            },
+            { $project: { _id: 1 } } // Only need _id to check existence
+          ],
+          as: "userAttempts",
+        },
+      },
+      {
+        $addFields: {
+          hasAttempt: { $gt: [{ $size: "$userAttempts" }, 0] },
+        },
+      },
+      {
+        $project: {
+          userAttempts: 0, // ❌ remove array from final output
+        },
+      },
+    ]);
+
+    return enrollments;
+  } catch (error) {
+    throw error;
+  }
+}
+
 
   async bulkCreateEnrollment(testId, emails) {
     try {
