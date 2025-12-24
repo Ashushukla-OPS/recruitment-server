@@ -2,7 +2,7 @@
 import { Worker } from 'bullmq';
 import connection from '../config/config/bullmq-connection.js';
 import logger from '../utils/logger.js';
-import { sendEnrollEmail, sendVerificationEmail, sendWelcomeEmail, sendInterviewEmail} from '../services/sendMail.js';
+import { sendEnrollEmail, sendVerificationEmail, sendWelcomeEmail, sendInterviewEmail, sendInterviewerEmail} from '../services/sendMail.js';
 
 // NO QueueScheduler needed anymore in BullMQ v5+
 // BullMQ auto-handles delayed jobs, retries, etc. when Worker starts
@@ -22,7 +22,8 @@ const worker = new Worker(
         await sendEnrollEmail(job.data)
       }
       else if (job.name === 'schedule-interview') {
-        await sendInterviewEmail(job.data)
+        await sendInterviewEmail(job.data);
+        await sendInterviewerEmail(job.data);
       }
       else {
         logger.warn(`Unknown job type: ${job.name}`);

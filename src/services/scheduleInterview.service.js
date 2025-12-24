@@ -10,15 +10,15 @@ class ScheduleInterviewService {
     this.mongoUserRepository = new MongoUserRepository();
     this.jobRepository = new MongoJobRoleRepository();
   }
+
   async createInterview(data) {
     console.log(data);
     const candidate = await this.mongoUserRepository.findUserById(
       data.candidateId
     );
     const jobDetails = await this.jobRepository.findJobRoleById(data.jobId);
-    console.log("candidate:-->", candidate);
-    console.log("Job Details-->", jobDetails);
-
+  
+    console.log("Interviewer Email-->", data.interviewerEmail);
     emailQueue.add(
       "schedule-interview",
       {

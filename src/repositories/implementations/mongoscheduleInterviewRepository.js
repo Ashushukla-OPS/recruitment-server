@@ -5,7 +5,11 @@ export default class MongoScheduleInterviewRepository {
   async createInterview(data) {
     return ScheduledInterview.create(data);
   }
-
+  
+  async findByEmail(email) {
+    return ScheduledInterview.findOne({ interviewerEmail: email }).lean();
+  }
+  
   async getMyInterview(candidateId) {
     return ScheduledInterview.find({ candidateId })
       .populate("jobId")
