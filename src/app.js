@@ -25,6 +25,7 @@ import { sendWelcomeEmail } from "./services/sendMail.js";
 import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 
 import savedJobRoutes from "./routes/savedJob.routes.js";
+import passwordRoutes from "./routes/password.routes.js";
 
 
 const app = express();
@@ -36,7 +37,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
-app.use("/api/jobs", jobRoleRoutes);
+app.use("/api/jobs", jobRoleRoutes);     // add new route inside it
 app.use("/api/job-categories", jobCategoryRoutes);
 app.use("/api/job-apply", jobapply);
 app.use("/api/skills", skillRoutes);
@@ -57,6 +58,7 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 // });
 
 app.use("/api/saved-jobs", savedJobRoutes);
+app.use("/api/password", passwordRoutes);
 
 
 app.use(errorHandler);
