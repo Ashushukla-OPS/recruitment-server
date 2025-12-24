@@ -14,26 +14,31 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       return savedApplication;
     } catch (error) {
       console.error("Error creating job application:", error);
-      throw new AppError(`Failed to create job application: ${error.message}`, 500, error);
+      throw new AppError(
+        `Failed to create job application: ${error.message}`,
+        500,
+        error
+      );
     }
   }
+
+  /* ================= FIND BY USER + JOB ================= */
 
   async findByUserAndJob(candidateId, jobId) {
     const result = await jobAppModel.aggregate([
       {
         $match: {
           candidateId: new mongoose.Types.ObjectId(candidateId),
-          jobId: new mongoose.Types.ObjectId(jobId)
-        }
+          jobId: new mongoose.Types.ObjectId(jobId),
+        },
       },
-
       {
         $lookup: {
           from: "users",
           localField: "candidateId",
           foreignField: "_id",
-          as: "candidate"
-        }
+          as: "candidate",
+        },
       },
       {
         $unwind: {
@@ -41,14 +46,13 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $lookup: {
           from: "jobroles",
           localField: "jobId",
           foreignField: "_id",
-          as: "job"
-        }
+          as: "job",
+        },
       },
       {
         $unwind: {
@@ -56,44 +60,42 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $project: {
           status: 1,
           resumeUrl: 1,
           createdAt: 1,
-
           "candidate.firstName": 1,
           "candidate.lastName": 1,
           "candidate.email": 1,
-
           "job.title": 1,
           "job.description": 1,
-          "job.location": 1
-        }
-      }
+          "job.location": 1,
+        },
+      },
     ]);
 
     return result[0] || null;
   }
 
+  /* ================= UPDATE STATUS ================= */
 
-  async updateApplicationStatus(candidateId, status) {
+  async updateApplicationStatus(applicationId, status) {
     try {
       const updated = await jobAppModel.findByIdAndUpdate(
-        candidateId,
+        applicationId,
         { status },
         { new: true, runValidators: true }
       );
 
       if (!updated) throw new AppError("Application not found", 404);
-
       return updated;
     } catch (error) {
       throw new AppError("Failed to update application status", 500);
     }
   }
 
+  /* ================= ADMIN: ALL APPLICATIONS ================= */
 
   async getAllApplications(page = 1, limit = 10) {
     const pipeline = [
@@ -102,8 +104,8 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           from: "users",
           localField: "candidateId",
           foreignField: "_id",
-          as: "candidateDetails"
-        }
+          as: "candidateDetails",
+        },
       },
       {
         $unwind: {
@@ -111,14 +113,13 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $lookup: {
           from: "jobroles",
           localField: "jobId",
           foreignField: "_id",
-          as: "jobDetails"
-        }
+          as: "jobDetails",
+        },
       },
       {
         $unwind: {
@@ -126,7 +127,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $project: {
           _id: 1,
@@ -134,39 +134,33 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           coverletter: 1,
           status: 1,
           createdAt: 1,
-
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
           "candidateDetails.email": 1,
-
           "jobDetails.title": 1,
           "jobDetails.description": 1,
           "jobDetails.requiredExperience": 1,
-          "jobDetails.location": 1
-        }
-      }
+          "jobDetails.location": 1,
+        },
+      },
+      { $sort: { createdAt: -1 } },
     ];
-
-    pipeline.push({ $sort: { createdAt: -1 } });
 
     return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
 
+  /* ================= ADMIN: FILTER ================= */
 
   async filterApplications(status, page = 1, limit = 10) {
-    const matchStage = {};
-    if (status) matchStage.status = status;
-
     const pipeline = [
-      { $match: matchStage },
-
+      { $match: status ? { status } : {} },
       {
         $lookup: {
           from: "users",
           localField: "candidateId",
           foreignField: "_id",
-          as: "candidateDetails"
-        }
+          as: "candidateDetails",
+        },
       },
       {
         $unwind: {
@@ -174,14 +168,13 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $lookup: {
           from: "jobroles",
           localField: "jobId",
           foreignField: "_id",
-          as: "jobDetails"
-        }
+          as: "jobDetails",
+        },
       },
       {
         $unwind: {
@@ -189,27 +182,24 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-
       {
         $project: {
           _id: 1,
           status: 1,
           createdAt: 1,
-
           "candidateDetails.firstName": 1,
           "candidateDetails.email": 1,
-
           "jobDetails.title": 1,
           "jobDetails.location": 1,
-        }
-      }
+        },
+      },
+      { $sort: { createdAt: -1 } },
     ];
-
-    // Add sorting before pagination
-    pipeline.push({ $sort: { createdAt: -1 } });
 
     return await paginateAggregation(jobAppModel, pipeline, { page, limit });
   }
+
+ 
 
   async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
     const pipeline = [
@@ -229,12 +219,13 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       {
         $unwind: {
           path: "$job",
-          preserveNullAndEmptyArrays: true,
+          preserveNullAndEmptyArrays: false, // job must exist
         },
       },
       {
         $project: {
-          _id: 1,
+          _id: 1,               // applicationId
+          jobId: "$job._id",    // ✅🔥 MAIN FIX
           status: 1,
           createdAt: 1,
           jobTitle: "$job.title",
