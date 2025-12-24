@@ -33,7 +33,7 @@ router.patch(
 
 router.patch(
   "/:status",
-  "/status",
+  // "status",
   authenticateJWT,
   authorize("admin"),
   updateJobStatus,

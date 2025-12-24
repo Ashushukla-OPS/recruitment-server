@@ -103,6 +103,24 @@ class JobApplicationController {
             data: result.data,
         });
     })
+// Get Applicants by Job ID
+    getApplicantsByJobId = asyncHandler(async (req, res) => {
+  const jobId = req.params.id;
+  const page = Number(req.query.page) || 1;
+  const limit = Number(req.query.limit) || 10;
+
+  const result = await jobApplicationService.getApplicantsByJobId(
+    jobId,
+    page,
+    limit
+  );
+
+  res.status(200).json({
+    success: true,
+    pagination: result.pagination,
+    data: result.data,
+  });
+});
 }
 
 export default new JobApplicationController();
