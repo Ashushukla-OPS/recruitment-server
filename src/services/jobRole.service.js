@@ -18,9 +18,11 @@ class JobRoleService {
 
     // Business Logic: Check for duplicate title for same client
     const existingJobRoles = await this.jobRoleRepository.findJobRolesByClient(jobRoleData.clientId);
-    const duplicateTitle = existingJobRoles.find(
-      role => role.title.toLowerCase() === jobRoleData.title.toLowerCase()
-    );
+    
+    const rolesArray = Array.isArray(existingJobRoles) ? existingJobRoles : (existingJobRoles?.data || []);
+  const duplicateTitle = rolesArray.find(
+  role => role.title.toLowerCase() === jobRoleData.title.toLowerCase()
+);
 
     if (duplicateTitle) {
       throw new AppError("A job role with this title already exists for this client", 409);
@@ -41,7 +43,7 @@ class JobRoleService {
     return jobRole;
   }
 
-  async updateJobRole(id, jobRoleData) {
+  async updateJobRole( id, jobRoleData) {
     // Business Logic: Validate expiry date if provided
     if (jobRoleData.expiry) {
       const currentDate = new Date();
@@ -63,10 +65,11 @@ class JobRoleService {
       const clientIdToCheck = jobRoleData.clientId || existingJobRole.clientId;
 
       const existingJobRoles = await this.jobRoleRepository.findJobRolesByClient(clientIdToCheck);
-      const duplicateTitle = existingJobRoles.find(
-        role => role.title.toLowerCase() === titleToCheck.toLowerCase() &&
-          role._id.toString() !== id
-      );
+      const rolesArray = Array.isArray(existingJobRoles) ? existingJobRoles : (existingJobRoles?.docs || existingJobRoles?.data || []);
+    const duplicateTitle = rolesArray.find(
+      role => role.title.toLowerCase() === titleToCheck.toLowerCase() &&
+              role._id.toString() !== id
+    );
 
       if (duplicateTitle) {
         throw new AppError("A job role with this title already exists for this client", 409);
