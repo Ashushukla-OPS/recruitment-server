@@ -66,7 +66,6 @@ ${JSON.stringify(testPrompt, null, 2)}
     totalScore: computedScore,
     maxTotalMarks: maxTotalMarks,
     percentage: Number(computedPercentage.toFixed(2)),
-
     passed: computedPassed,
     results,
   };
