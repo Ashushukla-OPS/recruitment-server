@@ -217,6 +217,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           coverletter: 1,
           status: 1,
           createdAt: 1,
+          appliedAt: 1,
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
           "candidateDetails.email": 1,
