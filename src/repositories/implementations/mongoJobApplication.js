@@ -162,11 +162,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           coverletter: 1,
           status: 1,
           createdAt: 1,
-<<<<<<< HEAD
-          appliedAt: 1,
-
-=======
->>>>>>> 828e8fc140e0a4be053bf42d69f98ac3e6ae7ef1
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
           "candidateDetails.email": 1,
@@ -201,11 +196,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-<<<<<<< HEAD
-
-      // JOIN JOB DETAILS
-=======
->>>>>>> 828e8fc140e0a4be053bf42d69f98ac3e6ae7ef1
       {
         $lookup: {
           from: "jobroles",
@@ -220,64 +210,6 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           preserveNullAndEmptyArrays: true,
         },
       },
-<<<<<<< HEAD
-
-      // JOIN EXPERIENCE MODEL
-      {
-        $lookup: {
-          from: "experiences",
-          localField: "candidateId",
-          foreignField: "candidateId",
-          as: "experienceList"
-        }
-      },
-
-      // CALCULATE TOTAL EXPERIENCE IN YEARS
-      {
-        $addFields: {
-          totalExperienceYears: {
-            $sum: {
-              $map: {
-                input: "$experienceList",
-                as: "exp",
-                in: {
-                  $divide: [
-                    {
-                      $subtract: [
-                        {
-                          $ifNull: [
-                            "$$exp.endDate",
-                            {
-                              $cond: [
-                                { $eq: ["$$exp.isCurrent", true] },
-                                new Date(),          // IF CURRENTLY WORKING
-                                "$$exp.startDate"    // fallback
-                              ]
-                            }
-                          ]
-                        },
-                        "$$exp.startDate"
-                      ]
-                    },
-                    1000 * 60 * 60 * 24 * 365
-                  ]
-                }
-              }
-            }
-          }
-        }
-      },
-
-      // ROUND EXPERIENCE
-      {
-        $addFields: {
-          totalExperienceYears: { $round: ["$totalExperienceYears", 1] }
-        }
-      },
-
-      // FINAL OUTPUT
-=======
->>>>>>> 828e8fc140e0a4be053bf42d69f98ac3e6ae7ef1
       {
         $project: {
           _id: 1,
@@ -285,11 +217,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
           coverletter: 1,
           status: 1,
           createdAt: 1,
-<<<<<<< HEAD
           appliedAt: 1,
-
-=======
->>>>>>> 828e8fc140e0a4be053bf42d69f98ac3e6ae7ef1
           "candidateDetails.firstName": 1,
           "candidateDetails.lastName": 1,
           "candidateDetails.email": 1,
