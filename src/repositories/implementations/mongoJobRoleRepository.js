@@ -332,18 +332,17 @@ class MongoJobRoleRepository extends IJobRoleRepository {
   }
 
 
-async findJobRolesBySearch(q, location,page,limit) {
+
+async findJobRolesBySearch(q, location, page, limit, userId) {
+  console.log("check all data query location page limit userid mongo implementation===>",q,location,page,limit,userId)
   try {
     const pipeline = [];
-
     const matchStage = {};
 
-   
     if (q) {
       matchStage.title = { $regex: q, $options: "i" };
     }
 
-   
     if (location) {
       matchStage.$or = [
         { "location.city": { $regex: location, $options: "i" } },
@@ -351,43 +350,81 @@ async findJobRolesBySearch(q, location,page,limit) {
         { "location.country": { $regex: location, $options: "i" } },
       ];
     }
-    // const skip = (page - 1) * limit;
 
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
     }
-    
-    pipeline.push({
-      $lookup: {
-        from: "skills", 
-        localField: "skills",
-        foreignField: "_id",
-        as: "skills",
-      },
-    });
 
-    
-    pipeline.push({
-      $lookup: {
-        from: "categories", 
-        localField: "category",
-        foreignField: "_id",
-        as: "category",
+    pipeline.push(
+      {
+        $lookup: {
+          from: "jobapplications",
+          localField: "_id",
+          foreignField: "jobId",
+          as: "applications",
+        },
       },
-    });
+      {
+        $addFields: {
+          applied: {
+            $cond: {
+              if: userId
+                ? {
+                    $in: [
+                      new mongoose.Types.ObjectId(userId),
+                      "$applications.candidateId",
+                    ],
+                  }
+                : false,
+              then: true,
+              else: false,
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          applications: 0,
+        },
+      }
+    );
 
-   
-    pipeline.push({
-      $unwind: {
-        path: "$category",
-        preserveNullAndEmptyArrays: true,
+    // Lookups
+    pipeline.push(
+      {
+        $lookup: {
+          from: "skills",
+          localField: "skills",
+          foreignField: "_id",
+          as: "skills",
+        },
       },
-    });
-    pipeline.push({
-      $sort:{createdAt:-1}
-    })
-    
-   return await paginateAggregation(JobRole, pipeline, { page, limit });
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      // {
+      //     $lookup: {
+      //       from: "jobcategories",
+      //       localField: "category",
+      //       foreignField: "_id",
+      //       as: "category"
+      //     }
+      //   },
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      { $sort: { createdAt: -1 } }
+    );
+
+    return await paginateAggregation(JobRole, pipeline, { page, limit });
   } catch (error) {
     throw new AppError("Failed to fetch jobs.", 500);
   }
