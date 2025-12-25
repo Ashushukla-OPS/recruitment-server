@@ -17,11 +17,30 @@ class JobApplicationController {
             message,
             resumeUrl,
         });
-
-
         res.status(201).json(response);
     });
 
+    bulkUpdateApplicationStatus = asyncHandler(async (req,res)=>{
+        const {applicationIds, status} = req.body;
+
+        if(!status){
+            throw new AppError("Status is required", 400);
+        }
+        
+        if (!applicationIds || applicationIds.length === 0) {
+        throw new AppError("Application IDs are required", 400);
+        }
+
+        const bulkUpdate = await jobApplicationService.bulkUpdateApplicationStatus(
+            applicationIds,
+            status
+        );
+        res.status(200).json({
+            success: true,
+            message:"Bulk Application Status updated successfully",
+            data: bulkUpdate,
+        });
+    });
 
     getAllApplications = asyncHandler(async (req, res) => {
         const page = parseInt(req.query.page) || 1;
@@ -84,6 +103,17 @@ class JobApplicationController {
             data: result.data,
         });
     })
+// Get Applicants by Job ID
+  getApplicantsByJobId = asyncHandler(async (req, res) => {
+  const jobId = req.params.id;
+
+  const result = await jobApplicationService.getApplicantsByJobId(jobId);
+
+  res.status(200).json({
+    success: true,
+    applicants: result.applicants,
+  });
+});
 }
 
 export default new JobApplicationController();

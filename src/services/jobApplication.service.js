@@ -104,6 +104,10 @@ class JobApplicationService {
     return await this.jobAppRepo.getAllApplications(page, limit);
   }
 
+  async bulkUpdateApplicationStatus(applicationIds, status){
+    return await this.jobAppRepo.bulkUpdateApplicationStatus(applicationIds,status);
+  }
+
   async updateApplicationStatus(applicationId, status) {
     return await this.jobAppRepo.updateApplicationStatus(applicationId, status);
   }
@@ -115,6 +119,11 @@ class JobApplicationService {
   async getCandidateAllApplications(candidateId, page = 1, limit = 10) {
     return await this.jobAppRepo.getCandidateAllApplications(candidateId, page, limit);
   }
+
+  async getApplicantsByJobId(jobId) {
+    return await this.jobAppRepo.getApplicantsByJobId(jobId);
+  }
+
 }
 
 export default new JobApplicationService();
