@@ -10,6 +10,11 @@ class IJobApplicationRepository {
   async updateApplicationStatus(applicationId, status) {
     throw new Error("Method not implemented");
   }
+
+  async bulkUpdateApplicationStatus(applicationIds, status){
+    throw new Error("Method not implemented");
+  }
+
   async getAllApplications(page = 1, limit = 10) {
     throw new Error("Method not implemented");
   }
