@@ -334,7 +334,7 @@ class MongoJobRoleRepository extends IJobRoleRepository {
 
 
 async findJobRolesBySearch(q, location, page, limit, userId) {
-  console.log("check all data query location page limit userid mongo implementation===>",q,location,page,limit,userId)
+
   try {
     const pipeline = [];
     const matchStage = {};
@@ -407,14 +407,6 @@ async findJobRolesBySearch(q, location, page, limit, userId) {
           as: "category",
         },
       },
-      // {
-      //     $lookup: {
-      //       from: "jobcategories",
-      //       localField: "category",
-      //       foreignField: "_id",
-      //       as: "category"
-      //     }
-      //   },
       {
         $unwind: {
           path: "$category",
