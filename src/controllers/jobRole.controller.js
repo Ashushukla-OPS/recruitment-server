@@ -94,13 +94,16 @@ class JobRoleController {
     try {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
-      const result = await this.jobRoleService.getJobRolesByCategory(req.params.categoryId, page, limit);
+      const userId = req.userId
+      const result = await this.jobRoleService.getJobRolesByCategory(req.params.categoryId,page,limit,userId);
       res.status(200).json({
         success: true,
         data: result.data,
         pagination: result.pagination
       });
     } catch (error) {
+      console.log(error);
+      
       next(error);
     }
   };
@@ -134,6 +137,23 @@ class JobRoleController {
       next(error);
     }
   };
+
+  searchJobsJobRoles = async (req,res,next)=>{
+    try {
+       const { q="",location="", page = 1, limit = 10 } = req.query;
+      console.log("serarch query string in controller file==>",q,location)
+      const result  = await this.jobRoleService.searchJobRoles(q,location,Number(page),Number(limit))
+      console.log("result data ==>",result.data.length)
+         res.status(200).json({ 
+        success: true, 
+        data:result.data,
+         pagination: result.pagination
+   
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
 }
 
 export default new JobRoleController();

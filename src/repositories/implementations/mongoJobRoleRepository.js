@@ -268,16 +268,11 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-  async findJobRolesByCategory(categoryId, userId) {    
-  try {
-    return await JobRole.aggregate([
-      {
-        $match: {
-          category: new mongoose.Types.ObjectId(categoryId)
-        }
-      },
-
-      {
+  async findJobRolesByCategory(categoryId,page,limit,userId) {
+    try {
+      const pipeline = [
+        { $match: { category: new mongoose.Types.ObjectId(categoryId) } },
+        {
         $lookup: {
           from: "jobapplications",
           localField: "_id",
@@ -304,40 +299,99 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           }
         }
       },
-
-      {
-        $lookup: {
-          from: "users",
-          localField: "clientId",
-          foreignField: "_id",
-          as: "client",
-          pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
-        }
-      },
-
-      {
-        $lookup: {
-          from: "skills",
-          localField: "skills",
-          foreignField: "_id",
-          as: "skills"
-        }
-      },
-
-      {
+        {
+          $lookup: {
+            from: "users",
+            localField: "clientId",
+            foreignField: "_id",
+            as: "client",
+            pipeline: [{ $project: { name: 1, email: 1, company: 1 } }]
+          }
+        },
+        {
+          $lookup: {
+            from: "skills",
+            localField: "skills",
+            foreignField: "_id",
+            as: "skills"
+          }
+        },{
         $project: {
           applications: 0
         }
       },
+        {
+          $unwind: { path: "$client", preserveNullAndEmptyArrays: true }
+        },
+        { $sort: { createdAt: -1 } }
+      ];
+      return await paginateAggregation(JobRole, pipeline, { page, limit });
+    } catch (error) {
+      throw new AppError("Failed to fetch category job roles", 500);
+    }
+  }
 
-      { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
-      { $sort: { createdAt: -1 } }
-    ]);
+
+async findJobRolesBySearch(q, location,page,limit) {
+  try {
+    const pipeline = [];
+
+    const matchStage = {};
+
+   
+    if (q) {
+      matchStage.title = { $regex: q, $options: "i" };
+    }
+
+   
+    if (location) {
+      matchStage.$or = [
+        { "location.city": { $regex: location, $options: "i" } },
+        { "location.state": { $regex: location, $options: "i" } },
+        { "location.country": { $regex: location, $options: "i" } },
+      ];
+    }
+    // const skip = (page - 1) * limit;
+
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
+    }
+    
+    pipeline.push({
+      $lookup: {
+        from: "skills", 
+        localField: "skills",
+        foreignField: "_id",
+        as: "skills",
+      },
+    });
+
+    
+    pipeline.push({
+      $lookup: {
+        from: "categories", 
+        localField: "category",
+        foreignField: "_id",
+        as: "category",
+      },
+    });
+
+   
+    pipeline.push({
+      $unwind: {
+        path: "$category",
+        preserveNullAndEmptyArrays: true,
+      },
+    });
+    pipeline.push({
+      $sort:{createdAt:-1}
+    })
+    
+   return await paginateAggregation(JobRole, pipeline, { page, limit });
   } catch (error) {
-    throw new AppError("Failed to fetch category job roles", 500);
+    throw new AppError("Failed to fetch jobs.", 500);
   }
 }
-
 
 
 }
