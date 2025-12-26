@@ -316,3 +316,78 @@ export async function sendEnrollEmail(data) {
     throw error;
   }
 }
+
+export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, status }) => {
+  try {
+    const payload = {
+      sender: {
+        name: "Sheriyansh Team",
+        email: "anshur9608837@gmail.com",
+      },
+      to: [
+        {
+          email: to,
+          name: name || "Candidate",
+        },
+      ],
+      subject: `Update on your application for ${jobTitle}`,
+      htmlContent: `
+        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
+          <h2 style="color: #1a73e8;">Hello ${name || "there"} 👋</h2>
+
+          <p>
+            We wanted to inform you that the status of your application for the
+            <strong>${jobTitle}</strong> position has been updated.
+          </p>
+
+          <p style="font-size: 16px; margin: 20px 0;">
+            <strong>Current Status:</strong>
+            <span style="
+              padding: 6px 12px;
+              background: #1a73e8;
+              color: #ffffff;
+              border-radius: 6px;
+              text-transform: capitalize;
+            ">
+              ${status}
+            </span>
+          </p>
+
+          <p>
+            We truly appreciate the time and effort you invested in applying.
+            Our team will reach out to you if there are further steps.
+          </p>
+
+          <hr style="margin: 30px 0;" />
+
+          <p style="font-size: 14px; color: #555;">
+            Best wishes,<br />
+            <strong>Sheriyansh Recruitment Team</strong>
+          </p>
+        </div>
+      `,
+      textContent: `Hello ${name},
+Your application for "${jobTitle}" has been updated.
+Current Status: ${status}
+Regards,
+Sheriyansh Recruitment Team`,
+    }
+
+    const response = await axios.post(BREVO_URL, payload, {
+      headers: {
+        "api-key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    })
+
+    console.log("APPLICATION STATUS UPDATE EMAIL SENT:", response.data.messageId)
+
+    return response.data
+  } catch (error) {
+    console.error(
+      "Brevo application status update email failed:",
+      error.response?.data || error.message
+    )
+    throw error
+  }
+}
