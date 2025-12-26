@@ -124,6 +124,55 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       throw new AppError("Failed to bulk update application statuses", 500);
     }
   }
+  
+  async findApplicationsForBulkMail(applicationIds) {
+  try {
+    const ObjectIds = applicationIds.map(id => {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        throw new AppError(`Invalid application id: ${id}`, 400);
+      }
+      return new mongoose.Types.ObjectId(id);
+    });
+
+    return await jobAppModel.aggregate([
+      { $match: { _id: { $in: ObjectIds } } },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "candidateId",
+          foreignField: "_id",
+          as: "candidate",
+        },
+      },
+      { $unwind: "$candidate" },
+
+      {
+        $lookup: {
+          from: "jobroles",
+          localField: "jobId",
+          foreignField: "_id",
+          as: "job",
+        },
+      },
+      { $unwind: "$job" },
+
+      {
+        $project: {
+          _id: 1,
+          status: 1,
+          "candidate.firstName": 1,
+          "candidate.lastName": 1,
+          "candidate.email": 1,
+          "job.title": 1,
+        },
+      },
+    ]);
+  } catch (error) {
+    console.error(error);
+    throw new AppError("Failed to fetch applications for bulk mail", 500);
+  }
+}
 
   async getAllApplications(page = 1, limit = 10) {
     const pipeline = [

@@ -9,6 +9,7 @@ import {
   sendInterviewEmail,
   sendInterviewerEmail,
   sendResetPasswordEmail,
+  sendApplicationStatusUpdateEmail,
 } from '../services/sendMail.js';
 
 // NO QueueScheduler needed in BullMQ v5+
@@ -36,6 +37,8 @@ const worker = new Worker(
       } 
       else if (job.name === 'reset-password') {
         await sendResetPasswordEmail(job.data);
+      } else if (job.name === "application-status-update") {
+        await sendApplicationStatusUpdateEmail(job.data);
       } 
       else {
         logger.warn(`Unknown job type: ${job.name}`);
