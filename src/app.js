@@ -63,12 +63,3 @@ app.use("/api/password", passwordRoutes);
 
 app.use(errorHandler);
 export default app;
-
-
-
-
-
-
-
-
-
