@@ -13,7 +13,7 @@ const router = express.Router();
 
 
 // job search 
-router.get("/search",jobRoleController.searchJobsJobRoles)
+router.get("/search",authenticateJWT,jobRoleController.searchJobsJobRoles)
 
 
 

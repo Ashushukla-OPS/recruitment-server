@@ -141,8 +141,9 @@ class JobRoleController {
   searchJobsJobRoles = async (req,res,next)=>{
     try {
        const { q="",location="", page = 1, limit = 10 } = req.query;
+       const userId = req.userId
       console.log("serarch query string in controller file==>",q,location)
-      const result  = await this.jobRoleService.searchJobRoles(q,location,Number(page),Number(limit))
+      const result  = await this.jobRoleService.searchJobRoles(q,location,Number(page),Number(limit),userId)
       console.log("result data ==>",result.data.length)
          res.status(200).json({ 
         success: true, 
