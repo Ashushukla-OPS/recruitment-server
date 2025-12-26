@@ -27,7 +27,7 @@ const jobApplicationSchema = new mongoose.Schema(
         "forwarded",
         "interview",
         "hired",
-      ],
+      ], 
       default: "applied",
     },
     appliedAt: {
