@@ -6,7 +6,6 @@ import config from "../config/environment.js";
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { json } from "express";
-import { sendVerificationEmail } from "./sendMail.js";
 import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
 

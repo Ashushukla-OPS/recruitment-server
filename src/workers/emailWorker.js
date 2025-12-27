@@ -2,15 +2,13 @@
 import { Worker } from 'bullmq';
 import connection from '../config/config/bullmq-connection.js';
 import logger from '../utils/logger.js';
-import {
-  sendEnrollEmail,
-  sendVerificationEmail,
-  sendWelcomeEmail,
-  sendInterviewEmail,
-  sendInterviewerEmail,
-  sendResetPasswordEmail,
-  sendApplicationStatusUpdateEmail,
-} from '../services/sendMail.js';
+import { sendWelcomeEmail } from '../services/sendMailServices/sendWelcomeEmail.js';
+import { sendVerificationEmail } from '../services/sendMailServices/sendVerificationEmail.js';
+import { sendEnrollEmail } from '../services/sendMailServices/sendEnrollEmail.js';
+import { sendInterviewEmail } from '../services/sendMailServices/sendInterviewEmail.js';
+import { sendInterviewerEmail } from '../services/sendMailServices/sendInterviewerEmail.js';
+import { sendResetPasswordEmail } from '../services/sendMailServices/sendResetPasswordEmail.js';
+import { sendApplicationStatusUpdateEmail } from '../services/sendMailServices/sendApplicationStatusUpdateEmail.js';
 
 // NO QueueScheduler needed in BullMQ v5+
 // BullMQ automatically handles delayed jobs, retries, etc. when Worker is active
