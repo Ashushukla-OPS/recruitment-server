@@ -20,15 +20,15 @@ class SkillController {
     }
 
     async getAllSkills(req, res, next) {
+        
         try {
-            const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 10;
-            const result = await skillService.getAllSkills(page, limit);
-            res.status(200).json({
-                success: true,
-                data: result.data,
-                pagination: result.pagination
-            });
+           
+            const skills = await skillService.getAllSkills();
+           
+    res.status(200).json({
+      success: true,
+      data: skills,
+    });
         } catch (error) {
             next(error);
         }
