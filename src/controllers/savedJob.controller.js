@@ -20,13 +20,15 @@ class SavedJobController {
 
   getSavedJobs = asyncHandler(async (req, res) => {
     const userId = req.userId;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-    const savedJobs = await savedJobService.getSavedJobs(userId);
+    const result = await savedJobService.getSavedJobs(userId, page, limit);
 
     res.status(200).json({
       success: true,
-      total: savedJobs.length,
-      data: savedJobs,
+      data: result.data,
+      pagination: result.pagination,
     });
   });
 

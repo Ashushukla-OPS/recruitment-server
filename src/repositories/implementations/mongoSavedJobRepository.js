@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import savedJobModel from "../../models/savedJob.model.js";
 import { AppError } from "../../utils/errors.js";
 import ISavedJobRepository from "../contracts/ISavedJobRepository.js";
+import { paginateAggregation } from "../../utils/pagination.util.js";
 
 class MongoSavedJobRepository extends ISavedJobRepository {
 
@@ -19,17 +20,36 @@ class MongoSavedJobRepository extends ISavedJobRepository {
     }
   }
 
-  async getSavedJob(userId) {
+  async getSavedJob(userId, page = 1, limit = 10) {
     try {
-      return await savedJobModel
-        .find({ userId: new mongoose.Types.ObjectId(userId) })
-        .select("-userId -__v")
-        .populate({
-          path: "jobId",
-          select: "-skills -__v",
-        })
-        .lean();
-    } catch {
+      const pipeline = [
+        { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+        {
+          $lookup: {
+            from: "jobroles",
+            localField: "jobId",
+            foreignField: "_id",
+            as: "jobId",
+          },
+        },
+        { $unwind: "$jobId" },
+        {
+          $project: {
+            "jobId._id": 1,
+            "jobId.title": 1,
+            "jobId.description": 1,
+            "jobId.company": 1,
+            "jobId.location": 1,
+            "jobId.salary": 1,
+            "jobId.jobType": 1,
+            "jobId.expiryDate": 1,
+            createdAt: 1,
+          },
+        },
+        { $sort: { createdAt: -1 } },
+      ];
+      return await paginateAggregation(savedJobModel, pipeline, { page, limit });
+    } catch (error) {
       throw new AppError("Unable to fetch saved jobs", 500);
     }
   }

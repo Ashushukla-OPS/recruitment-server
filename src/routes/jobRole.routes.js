@@ -13,7 +13,7 @@ const router = express.Router();
 
 
 // job search 
-router.get("/search",jobRoleController.searchJobsJobRoles)
+router.get("/search",authenticateJWT,jobRoleController.searchJobsJobRoles)
 
 
 
@@ -63,7 +63,7 @@ router.get(
 );
 
 router.get(
-  "/category/:categoryId",
+  "/category/:categoryId",authenticateJWT,
   jobRoleController.getJobRolesByCategory
 );
 
