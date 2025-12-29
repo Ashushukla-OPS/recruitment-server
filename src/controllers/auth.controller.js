@@ -87,7 +87,7 @@ class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.status(200).json({ success: true, expiresIn: 10 , data: result });
+      res.status(200).json({ success: true, expiresIn: 3600 , data: result });
     } catch (error) {
       next(error);
     }
