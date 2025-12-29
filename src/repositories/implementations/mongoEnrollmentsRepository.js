@@ -172,6 +172,15 @@ async findEnrollmentsByUser(email) {
       );
     }
   }
+
+  async updateEnrollmentStatus(id,status){
+     return TestEnrollments.findByIdAndUpdate(
+      id,
+   { status },
+    { new: true }
+     );
+  }
 }
+
 
 export default MongoEnrollmentsRespository;
