@@ -58,6 +58,5 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
 
-
 app.use(errorHandler);
 export default app;
