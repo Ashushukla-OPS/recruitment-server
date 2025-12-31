@@ -288,7 +288,6 @@ class UserService {
     const result = await this.userRepository.findAllUsers(page, limit,search);
     return result;
   }
-
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
     if (!user) throw new AppError("User not found", 404);
