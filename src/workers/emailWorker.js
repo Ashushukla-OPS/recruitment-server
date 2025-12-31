@@ -10,6 +10,8 @@ import {
   sendInterviewerEmail,
   sendResetPasswordEmail,
   sendApplicationStatusUpdateEmail,
+  sendRescheduledInterviewEmail,
+  sendRescheduledInterviewerEmail 
 } from '../services/sendMail.js';
 
 // NO QueueScheduler needed in BullMQ v5+
@@ -34,6 +36,11 @@ const worker = new Worker(
         // Send to both candidate and interviewer
         await sendInterviewEmail(job.data);
         await sendInterviewerEmail(job.data);
+      } 
+      else if (job.name === 'reschedule-interview') {
+        // Send to both candidate and interviewer
+        await sendRescheduledInterviewEmail(job.data);
+        await sendRescheduledInterviewerEmail(job.data);
       } 
       else if (job.name === 'reset-password') {
         await sendResetPasswordEmail(job.data);

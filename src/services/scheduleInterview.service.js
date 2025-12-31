@@ -92,6 +92,71 @@ class ScheduleInterviewService {
     }
     return deleted;
   }
+async rescheduleInterview(interviewId, data) {
+  const interview =
+    await this.scheduleInterviewRepository.getInterviewById(interviewId);
+
+  if (!interview) {
+    throw new AppError("Interview not found", 404);
+  }
+
+  
+  const candidateId =
+    typeof interview.candidateId === "object"
+      ? interview.candidateId._id
+      : interview.candidateId;
+
+
+  const jobId =
+    typeof interview.jobId === "object"
+      ? interview.jobId._id
+      : interview.jobId;
+
+  const candidate = await this.mongoUserRepository.findUserById(candidateId);
+  const jobDetails = await this.jobRepository.findJobRoleById(jobId);
+
+  if (!candidate || !jobDetails) {
+    throw new AppError("Candidate or Job not found", 404);
+  }
+
+  // Reschedule email notification
+  try {
+    await emailQueue.add(
+      "reschedule-interview",
+      {
+        candidateEmail: candidate.email,
+        candidateName: `${candidate.firstName} ${candidate.lastName}`,
+        interviewer: data.interviewerEmail,
+        jobTitle: jobDetails.title,
+        meetingLink: data.meetingLink,
+        Timing: data.timing,
+      },
+      {
+        attempts: 3,
+        backoff: {
+          type: "exponential",
+          delay: 5000,
+        },
+        removeOnComplete: true,
+        removeOnFail: false,
+      }
+    );
+  } catch (err) {
+    console.error("Reschedule email queue failed:", err.message);
+  }
+
+  
+  return await this.scheduleInterviewRepository.rescheduleInterview(
+    interviewId,
+    {
+      interviewerEmail: data.interviewerEmail,
+      meetingLink: data.meetingLink,
+      timing: data.timing,
+      status: "Rescheduled",
+    }
+  );
+}
+
 }
 
 export default ScheduleInterviewService;
