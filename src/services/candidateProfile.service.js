@@ -1,5 +1,6 @@
 import MongoCandidateProfileRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
 import MongoSkillRepository from "../repositories/implementations/mongoSkillRepository.js";
+import User from "../models/user.model.js";
 import { AppError } from "../utils/errors.js";
 import mongoose from "mongoose";
 
@@ -51,21 +52,38 @@ class CandidateProfileService {
   }
 
   async getProfileByUserId(userId) {
-    let CandidateProfile =
+    let candidateProfile =
       await this.candidateProfileRepository.findProfileByUserId(userId);
-    if (!CandidateProfile) {
-      const profileData = { userId };
-      CandidateProfile = await this.candidateProfileRepository.createProfile(
-        profileData
-      );
-    }
-    const completion = await this.calculateProfileInfoo(CandidateProfile);
 
-    const profile = {
-      ...(CandidateProfile.toObject?.() ?? CandidateProfile),
+    if (!candidateProfile) {
+      candidateProfile =
+        await this.candidateProfileRepository.createProfile({ userId });
+    }
+
+    const user = await User.findById(userId).select(
+      "firstName lastName email phoneNumber"
+    );
+
+    const profileObject =
+      candidateProfile.toObject?.() ?? candidateProfile;
+
+    const completion = await this.calculateProfileInfoo({
+      ...profileObject,
+      user,
+    });
+
+    return {
+      ...profileObject,
+      user: user
+        ? {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            phoneNumber: user.phoneNumber,
+          }
+        : null,
       completion,
     };
-    return profile;
   }
 
   async updateProfile(userId, profileData) {
@@ -138,7 +156,6 @@ class CandidateProfileService {
       throw new AppError("Profile not found", 404);
     }
 
-    // AFTER aggregation pipeline → skills = ["React", "Node"]
     const existingSkillNames = profile.skills.map((s) => s.toLowerCase());
 
     const duplicates = trimmedSkillNames.filter((name) =>
@@ -244,7 +261,6 @@ class CandidateProfileService {
   }
 
   async calculateProfileInfoo(profile) {
-
     const rules = [
       {
         condition:

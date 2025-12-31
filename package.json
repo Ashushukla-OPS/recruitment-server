@@ -9,8 +9,8 @@
     "worker": "node src/workers/emailWorker.js",
     "worker:dev": "nodemon src/workers/emailWorker.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run worker:dev\"",
-    "start:all": "concurrently \"npm run start\" \"npm run worker\" --names \"API,WORKER\" --prefix-colors \"blue,green\""
-    
+    "start:all": "concurrently \"npm run start\" \"npm run worker\" --names \"API,WORKER\" --prefix-colors \"blue,green\"",
+    "build": "echo \"No build step for backend\""
   },
   "keywords": [],
   "author": "",

@@ -147,6 +147,7 @@ class MongoJobRoleRepository extends IJobRoleRepository {
         },
         {
           $addFields: {
+             applicantsCount: { $size: "$applications" },
             applied: {
               $cond: {
                 if: userId

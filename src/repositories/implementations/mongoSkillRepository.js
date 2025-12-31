@@ -35,18 +35,14 @@ class MongoSkillRepository extends ISkillRepository {
       throw new AppError("Failed to find skill", 500);
     }
   }
-
-  async findAllSkills(page = 1, limit = 10) {
-    try {
-      const pipeline = [
-        { $project: { name: 1 } },
-        { $sort: { name: 1 } }
-      ];
-      return await paginateAggregation(Skill, pipeline, { page, limit });
-    } catch (error) {
-      throw new AppError("Failed to fetch skills", 500);
-    }
+async findAllSkills() {
+  
+  try {
+    return await Skill.find()
+  } catch (error) {
+    throw new AppError("Failed to fetch skills", 500);
   }
+}
 
   async updateSkill(id, skillData) {
     if (!mongoose.Types.ObjectId.isValid(id)) {

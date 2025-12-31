@@ -134,7 +134,7 @@ class JobRoleController {
         pagination: result.pagination
       });
     } catch (error) {
-      next(error);
+      next(error)
     }
   };
 
