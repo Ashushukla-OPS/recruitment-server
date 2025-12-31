@@ -86,7 +86,7 @@ class TestAttemptsService {
       throw new AppError("Test attempt not found", 404);
     }
 
-    await this.enrollmentReposetory.updateEnrollmentStatusByTestAndEmail(
+    await this.enrollmentReposetory.updateEnrollmentStatus(
   testResults.testId,
   updatedAttempt.email,
   "Completed"
