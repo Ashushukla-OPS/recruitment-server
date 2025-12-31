@@ -10,8 +10,7 @@ const TestAttemptSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-    },
-
+    },    
     score: {
       type: Number,
       required: true,
@@ -47,6 +46,14 @@ const TestAttemptSchema = new mongoose.Schema(
       type: [mongoose.Schema.Types.Mixed],
       required: true,
     },
+    tabSwitches: {
+    type: Number,
+    default: 0
+  },
+  isDisqualified: {
+    type: Boolean,
+    default: false
+  },
   },
   {
     timestamps: true,
