@@ -28,7 +28,7 @@ const TestAttemptSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["Started", "Submitted", "Graded", "Failed"],
+      enum: ["Started", "Submitted", "Graded", "Failed", "Disqualified"],
       default: "Submitted",
     },
     startTime: {
