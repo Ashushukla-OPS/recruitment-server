@@ -24,7 +24,7 @@ class UserService {
       7 * 24 * 3600
     );
   }
-
+  
   // Helper: Safe role object for cache & JWT
   _getSafeRole(user) {
     return user.role
@@ -284,11 +284,10 @@ class UserService {
     return safeUser;
   }
 
-  async getAllUsers(page = 1, limit = 10) {
-    const result = await this.userRepository.findAllUsers(page, limit);
+  async getAllUsers(page = 1, limit = 10,search = "") {
+    const result = await this.userRepository.findAllUsers(page, limit,search);
     return result;
   }
-
   async updateUser(id, userData) {
     const user = await this.userRepository.updateUser(id, userData);
     if (!user) throw new AppError("User not found", 404);
