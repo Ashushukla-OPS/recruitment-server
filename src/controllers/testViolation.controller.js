@@ -31,7 +31,7 @@ export const logViolation = async (req, res) => {
     if (attempt.tabSwitches >= 3) {
       attempt.isDisqualified = true;
       attempt.status = "Disqualified";
-
+      
       await TestEnrollments.updateOne(
         { testId: attempt.testId, email: attempt.email },
         { status: "Disqualified" }
