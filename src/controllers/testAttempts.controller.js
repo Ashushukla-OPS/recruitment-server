@@ -14,38 +14,6 @@ class TestAttemptsController {
     this.testService = new TestService();
   }
 
-  // async startTest(req, res, next) {
-  //   try {
-  //     const { testId } = req.body;
-  //     const email = req.user.email;
-
-  //     const testSummary = await this.testService.getTestById(testId);
-
-  //     const data = {
-  //       title: testSummary.title,
-  //       summury: testSummary.summury,
-  //       showResults: testSummary.showResults,
-  //       category: testSummary.category,
-  //       status: testSummary.status,
-  //       duration: testSummary.duration,
-  //       passingScore: testSummary.passingScore,
-  //       prompt: testSummary.prompt,
-  //     };
-
-  //     const resfromAI = await testGenerator({ prompt: data });
-
-  //     const attempt = await this.testAttemptsService.startTest(testId, email);
-
-  //     return res.status(201).json({
-  //       success: true,
-  //       data: attempt,
-  //       questions: resfromAI,
-  //     });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
-
   async startTest(req, res, next) {
   try {
     const { testId } = req.body;
@@ -67,13 +35,6 @@ class TestAttemptsController {
 
     // 2️⃣ Generate questions from AI (already normalized)
     const aiResult = await testGenerator(testConfig);
-    /**
-     * aiResult = {
-     *   questions: [],
-     *   duration: number,
-     *   passingScore: number
-     * }
-     */
 
     // 3️⃣ Create attempt
     const attempt = await this.testAttemptsService.startTest(testId, email);
@@ -99,12 +60,24 @@ class TestAttemptsController {
   async submitTest(req, res, next) {
     try {
       const attemptId = req.params.attemptId;
-      const { testId, questions ,answers } = req.body;
+      const { testId, questions ,answers, isDisqualified  = false } = req.body;
 
       if (!testId) {
         return res
           .status(400)
           .json({ success: false, message: "testId is required" });
+      }
+
+      if (isDisqualified) {
+        const updatedAttempt = await this.testAttemptsService.submitTest(attemptId, {
+          testId,
+          answers,
+          score: 0,
+          percentage: 0,
+          isPassed: false,
+          status: "Disqualified",
+        });
+        return res.status(200).json({ success: true, message: "Attempt recorded as disqualified", attempt: updatedAttempt });
       }
 
       const test = await this.testService.getTestById(testId);
@@ -169,8 +142,8 @@ class TestAttemptsController {
         data: attempts,
       });
     } catch (error) {
-      next(error);
-    }
+      next(error);  
+    } 
   }
 
   

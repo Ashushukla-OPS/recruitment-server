@@ -48,6 +48,7 @@ class MongoTestRepository extends ItestsRepository {
         {
           $addFields: {
             enrolledCount: { $size: "$enrollments" },
+            prompt: { $ifNull: ["$prompt", "Create a Test"] },
           },
         },
         {
@@ -86,6 +87,18 @@ class MongoTestRepository extends ItestsRepository {
       throw new AppError(`Failed to update test: ${error.message}`, 500, error);
     }
   }
+
+  async findAttemptsByTest(testId) {
+  try {
+    return await TestAttempt.find({ testId })
+      .populate("userId", "name email") // Get candidate details
+      .sort({ createdAt: -1 })
+      .lean();
+  } catch (error) {
+    throw new AppError("Failed to fetch test results", 500);
+  }
+}
+
 }
 
 export default MongoTestRepository;

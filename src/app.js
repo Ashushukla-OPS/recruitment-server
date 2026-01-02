@@ -21,12 +21,12 @@ import testEnrollmentRoutes from "./routes/TestEnrollment.routes.js";
 import testAttemptRoutes from "./routes/testAttempts.routes.js";
 import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
-import { sendWelcomeEmail } from "./services/sendMail.js";
 import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 
+import ViolationRoutes  from "./routes/testViolation.routes.js";
 
 const app = express();
 app.set("trust proxy", 1);  
@@ -50,7 +50,6 @@ app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
 app.use("/api/interviews", ScheduleInterviewRoutes);
-// await sendWelcomeEmail({
 //   to: "agr.rbih@gmail.com",
 //   name: "Rohan",
 //   jobTitle: "Frontend Developer",
@@ -60,6 +59,7 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
 
+app.use('/api/ai/', ViolationRoutes)
 
 app.use(errorHandler);
 export default app;

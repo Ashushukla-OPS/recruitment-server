@@ -3,7 +3,6 @@ import { AppError } from "../utils/errors.js";
 import MongoApplicationRespository from "../repositories/implementations/mongoJobApplication.js";
 import MongoCandidateProfileRepository from "../repositories/implementations/mongoCandidateProfileRepository.js";
 import MongoJobRoleRepository from "../repositories/implementations/mongoJobRoleRepository.js";
-import { sendWelcomeEmail } from "./sendMail.js";
 import logger from "../utils/logger.js";
 import { emailQueue } from "../queues/emailQueue.js";
 
@@ -122,6 +121,11 @@ class JobApplicationService {
 
   async getApplicantsByJobId(jobId) {
     return await this.jobAppRepo.getApplicantsByJobId(jobId);
+  }
+
+  async getShortlistedCounts() {
+    const shortlistedApplications = await this.jobAppRepo.countByStatus("shortlisted");
+    return { shortlistedApplications };
   }
 
    async bulkUpdateApplicationStatus(applicationIds, status) {
