@@ -62,38 +62,50 @@ class TestEnrollmentService {
   }
 
   async enrollUsersBulk(testId, emails) {
-    const result = await this.testEnrollmentRepository.bulkCreateEnrollment(testId, emails)
+  const result =
+    await this.testEnrollmentRepository.bulkCreateEnrollment(testId, emails);
 
-    const test = await Tests.findById(testId).select("title").lean();
-    try {
-      const jobs = emails.map((email) => ({
-        name: "enroll-candidate",
-        data: {
-          to: email.toLowerCase().trim(),
-          name: "Candidate",
-          testId: testId.toString(),
-          testTitle: test?.title || "Sheryians Assesment test",
-        },
-        opts: {
-          attempts: 3,
-          backoff: { type: "exponential", delay: 5000 },
-          removeOnComplete: true,
-          removeOnFail: false,
-        },
-      }))
+  const test = await Tests.findById(testId).select("title").lean();
 
-      await emailQueue.addBulk(jobs)
-      logger.info(`Queued ${jobs.length} bulk enrollment emails`, { testId })
-    } catch (error) {
-      logger.warn("Failed to queue bulk emails", { testId, error: error.message })
+  try {
+    const jobs = result.newEmails.map((email) => ({
+      name: "enroll-candidate",
+      data: {
+        to: email.toLowerCase().trim(),
+        name: "Candidate",
+        testId: testId.toString(),
+        testTitle: test?.title || "Sheryians Assessment test",
+      },
+      opts: {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: true,
+        removeOnFail: false,
+      },
+    }));
+
+    if (jobs.length > 0) {
+      await emailQueue.addBulk(jobs);
+      logger.info(`Queued ${jobs.length} bulk enrollment emails`, { testId });
     }
-
-    return {
-      success: true,
-      insertedCount: result.insertedCount || result.nInserted || emails.length,
-      totalProvided: emails.length,
-    }
+  } catch (error) {
+    logger.warn("Failed to queue bulk emails", {
+      testId,
+      error: error.message,
+    });
   }
+
+  return {
+    success: true,
+    message:
+      result.insertedCount === 0
+        ? "All selected users are already enrolled for this test."
+        : "Users enrolled successfully.",
+    insertedCount: result.insertedCount,
+    skippedCount: result.skippedCount,
+    totalProvided: emails.length,
+  };
+}
 }
 
 export default TestEnrollmentService
