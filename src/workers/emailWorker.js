@@ -11,7 +11,9 @@ import {
   sendResetPasswordEmail,
   sendApplicationStatusUpdateEmail,
   sendRescheduledInterviewEmail,
-  sendRescheduledInterviewerEmail 
+  sendRescheduledInterviewerEmail,
+  sendCancelledInterviewEmail,
+  sendCancelledInterviewerEmail
 } from '../services/sendMail.js';
 
 // NO QueueScheduler needed in BullMQ v5+
@@ -47,6 +49,15 @@ const worker = new Worker(
       } else if (job.name === "application-status-update") {
         await sendApplicationStatusUpdateEmail(job.data);
       } 
+      else if (job.name === "cancel-interview") {
+        await sendCancelledInterviewEmail(job.data);
+      }
+
+      else if (job.name === "cancel-interview-interviewer") {
+        await sendCancelledInterviewerEmail(job.data);
+      } 
+
+      
       else {
         logger.warn(`Unknown job type: ${job.name}`);
       }

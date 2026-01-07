@@ -77,14 +77,85 @@ class ScheduleInterviewService {
     return interview;
   }
 
-  async updateInterviewStatus(id, status) {
-    const updated =
-      await this.scheduleInterviewRepository.updateInterviewStatus(id, status);
-    if (!updated) {
-      throw new AppError("Interview not found", 404);
-    }
-    return updated;
+async updateInterviewStatus(id, status) {
+  const interview = await this.scheduleInterviewRepository.getInterviewById(id);
+
+  if (!interview) {
+    throw new AppError("Interview not found", 404);
   }
+
+if (status === "Cancelled") {
+  const candidateId =
+    typeof interview.candidateId === "object"
+      ? interview.candidateId._id
+      : interview.candidateId;
+
+  const jobId =
+    typeof interview.jobId === "object"
+      ? interview.jobId._id
+      : interview.jobId;
+  
+  const interviewerEmail =
+  interview.interviewerEmail ||
+  interview.interviewer ||
+  interview.interviewerId?.email ||
+  interview.interviewer?.email ||
+  null;
+
+  const candidate =
+    await this.mongoUserRepository.findUserById(candidateId);
+  const jobDetails =
+    await this.jobRepository.findJobRoleById(jobId);
+
+  if (!candidate || !jobDetails || !interviewerEmail) {
+    throw new AppError("Candidate or Job, interviewerEmail not found", 404);
+  }
+
+  try {
+    await emailQueue.add(
+      "cancel-interview",
+      {
+        candidateEmail: candidate.email,
+        candidateName: `${candidate.firstName} ${candidate.lastName}`,
+        jobTitle: jobDetails.title,
+      },
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: true,
+        removeOnFail: false,
+      }
+    );
+console.log("INTERVIEW OBJECT:", interview);
+
+    await emailQueue.add(
+      "cancel-interview-interviewer",
+      {
+        interviewer: interview.interviewerEmail,
+        candidateName: `${candidate.firstName} ${candidate.lastName}`,
+        jobTitle: jobDetails.title,
+      },
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 5000 },
+        removeOnComplete: true,
+        removeOnFail: false,
+      }
+    );
+  } catch (err) {
+    console.error("Cancel interview email queue failed:", err.message);
+  }
+}
+
+  const updated =
+    await this.scheduleInterviewRepository.updateInterviewStatus(id, status);
+
+  if (!updated) {
+    throw new AppError("Interview not found", 404);
+  }
+
+  return updated;
+}
   async deleteInterview(id) {
     const deleted = await this.scheduleInterviewRepository.deleteInterview(id);
     if (!deleted) {

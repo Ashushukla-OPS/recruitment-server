@@ -251,6 +251,99 @@ export async function sendRescheduledInterviewerEmail(data) {
   }
 }
 
+/**
+ * Send interview cancellation email to candidate
+ */
+export async function sendCancelledInterviewEmail(data) {
+  try {
+    const payload = {
+      sender: { name: "Sheryians", email: "anshur9608837@gmail.com" },
+      to: [{ email: data.candidateEmail, name: data.candidateName }],
+      subject: `Interview Cancelled for ${data.jobTitle}`,
+      htmlContent: `
+        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
+          <h1 style="color: #e53935;">Hi ${data.candidateName || "Candidate"}!</h1>
+          <p>We regret to inform you that your interview for 
+            <strong>${data.jobTitle}</strong> at <strong>Sheryians</strong>
+            has been <b>cancelled</b>.
+          </p>
+
+          <p>If this was unintentional or needs rescheduling, our recruitment team
+          will reach out to you.</p>
+          <p>Thank you for your time and interest.</p>
+
+          <hr />
+          <small>Best regards,<br />Sheryians Team</small>
+        </div>
+      `,
+      textContent: `Hi ${data.candidateName}, your interview for ${data.jobTitle} has been cancelled.`,
+    };
+
+    const response = await axios.post(BREVO_URL, payload, {
+      headers: {
+        "api-key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("CANCEL INTERVIEW EMAIL SENT:", response.data.messageId);
+    return response.data;
+  } catch (error) {
+    console.error("Brevo cancel interview email failed:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    throw error;
+  }
+}
+
+/**
+ * Send interview cancellation email to interviewer
+ */
+export async function sendCancelledInterviewerEmail(data) {
+  try {
+    const payload = {
+      sender: { name: "Sheryians", email: "anshur9608837@gmail.com" },
+      to: [{ email: data.interviewer }],
+      subject: `Interview Cancelled – ${data.jobTitle}`,
+      htmlContent: `
+        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
+          <h2 style="color: #e53935;">Interview Cancelled</h2>
+
+          <p>The following interview has been <strong>cancelled</strong>:</p>
+
+          <p><strong>Candidate:</strong> ${data.candidateName}</p>
+          <p><strong>Position:</strong> ${data.jobTitle}</p>
+
+          <p>No further action is required from your side.</p>
+
+          <hr />
+          <small>Sheryians Recruitment Team</small>
+        </div>
+      `,
+      textContent: `Interview cancelled for candidate ${data.candidateName} – Position: ${data.jobTitle}`,
+    };
+
+    const response = await axios.post(BREVO_URL, payload, {
+      headers: {
+        "api-key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("CANCEL INTERVIEW EMAIL SENT (INTERVIEWER):", response.data.messageId);
+    return response.data;
+  } catch (error) {
+    console.error("Brevo cancel interview interviewer email failed:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    throw error;
+  }
+}
+
 
 /**
  * Send password reset email
