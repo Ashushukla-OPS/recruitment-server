@@ -16,29 +16,38 @@ class ScheduleInterviewService {
     const candidate = await this.mongoUserRepository.findUserById(
       data.candidateId
     );
+    
     const jobDetails = await this.jobRepository.findJobRoleById(data.jobId);
+
+    if (!candidate) {
+    throw new AppError("Candidate not found", 404);
+  }
   
     console.log("Interviewer Email-->", data.interviewerEmail);
-    emailQueue.add(
-      "schedule-interview",
-      {
-        candidateEmail: candidate.email,
-        candidateName: `${candidate.firstName} ${candidate.lastName}`,
-        interviewer: data.interviewerEmail,
-        jobTitle: jobDetails.title,
-        meetingLink: data.meetingLink,
-        Timing: data.timing
-      },
-      {
-        attempts: 3,
-        backoff: {
-          type: "exponential",
-          delay: 5000,
+    try {
+      await emailQueue.add(
+        "schedule-interview",
+        {
+          candidateEmail: candidate.email,
+          candidateName: `${candidate.firstName} ${candidate.lastName}`,
+          interviewer: data.interviewerEmail,
+          jobTitle: jobDetails.title,
+          meetingLink: data.meetingLink,
+          Timing: data.timing
         },
-        removeOnComplete: true,
-        removeOnFail: false,
-      }
-    );
+        {
+          attempts: 3,
+          backoff: {
+            type: "exponential",
+            delay: 5000,
+          },
+          removeOnComplete: true,
+          removeOnFail: false,
+        }
+      );
+    } catch (err) {
+      console.error("Email queue failed:", err.message);
+    }
     return await this.scheduleInterviewRepository.createInterview(data);
   }
   async getMyInterviews(candidateId) {
@@ -78,6 +87,10 @@ class ScheduleInterviewService {
   }
   async deleteInterview(id) {
     const deleted = await this.scheduleInterviewRepository.deleteInterview(id);
+    if (!deleted) {
+      throw new AppError("Interview not found", 404);
+    }
+    return deleted;
   }
 }
 
