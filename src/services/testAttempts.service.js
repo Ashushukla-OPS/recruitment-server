@@ -18,11 +18,11 @@ class TestAttemptsService {
       throw new AppError("you are not enrolled for this test.", 409)
     }
 
+    // if (enrollment.status === "Started") {
+      //   throw new AppError("You have already started this test. Re-attempt is not allowed.", 409)
+      // }
+      
     // 2️⃣ Block re-attempt
-    if (enrollment.status === "Started") {
-      throw new AppError("You have already started this test. Re-attempt is not allowed.", 409)
-    }
-
     if (enrollment.status === "Completed") {
       throw new AppError("You have already completed this test.", 409)
     }
