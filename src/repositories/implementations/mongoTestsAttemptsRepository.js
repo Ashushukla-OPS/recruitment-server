@@ -113,6 +113,73 @@ async findAttemptsByCandidate(testId, email) {           ///user specifuic test
       );
     }
   }
+
+  async findAttemptsforEmail(testId) {
+    try {
+      const attempts = await TestAttempts.aggregate([
+        {
+          $match: {
+            testId: new mongoose.Types.ObjectId(testId),
+            status: "Graded",
+          },
+        },
+
+        {
+          $sort: { startTime: -1 },
+        },
+
+        {
+          $group: {
+            _id: "$email",
+            attempt: { $first: "$$ROOT" },
+          },
+        },
+
+        {
+          $replaceRoot: { newRoot: "$attempt" },
+        },
+
+        {
+          $lookup: {
+            from: "users",
+            localField: "email",
+            foreignField: "email",
+            as: "userInfo",
+          },
+        },
+
+        {
+          $unwind: {
+            path: "$userInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $addFields: {
+            firstName: "$userInfo.firstName",
+            lastName: "$userInfo.lastName",
+          },
+        },
+
+        {
+          $project: {
+            userInfo: 0,
+          },
+        },
+      ]);
+
+      return attempts;
+    } catch (error) {
+      throw new AppError(
+        `Failed to find user attempts: ${error.message}`,
+        500,
+        error
+      );
+    }
+  }
 }
+
+
 
 export default MongoTestAttampsRepository;
