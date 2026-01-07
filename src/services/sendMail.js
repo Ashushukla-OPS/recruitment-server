@@ -17,9 +17,8 @@ export async function sendWelcomeEmail(data) {
       htmlContent: `
         <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
           <h1 style="color: #1a73e8;">Hi ${data.name || "Candidate"}!</h1>
-          <p>Thank you for applying to <strong>${
-            data.jobTitle
-          }</strong> at <strong>Sheriyansh</strong>.</p>
+          <p>Thank you for applying to <strong>${data.jobTitle
+        }</strong> at <strong>Sheriyansh</strong>.</p>
           <p>Your application has been received and is under review.</p>
           <br />
           <p>We'll get back to you soon!</p>
@@ -61,9 +60,8 @@ export async function sendInterviewEmail(data) {
       htmlContent: `
         <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
           <h1 style="color: #1a73e8;">Hi ${data.candidateName || "Candidate"}!</h1>
-          <p>Your interview for <strong>${
-            data.jobTitle
-          }</strong> at <strong>Sheryians</strong> has been scheduled.</p>
+          <p>Your interview for <strong>${data.jobTitle
+        }</strong> at <strong>Sheryians</strong> has been scheduled.</p>
           <p><strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}</p>
           <p><strong>Meeting Link:</strong></p>
           <a href="${data.meetingLink}" target="_blank">${data.meetingLink}</a>
@@ -73,11 +71,9 @@ export async function sendInterviewEmail(data) {
           <small>Best of luck!</small>
         </div>
       `,
-      textContent: `Hi ${data.candidateName || "Candidate"}, your interview for ${
-        data.jobTitle
-      } is scheduled on ${new Date(data.Timing).toLocaleString()}. Meeting link: ${
-        data.meetingLink
-      }`,
+      textContent: `Hi ${data.candidateName || "Candidate"}, your interview for ${data.jobTitle
+        } is scheduled on ${new Date(data.Timing).toLocaleString()}. Meeting link: ${data.meetingLink
+        }`,
     }
 
     const response = await axios.post(BREVO_URL, payload, {
@@ -126,11 +122,10 @@ export async function sendInterviewerEmail(data) {
           <small>Best regards,<br />Sheryians Team</small>
         </div>
       `,
-      textContent: `Dear Interviewer, an interview has been scheduled for candidate ${
-        data.candidateName
-      } for the position ${data.jobTitle} on ${new Date(
-        data.Timing
-      ).toLocaleString()}. Meeting link: ${data.meetingLink}`,
+      textContent: `Dear Interviewer, an interview has been scheduled for candidate ${data.candidateName
+        } for the position ${data.jobTitle} on ${new Date(
+          data.Timing
+        ).toLocaleString()}. Meeting link: ${data.meetingLink}`,
     }
 
     const response = await axios.post(BREVO_URL, payload, {
@@ -162,9 +157,8 @@ export async function sendRescheduledInterviewEmail(data) {
       htmlContent: `
         <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
           <h1 style="color: #1a73e8;">Hi ${data.candidateName || "Candidate"}!</h1>
-          <p>Your interview for <strong>${
-            data.jobTitle
-          }</strong> at <strong>Sheryians</strong> has been Rescheduled.</p>
+          <p>Your interview for <strong>${data.jobTitle
+        }</strong> at <strong>Sheryians</strong> has been Rescheduled.</p>
           <p><strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}</p>
           <p><strong>Meeting Link:</strong></p>
           <a href="${data.meetingLink}" target="_blank">${data.meetingLink}</a>
@@ -174,11 +168,9 @@ export async function sendRescheduledInterviewEmail(data) {
           <small>Best of luck!</small>
         </div>
       `,
-      textContent: `Hi ${data.candidateName || "Candidate"}, your interview for ${
-        data.jobTitle
-      } is rescheduled on ${new Date(data.Timing).toLocaleString()}. Meeting link: ${
-        data.meetingLink
-      }`,
+      textContent: `Hi ${data.candidateName || "Candidate"}, your interview for ${data.jobTitle
+        } is rescheduled on ${new Date(data.Timing).toLocaleString()}. Meeting link: ${data.meetingLink
+        }`,
     }
 
     const response = await axios.post(BREVO_URL, payload, {
@@ -204,50 +196,184 @@ export async function sendRescheduledInterviewEmail(data) {
 export async function sendRescheduledInterviewerEmail(data) {
   try {
     const payload = {
-      sender: { name: "Sheryians", email: "anshur9608837@gmail.com" },
+      sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
       to: [{ email: data.interviewer }],
-      subject: `Interview Rescheduled for ${data.jobTitle}`,
+      subject: `Interview Rescheduled – ${data.jobTitle}`,
       htmlContent: `
-        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-          <h1 style="color: #1a73e8;">Dear Interviewer,</h1>
-          <p>I hope this email finds you well.</p>
-          <p>This is to inform you that an interview has been rescheduled for the following candidate:</p>
-          <p><strong>Candidate Name:</strong> ${data.candidateName}</p>
-          <p><strong>Position:</strong> ${data.jobTitle}</p>
-          <p><strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}</p>
-          <p><strong>Meeting Link:</strong></p>
-          <a href="${data.meetingLink}" target="_blank">${data.meetingLink}</a>
-          <br /><br />
-          <p>Kindly let us know if the rescheduled time works for you or if any adjustments are required.</p>
-          <p>Please feel free to reach out if you have any questions or need further information.</p>
-          <p>Thank you for your time and cooperation.</p>
-          <hr />
-          <small>Best regards,<br />Sheryians Team</small>
-        </div>
+      <div style="
+  background:#f2f5f9;
+  padding:40px 0;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+">
+
+  <!-- MAIN CARD -->
+  <div style="
+    max-width:600px;
+    margin:0 auto;
+    background:#ffffff;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 12px 30px rgba(0,0,0,0.08);
+  ">
+
+    <!-- HEADER -->
+    <div style="
+      background:linear-gradient(135deg,#1a73e8,#0b5ed7);
+      padding:28px 24px;
+      display:flex;
+      align-items:center;
+      gap:14px
+    ">
+      <img
+        src="https://avatars.githubusercontent.com/u/69582226?v=4"
+        alt="Sheryians Logo"
+        style="
+          height:48px;
+          margin-right:14px;
+          
+          border-radius:10px;
+        "
+      />
+       <!-- TEXT BLOCK -->
+  <div>
+    <div style="
+      font-size:20px;
+      font-weight:800;
+      color:#ffffff;
+      line-height:1.2;
+    ">
+      Interview Rescheduled
+    </div>
+
+    <div style="
+      font-size:13px;
+      color:#e3efff;
+      margin-top:4px;
+    ">
+      Sheryians Recruitment Team
+    </div>
+  </div>
+
+</div>
+
+    <!-- BODY -->
+    <div style="padding:28px 26px;color:#333;">
+      <p style="margin-top:0;font-size:15px;">
+        Dear Interviewer,
+      </p>
+
+      <p style="font-size:14.5px;line-height:1.7;">
+        This is to inform you that the interview has been
+        <strong>rescheduled</strong>. Please find the updated details below:
+      </p>
+
+      <!-- DETAILS CARD -->
+      <div style="
+        margin:22px 0;
+        padding:18px 20px;
+        background:#f8fbff;
+        border-left:4px solid #1a73e8;
+        border-radius:8px;
+      ">
+        <p style="margin:6px 0;"><strong>Candidate:</strong> ${data.candidateName}</p>
+        <p style="margin:6px 0;"><strong>Position:</strong> ${data.jobTitle}</p>
+        <p style="margin:6px 0;"><strong>Date & Time:</strong> ${new Date(
+          data.Timing
+        ).toLocaleString()}</p>
+
+        <p style="margin:10px 0 0;">
+          <strong>Meeting Link:</strong><br />
+          <a
+            href="${data.meetingLink}"
+            target="_blank"
+            style="
+              display:inline-block;
+              margin-top:8px;
+              padding:10px 18px;
+              background:#1a73e8;
+              color:#ffffff;
+              text-decoration:none;
+              border-radius:6px;
+              font-size:13px;
+              font-weight:600;
+            "
+          >
+            Join Meeting →
+          </a>
+          <p>if link doesn't work copy paste this: </p>
+          <p style="word-break: break-all; color: #1a73e8;">${data.meetingLink}</p>
+        </p>
+      </div>
+
+      <!-- NOTE -->
+      <div style="
+        background:#fff8e1;
+        padding:14px 16px;
+        border-radius:8px;
+        font-size:13.5px;
+        color:#6b5e00;
+      ">
+        ⚠️ If the rescheduled time does not work for you, please reply to this
+        email so we can assist with further changes.
+      </div>
+
+      <p style="margin-top:26px;font-size:14px;">
+        Thank you for your time and cooperation.
+      </p>
+
+      <p style="margin-bottom:0;">
+        Best regards,<br />
+        <strong>Sheryians Recruitment Team</strong>
+      </p>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="
+      background:#f6f8fb;
+      padding:16px;
+      text-align:center;
+      font-size:12px;
+      color:#777;
+    ">
+      © ${new Date().getFullYear()} Sheryians · All rights reserved
+    </div>
+
+  </div>
+</div>
+
+        
       `,
-      textContent: `Dear Interviewer, an interview has been rescheduled for candidate ${
-        data.candidateName
-      } for the position ${data.jobTitle} on ${new Date(
-        data.Timing
-      ).toLocaleString()}. Meeting link: ${data.meetingLink}`,
-    }
+      textContent: `Dear Interviewer,
+
+The interview has been rescheduled.
+
+Candidate: ${data.candidateName}
+Position: ${data.jobTitle}
+Date & Time: ${new Date(data.Timing).toLocaleString()}
+Meeting Link: ${data.meetingLink}
+
+If this time does not work for you, please reply to this email.
+
+Best regards,
+Sheryians Recruitment Team`,
+    };
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    })
+    });
 
-    console.log("INTERVIEW EMAIL SENT (Interviewer):", response.data.messageId)
-    return response.data
+    console.log("RESCHEDULE EMAIL SENT (INTERVIEWER):", response.data.messageId);
+    return response.data;
   } catch (error) {
-    console.error("Brevo interviewer email failed:", {
+    console.error("Brevo reschedule interviewer email failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    })
-    throw error
+    });
+    throw error;
   }
 }
 
@@ -397,9 +523,8 @@ export async function sendResetPasswordEmail(data) {
           </small>
         </div>
       `,
-      textContent: `Hi ${
-        data.name || "User"
-      }, reset your password using this link: ${resetLink} (expires in 15 minutes)`,
+      textContent: `Hi ${data.name || "User"
+        }, reset your password using this link: ${resetLink} (expires in 15 minutes)`,
     }
 
     const response = await axios.post(BREVO_URL, payload, {
