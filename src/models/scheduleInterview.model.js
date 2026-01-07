@@ -4,7 +4,7 @@ const scheduleSchema = new mongoose.Schema(
 {
     jobId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "JobRoles",
+      ref: "JobRole",
       required: true,
     },
    
