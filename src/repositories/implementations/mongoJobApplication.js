@@ -413,6 +413,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       {
         $project: {
           _id: 1,
+          candidateId: 1, 
           resumeUrl: 1,
           status: 1,
           createdAt: 1,

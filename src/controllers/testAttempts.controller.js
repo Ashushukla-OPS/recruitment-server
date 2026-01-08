@@ -2,6 +2,7 @@ import { testGenerator } from "../agents/TestGenerator.js";
 import { evaluateTest } from "../agents/TestEvalutor.js";
 import TestAttemptsService from "../services/testAttempts.service.js";
 import TestService from "../services/tests.service.js";
+import { sendTestResultEmail } from "../services/sendMailServices/sendTestResultMarksEmail.js";
 
 class TestAttemptsController {
   constructor() {
@@ -12,6 +13,8 @@ class TestAttemptsController {
     this.getUserAttempts = this.getUserAttempts.bind(this);
     this.getCandidateAttempts = this.getCandidateAttempts.bind(this);
     this.testService = new TestService();
+    this.publishTestResults = this.publishTestResults.bind(this);
+
   }
 
   async startTest(req, res, next) {
@@ -170,6 +173,53 @@ class TestAttemptsController {
       next(error);
     }
   }
+
+  async publishTestResults(req, res, next) {
+    try {
+      const { testId } = req.params;
+      const test = await this.testService.testRepository.enableShowResults(testId);
+      if (!test) {
+        return res.status(404).json({
+          success: false,
+          message: "Test not found",
+        });
+      }
+
+      if (test.alreadyEnabled) {
+        return res.status(400).json({
+          success: false,
+          message: "Results already published",
+        });
+      }
+
+      const attempts =
+        await this.testAttemptsService.testAttemptsRepogitory.findAttemptsforEmail(
+          testId
+        );
+
+      for (const attempt of attempts) {
+        await sendTestResultEmail({
+          to: attempt.email,
+          name: `${attempt.firstName} ${attempt.lastName}`,
+          testTitle: test.title,
+          score: attempt.score,
+          percentage: attempt.percentage,
+          isPassed: attempt.isPassed,
+          resultLink: `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/tests`,
+        });
+      }
+      res.status(200).json({
+        success: true,
+        message: "Results published and emails sent successfully",
+        emailSent: attempts.length,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
+  
 }
 
 export default new TestAttemptsController();

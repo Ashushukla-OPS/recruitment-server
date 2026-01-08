@@ -99,6 +99,18 @@ class MongoTestRepository extends ItestsRepository {
   }
 }
 
+  async enableShowResults(testId) {
+    const test = await Tests.findById(testId);
+    if (!test) return null;
+    if (test.showResults === true) {
+      return { alreadyEnabled: true };
+    }
+    test.showResults = true;
+    await test.save();
+
+    return test;
+  }
+
 }
 
 export default MongoTestRepository;
