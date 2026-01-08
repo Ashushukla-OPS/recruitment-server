@@ -6,8 +6,8 @@ import {
   sendEnrollEmail,
   sendVerificationEmail,
   sendWelcomeEmail,
-  sendInterviewEmail,
-  sendInterviewerEmail,
+  sendScheduleInterviewEmail,
+  sendScheduleInterviewerEmail,
   sendResetPasswordEmail,
   sendApplicationStatusUpdateEmail,
   sendRescheduledInterviewEmail,
@@ -36,8 +36,8 @@ const worker = new Worker(
       } 
       else if (job.name === 'schedule-interview') {
         // Send to both candidate and interviewer
-        await sendInterviewEmail(job.data);
-        await sendInterviewerEmail(job.data);
+        await sendScheduleInterviewEmail(job.data);
+        await sendScheduleInterviewerEmail(job.data);
       } 
       else if (job.name === 'reschedule-interview') {
         // Send to both candidate and interviewer

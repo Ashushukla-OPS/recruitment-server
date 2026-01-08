@@ -51,99 +51,354 @@ export async function sendWelcomeEmail(data) {
 /**
  * Send interview email to candidate
  */
-export async function sendInterviewEmail(data) {
+export async function sendScheduleInterviewEmail(data) {
   try {
     const payload = {
-      sender: { name: "Sheryians", email: "anshur9608837@gmail.com" },
+      sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
       to: [{ email: data.candidateEmail, name: data.candidateName }],
-      subject: `Interview Scheduled for ${data.jobTitle}`,
+      subject: `Interview Scheduled – ${data.jobTitle}`,
       htmlContent: `
-        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-          <h1 style="color: #1a73e8;">Hi ${data.candidateName || "Candidate"}!</h1>
-          <p>Your interview for <strong>${data.jobTitle
-        }</strong> at <strong>Sheryians</strong> has been scheduled.</p>
-          <p><strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}</p>
-          <p><strong>Meeting Link:</strong></p>
-          <a href="${data.meetingLink}" target="_blank">${data.meetingLink}</a>
-          <br /><br />
-          <p>Please join on time and ensure a stable internet connection.</p>
-          <hr />
-          <small>Best of luck!</small>
+      <div style="
+        background:#f2f5f9;
+        padding:40px 0;
+        font-family:'Segoe UI', Roboto, Arial, sans-serif;
+      ">
+
+        <!-- MAIN CARD -->
+        <div style="
+          max-width:600px;
+          margin:0 auto;
+          background:#ffffff;
+          border-radius:14px;
+          overflow:hidden;
+          box-shadow:0 12px 30px rgba(0,0,0,0.08);
+        ">
+
+          <!-- HEADER -->
+          <div style="
+            padding:28px 24px;
+            display:flex;
+            align-items:center;
+            gap:14px;
+          ">
+            <div>
+              <div style="
+                font-size:20px;
+                font-weight:800;
+                color:#000;
+                line-height:1.2;
+              ">
+                Interview Scheduled
+              </div>
+
+              <div style="
+                font-size:13px;
+                color:#000;
+                margin-top:4px;
+              ">
+                Sheryians Recruitment Team
+              </div>
+            </div>
+          </div>
+
+          <!-- BODY -->
+          <div style="padding:28px 26px;color:#333;">
+            <p style="margin-top:0;font-size:15px;">
+              Dear ${data.candidateName},
+            </p>
+
+            <p style="font-size:14.5px;line-height:1.7;">
+              We would like to inform you that your interview for the position of
+              <strong>${data.jobTitle}</strong> has been
+              <strong>scheduled</strong>. Please find the updated details below:
+            </p>
+
+            <!-- DETAILS CARD -->
+            <div style="
+              margin:22px 0;
+              padding:18px 20px;
+              background:#f8fbff;
+              border-left:4px solid #1a73e8;
+              border-radius:8px;
+            ">
+              <p style="margin:6px 0;"><strong>Position:</strong> ${data.jobTitle}</p>
+              <p style="margin:6px 0;">
+                <strong>Date & Time:</strong>
+                ${new Date(data.Timing).toLocaleString()}
+              </p>
+
+              <p style="margin:10px 0 0;">
+                <strong>Meeting Link:</strong><br />
+                <a
+                  href="${data.meetingLink}"
+                  target="_blank"
+                  style="
+                    display:inline-block;
+                    margin-top:8px;
+                    padding:10px 18px;
+                    background:#1a73e8;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:6px;
+                    font-size:13px;
+                    font-weight:600;
+                  "
+                >
+                  Join Meeting →
+                </a>
+              </p>
+
+              <p style="margin-top:10px;font-size:12.5px;color:#555;">
+                If the button does not work, copy and paste this link:
+              </p>
+              <p style="word-break:break-all;color:#1a73e8;">
+                ${data.meetingLink}
+              </p>
+            </div>
+
+            <!-- NOTE -->
+            <div style="
+              background:#fff8e1;
+              padding:14px 16px;
+              border-radius:8px;
+              font-size:13.5px;
+              color:#6b5e00;
+            ">
+              ⚠️ If the scheduled time does not work for you, please reply to
+              this email and our team will assist you with further steps.
+            </div>
+
+            <p style="margin-top:26px;font-size:14px;">
+              We appreciate your flexibility and look forward to speaking with you.
+            </p>
+
+            <p style="margin-bottom:0;">
+              Best regards,<br />
+              <strong>Sheryians Recruitment Team</strong>
+            </p>
+          </div>
+
+          <!-- FOOTER -->
+          <div style="
+            background:#f6f8fb;
+            padding:16px;
+            text-align:center;
+            font-size:12px;
+            color:#777;
+          ">
+            © ${new Date().getFullYear()} Sheryians · All rights reserved
+          </div>
+
         </div>
+      </div>
       `,
-      textContent: `Hi ${data.candidateName || "Candidate"}, your interview for ${data.jobTitle
-        } is scheduled on ${new Date(data.Timing).toLocaleString()}. Meeting link: ${data.meetingLink
-        }`,
-    }
+      textContent: `Dear ${data.candidateName},
+
+Your interview for the position of ${data.jobTitle} has been scheduled.
+
+Date & Time: ${new Date(data.Timing).toLocaleString()}
+Meeting Link: ${data.meetingLink}
+
+If the updated time does not work for you, please reply to this email.
+
+Best regards,
+Sheryians Recruitment Team`,
+    };
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    })
+    });
 
-    console.log("INTERVIEW EMAIL SENT (Candidate):", response.data.messageId)
-    return response.data
+    console.log("SCHEDULE EMAIL SENT (CANDIDATE):", response.data.messageId);
+    return response.data;
   } catch (error) {
-    console.error("Brevo interview email (candidate) failed:", {
+    console.error("Brevo reschedule candidate email failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    })
-    throw error
+    });
+    throw error;
   }
 }
 
 /**
  * Send interview notification to interviewer
  */
-export async function sendInterviewerEmail(data) {
+export async function sendScheduleInterviewerEmail(data) {
   try {
     const payload = {
-      sender: { name: "Sheryians", email: "anshur9608837@gmail.com" },
+      sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
       to: [{ email: data.interviewer }],
-      subject: `Interview Scheduled for ${data.jobTitle}`,
+      subject: `Interview Scheduled – ${data.jobTitle}`,
       htmlContent: `
-        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-          <h1 style="color: #1a73e8;">Dear Interviewer,</h1>
-          <p>I hope this email finds you well.</p>
-          <p>This is to inform you that an interview has been scheduled for the following candidate:</p>
-          <p><strong>Candidate Name:</strong> ${data.candidateName}</p>
-          <p><strong>Position:</strong> ${data.jobTitle}</p>
-          <p><strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}</p>
-          <p><strong>Meeting Link:</strong></p>
-          <a href="${data.meetingLink}" target="_blank">${data.meetingLink}</a>
-          <br /><br />
-          <p>Kindly let us know if the scheduled time works for you or if any adjustments are required.</p>
-          <p>Please feel free to reach out if you have any questions or need further information.</p>
-          <p>Thank you for your time and cooperation.</p>
-          <hr />
-          <small>Best regards,<br />Sheryians Team</small>
-        </div>
-      `,
-      textContent: `Dear Interviewer, an interview has been scheduled for candidate ${data.candidateName
-        } for the position ${data.jobTitle} on ${new Date(
+      <div style="
+  background:#f2f5f9;
+  padding:40px 0;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+">
+
+  <!-- MAIN CARD -->
+  <div style="
+    max-width:600px;
+    margin:0 auto;
+    background:#ffffff;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 12px 30px rgba(0,0,0,0.08);
+  ">
+
+    <!-- HEADER -->
+    <div style="
+      
+      padding:28px 24px;
+      display:flex;
+      align-items:center;
+      gap:14px
+    ">
+    
+       <!-- TEXT BLOCK -->
+  <div>
+    <div style="
+      font-size:20px;
+      font-weight:800;
+      color: black;
+      line-height:1.2;
+    ">
+      Interview Scheduled
+    </div>
+
+    <div style="
+      font-size:13px;
+      color: black;
+      margin-top:4px;
+    ">
+      Sheryians Recruitment Team
+    </div>
+  </div>
+
+</div>
+
+    <!-- BODY -->
+    <div style="padding:28px 26px;color:#333;">
+      <p style="margin-top:0;font-size:15px;">
+        Dear Interviewer,
+      </p>
+
+      <p style="font-size:14.5px;line-height:1.7;">
+        This is to inform you that the interview has been
+        <strong>scheduled</strong>. Please find the updated details below:
+      </p>
+
+      <!-- DETAILS CARD -->
+      <div style="
+        margin:22px 0;
+        padding:18px 20px;
+        background:#f8fbff;
+        border-left:4px solid #1a73e8;
+        border-radius:8px;
+      ">
+        <p style="margin:6px 0;"><strong>Candidate:</strong> ${data.candidateName}</p>
+        <p style="margin:6px 0;"><strong>Position:</strong> ${data.jobTitle}</p>
+        <p style="margin:6px 0;"><strong>Date & Time:</strong> ${new Date(
           data.Timing
-        ).toLocaleString()}. Meeting link: ${data.meetingLink}`,
-    }
+        ).toLocaleString()}</p>
+
+        <p style="margin:10px 0 0;">
+          <strong>Meeting Link:</strong><br />
+          <a
+            href="${data.meetingLink}"
+            target="_blank"
+            style="
+              display:inline-block;
+              margin-top:8px;
+              padding:10px 18px;
+              background:#1a73e8;
+              color:#ffffff;
+              text-decoration:none;
+              border-radius:6px;
+              font-size:13px;
+              font-weight:600;
+            "
+          >
+            Join Meeting →
+          </a>
+          <p>if link doesn't work copy and paste this: </p>
+          <p style="word-break: break-all; color: #1a73e8;">${data.meetingLink}</p>
+        </p>
+      </div>
+
+      <!-- NOTE -->
+      <div style="
+        background:#fff8e1;
+        padding:14px 16px;
+        border-radius:8px;
+        font-size:13.5px;
+        color:#6b5e00;
+      ">
+        ⚠️ If the scheduled time does not work for you, please reply to this
+        email so we can assist with further changes.
+      </div>
+
+      <p style="margin-top:26px;font-size:14px;">
+        Thank you for your time and cooperation.
+      </p>
+
+      <p style="margin-bottom:0;">
+        Best regards,<br />
+        <strong>Sheryians Recruitment Team</strong>
+      </p>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="
+      background:#f6f8fb;
+      padding:16px;
+      text-align:center;
+      font-size:12px;
+      color:#777;
+    ">
+      © ${new Date().getFullYear()} Sheryians · All rights reserved
+    </div>
+
+  </div>
+</div>
+
+        
+      `,
+      textContent: `Dear Interviewer,
+
+The interview has been scheduled.
+
+Candidate: ${data.candidateName}
+Position: ${data.jobTitle}
+Date & Time: ${new Date(data.Timing).toLocaleString()}
+Meeting Link: ${data.meetingLink}
+
+If this time does not work for you, please reply to this email.
+
+Best regards,
+Sheryians Recruitment Team`,
+    };
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    })
+    });
 
-    console.log("INTERVIEW EMAIL SENT (Interviewer):", response.data.messageId)
-    return response.data
+    console.log("SCHEDULE EMAIL SENT (INTERVIEWER):", response.data.messageId);
+    return response.data;
   } catch (error) {
-    console.error("Brevo interviewer email failed:", {
+    console.error("Brevo reschedule interviewer email failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    })
-    throw error
+    });
+    throw error;
   }
 }
 
@@ -151,44 +406,173 @@ export async function sendInterviewerEmail(data) {
 export async function sendRescheduledInterviewEmail(data) {
   try {
     const payload = {
-      sender: { name: "Sheryians", email: "anshur9608837@gmail.com" },
+      sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
       to: [{ email: data.candidateEmail, name: data.candidateName }],
-      subject: `Interview is Rescheduled for ${data.jobTitle}`,
+      subject: `Interview Rescheduled – ${data.jobTitle}`,
       htmlContent: `
-        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-          <h1 style="color: #1a73e8;">Hi ${data.candidateName || "Candidate"}!</h1>
-          <p>Your interview for <strong>${data.jobTitle
-        }</strong> at <strong>Sheryians</strong> has been Rescheduled.</p>
-          <p><strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}</p>
-          <p><strong>Meeting Link:</strong></p>
-          <a href="${data.meetingLink}" target="_blank">${data.meetingLink}</a>
-          <br /><br />
-          <p>Please join on time and ensure a stable internet connection.</p>
-          <hr />
-          <small>Best of luck!</small>
+      <div style="
+        background:#f2f5f9;
+        padding:40px 0;
+        font-family:'Segoe UI', Roboto, Arial, sans-serif;
+      ">
+
+        <!-- MAIN CARD -->
+        <div style="
+          max-width:600px;
+          margin:0 auto;
+          background:#ffffff;
+          border-radius:14px;
+          overflow:hidden;
+          box-shadow:0 12px 30px rgba(0,0,0,0.08);
+        ">
+
+          <!-- HEADER -->
+          <div style="
+            padding:28px 24px;
+            display:flex;
+            align-items:center;
+            gap:14px;
+          ">
+            <div>
+              <div style="
+                font-size:20px;
+                font-weight:800;
+                color:#000;
+                line-height:1.2;
+              ">
+                Interview Rescheduled
+              </div>
+
+              <div style="
+                font-size:13px;
+                color:#000;
+                margin-top:4px;
+              ">
+                Sheryians Recruitment Team
+              </div>
+            </div>
+          </div>
+
+          <!-- BODY -->
+          <div style="padding:28px 26px;color:#333;">
+            <p style="margin-top:0;font-size:15px;">
+              Dear ${data.candidateName},
+            </p>
+
+            <p style="font-size:14.5px;line-height:1.7;">
+              We would like to inform you that your interview for the position of
+              <strong>${data.jobTitle}</strong> has been
+              <strong>rescheduled</strong>. Please find the updated details below:
+            </p>
+
+            <!-- DETAILS CARD -->
+            <div style="
+              margin:22px 0;
+              padding:18px 20px;
+              background:#f8fbff;
+              border-left:4px solid #1a73e8;
+              border-radius:8px;
+            ">
+              <p style="margin:6px 0;"><strong>Position:</strong> ${data.jobTitle}</p>
+              <p style="margin:6px 0;">
+                <strong>Date & Time:</strong>
+                ${new Date(data.Timing).toLocaleString()}
+              </p>
+
+              <p style="margin:10px 0 0;">
+                <strong>Meeting Link:</strong><br />
+                <a
+                  href="${data.meetingLink}"
+                  target="_blank"
+                  style="
+                    display:inline-block;
+                    margin-top:8px;
+                    padding:10px 18px;
+                    background:#1a73e8;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:6px;
+                    font-size:13px;
+                    font-weight:600;
+                  "
+                >
+                  Join Meeting →
+                </a>
+              </p>
+
+              <p style="margin-top:10px;font-size:12.5px;color:#555;">
+                If the button does not work, copy and paste this link:
+              </p>
+              <p style="word-break:break-all;color:#1a73e8;">
+                ${data.meetingLink}
+              </p>
+            </div>
+
+            <!-- NOTE -->
+            <div style="
+              background:#fff8e1;
+              padding:14px 16px;
+              border-radius:8px;
+              font-size:13.5px;
+              color:#6b5e00;
+            ">
+              ⚠️ If the rescheduled time does not work for you, please reply to
+              this email and our team will assist you with further steps.
+            </div>
+
+            <p style="margin-top:26px;font-size:14px;">
+              We appreciate your flexibility and look forward to speaking with you.
+            </p>
+
+            <p style="margin-bottom:0;">
+              Best regards,<br />
+              <strong>Sheryians Recruitment Team</strong>
+            </p>
+          </div>
+
+          <!-- FOOTER -->
+          <div style="
+            background:#f6f8fb;
+            padding:16px;
+            text-align:center;
+            font-size:12px;
+            color:#777;
+          ">
+            © ${new Date().getFullYear()} Sheryians · All rights reserved
+          </div>
+
         </div>
+      </div>
       `,
-      textContent: `Hi ${data.candidateName || "Candidate"}, your interview for ${data.jobTitle
-        } is rescheduled on ${new Date(data.Timing).toLocaleString()}. Meeting link: ${data.meetingLink
-        }`,
-    }
+      textContent: `Dear ${data.candidateName},
+
+Your interview for the position of ${data.jobTitle} has been rescheduled.
+
+Date & Time: ${new Date(data.Timing).toLocaleString()}
+Meeting Link: ${data.meetingLink}
+
+If the updated time does not work for you, please reply to this email.
+
+Best regards,
+Sheryians Recruitment Team`,
+    };
 
     const response = await axios.post(BREVO_URL, payload, {
       headers: {
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    })
+    });
 
-    console.log("INTERVIEW EMAIL SENT (Candidate):", response.data.messageId)
-    return response.data
+    console.log("RESCHEDULE EMAIL SENT (CANDIDATE):", response.data.messageId);
+    return response.data;
   } catch (error) {
-    console.error("Brevo interview email (candidate) failed:", {
+    console.error("Brevo reschedule candidate email failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    })
-    throw error
+    });
+    throw error;
   }
 }
 
@@ -218,28 +602,19 @@ export async function sendRescheduledInterviewerEmail(data) {
 
     <!-- HEADER -->
     <div style="
-      background:linear-gradient(135deg,#1a73e8,#0b5ed7);
+      
       padding:28px 24px;
       display:flex;
       align-items:center;
       gap:14px
     ">
-      <img
-        src="https://avatars.githubusercontent.com/u/69582226?v=4"
-        alt="Sheryians Logo"
-        style="
-          height:48px;
-          margin-right:14px;
-          
-          border-radius:10px;
-        "
-      />
+    
        <!-- TEXT BLOCK -->
   <div>
     <div style="
       font-size:20px;
       font-weight:800;
-      color:#ffffff;
+      color: black;
       line-height:1.2;
     ">
       Interview Rescheduled
@@ -247,7 +622,7 @@ export async function sendRescheduledInterviewerEmail(data) {
 
     <div style="
       font-size:13px;
-      color:#e3efff;
+      color: black;
       margin-top:4px;
     ">
       Sheryians Recruitment Team
@@ -300,7 +675,7 @@ export async function sendRescheduledInterviewerEmail(data) {
           >
             Join Meeting →
           </a>
-          <p>if link doesn't work copy paste this: </p>
+          <p>if link doesn't work copy and paste this: </p>
           <p style="word-break: break-all; color: #1a73e8;">${data.meetingLink}</p>
         </p>
       </div>
@@ -383,44 +758,71 @@ Sheryians Recruitment Team`,
 export async function sendCancelledInterviewEmail(data) {
   try {
     const payload = {
-      sender: { name: "Sheryians", email: "anshur9608837@gmail.com" },
+      sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
       to: [{ email: data.candidateEmail, name: data.candidateName }],
-      subject: `Interview Cancelled for ${data.jobTitle}`,
+      subject: `Interview Cancelled – ${data.jobTitle}`,
       htmlContent: `
-        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-          <h1 style="color: #e53935;">Hi ${data.candidateName || "Candidate"}!</h1>
-          <p>We regret to inform you that your interview for 
-            <strong>${data.jobTitle}</strong> at <strong>Sheryians</strong>
-            has been <b>cancelled</b>.
-          </p>
+      <div style="background:#f2f5f9;padding:40px 0;font-family:'Segoe UI', Roboto, Arial, sans-serif;">
+        <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,0.08);">
 
-          <p>If this was unintentional or needs rescheduling, our recruitment team
-          will reach out to you.</p>
-          <p>Thank you for your time and interest.</p>
+          <!-- HEADER -->
+          <div style="padding:28px 24px;">
+            <div style="font-size:20px;font-weight:800;color:#000;">Interview Cancelled</div>
+            <div style="font-size:13px;color:#000;margin-top:4px;">Sheryians Recruitment Team</div>
+          </div>
 
-          <hr />
-          <small>Best regards,<br />Sheryians Team</small>
+          <!-- BODY -->
+          <div style="padding:28px 26px;color:#333;">
+            <p>Dear ${data.candidateName},</p>
+
+            <p style="line-height:1.7;">
+              We regret to inform you that your interview for the position of
+              <strong>${data.jobTitle}</strong> has been <strong>cancelled</strong>.
+            </p>
+
+            <div style="margin:22px 0;padding:18px 20px;background:#fff5f5;border-left:4px solid #e53935;border-radius:8px;">
+              <p><strong>Position:</strong> ${data.jobTitle}</p>
+              <p><strong>Status:</strong> Cancelled</p>
+            </div>
+
+            <div style="background:#fff8e1;padding:14px 16px;border-radius:8px;font-size:13.5px;">
+              ⚠️ If this cancellation was unintentional or requires rescheduling,
+              our team will contact you shortly.
+            </div>
+
+            <p style="margin-top:26px;">
+              Thank you for your time and interest.
+            </p>
+
+            <p>
+              Best regards,<br />
+              <strong>Sheryians Recruitment Team</strong>
+            </p>
+          </div>
+
+          <!-- FOOTER -->
+          <div style="background:#f6f8fb;padding:16px;text-align:center;font-size:12px;color:#777;">
+            © ${new Date().getFullYear()} Sheryians · All rights reserved
+          </div>
+
         </div>
+      </div>
       `,
-      textContent: `Hi ${data.candidateName}, your interview for ${data.jobTitle} has been cancelled.`,
+      textContent: `Dear ${data.candidateName},
+
+Your interview for ${data.jobTitle} has been cancelled.
+
+If further steps are required, our team will reach out.
+
+Best regards,
+Sheryians Recruitment Team`,
     };
 
-    const response = await axios.post(BREVO_URL, payload, {
-      headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-      },
-    });
-
-    console.log("CANCEL INTERVIEW EMAIL SENT:", response.data.messageId);
-    return response.data;
-  } catch (error) {
-    console.error("Brevo cancel interview email failed:", {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-    });
-    throw error;
+    return (await axios.post(BREVO_URL, payload, {
+      headers: { "api-key": BREVO_API_KEY, "Content-Type": "application/json" },
+    })).data;
+  } catch (err) {
+    throw err;
   }
 }
 
@@ -430,43 +832,71 @@ export async function sendCancelledInterviewEmail(data) {
 export async function sendCancelledInterviewerEmail(data) {
   try {
     const payload = {
-      sender: { name: "Sheryians", email: "anshur9608837@gmail.com" },
+      sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
       to: [{ email: data.interviewer }],
       subject: `Interview Cancelled – ${data.jobTitle}`,
       htmlContent: `
-        <div style="font-family: Arial; padding: 20px; background: #f4f4f4; border-radius: 10px;">
-          <h2 style="color: #e53935;">Interview Cancelled</h2>
+      <div style="background:#f2f5f9;padding:40px 0;font-family:'Segoe UI', Roboto, Arial, sans-serif;">
+        <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,0.08);">
 
-          <p>The following interview has been <strong>cancelled</strong>:</p>
+          <!-- HEADER -->
+          <div style="padding:28px 24px;">
+            <div style="font-size:20px;font-weight:800;color:#000;">Interview Cancelled</div>
+            <div style="font-size:13px;color:#000;margin-top:4px;">Sheryians Recruitment Team</div>
+          </div>
 
-          <p><strong>Candidate:</strong> ${data.candidateName}</p>
-          <p><strong>Position:</strong> ${data.jobTitle}</p>
+          <!-- BODY -->
+          <div style="padding:28px 26px;color:#333;">
+            <p>Dear Interviewer,</p>
 
-          <p>No further action is required from your side.</p>
+            <p style="line-height:1.7;">
+              Please note that the following interview has been
+              <strong>cancelled</strong>.
+            </p>
 
-          <hr />
-          <small>Sheryians Recruitment Team</small>
+            <div style="margin:22px 0;padding:18px 20px;background:#fff5f5;border-left:4px solid #e53935;border-radius:8px;">
+              <p><strong>Candidate:</strong> ${data.candidateName}</p>
+              <p><strong>Position:</strong> ${data.jobTitle}</p>
+              <p><strong>Status:</strong> Cancelled</p>
+            </div>
+
+            <div style="background:#fff8e1;padding:14px 16px;border-radius:8px;font-size:13.5px;">
+              ⚠️ No further action is required from your side.
+            </div>
+
+            <p style="margin-top:26px;">
+              Thank you for your time and cooperation.
+            </p>
+
+            <p>
+              Best regards,<br />
+              <strong>Sheryians Recruitment Team</strong>
+            </p>
+          </div>
+
+          <!-- FOOTER -->
+          <div style="background:#f6f8fb;padding:16px;text-align:center;font-size:12px;color:#777;">
+            © ${new Date().getFullYear()} Sheryians · All rights reserved
+          </div>
+
         </div>
+      </div>
       `,
-      textContent: `Interview cancelled for candidate ${data.candidateName} – Position: ${data.jobTitle}`,
+      textContent: `Dear Interviewer,
+
+The interview with ${data.candidateName} for ${data.jobTitle} has been cancelled.
+
+No action is required.
+
+Best regards,
+Sheryians Recruitment Team`,
     };
 
-    const response = await axios.post(BREVO_URL, payload, {
-      headers: {
-        "api-key": BREVO_API_KEY,
-        "Content-Type": "application/json",
-      },
-    });
-
-    console.log("CANCEL INTERVIEW EMAIL SENT (INTERVIEWER):", response.data.messageId);
-    return response.data;
-  } catch (error) {
-    console.error("Brevo cancel interview interviewer email failed:", {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-    });
-    throw error;
+    return (await axios.post(BREVO_URL, payload, {
+      headers: { "api-key": BREVO_API_KEY, "Content-Type": "application/json" },
+    })).data;
+  } catch (err) {
+    throw err;
   }
 }
 
