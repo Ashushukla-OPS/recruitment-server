@@ -14,6 +14,7 @@ class TestAttemptsController {
     this.getCandidateAttempts = this.getCandidateAttempts.bind(this);
     this.testService = new TestService();
     this.publishTestResults = this.publishTestResults.bind(this);
+    this.testAttemptsRepository = this.testAttemptsService.testAttemptsRepogitory ;
 
   }
 
@@ -66,7 +67,7 @@ class TestAttemptsController {
   }
 
   async getAttemptById(attemptId) {
-    const attempt = await this.testAttemptsRepogitory.findById(att);
+    const attempt = await this.testAttemptsRepository.findById(attemptId);
 
     if (!attempt) {
       throw new AppError("Test attempt not found", 404);
@@ -107,7 +108,7 @@ class TestAttemptsController {
 
       const test = await this.testService.getTestById(testId);
 
-      const attempt = await this.testAttemptsService.getAttemptById(attemptId);
+      const attempt = await this.getAttemptById(attemptId);
 
       const evaluation = await evaluateTest({
         questions: attempt.questions,
