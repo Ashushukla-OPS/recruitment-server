@@ -10,25 +10,29 @@ class TestAttemptsService {
     this.testRepository = new MongoTestRepository();
   }
 
-  async startTest(testId, email) {
-    const attemptData = {
-      testId,
-      email,
-      score: 0,
-      percentage: 0,
-      startTime: new Date(),
-      status: "Started",
-      answers: [],
-    };
+ async startTest(testId, email, extra = {}) {
+  const attemptData = {
+    testId,
+    email,
+    score: 0,
+    percentage: 0,
+    startTime: new Date(),
+    status: "Started",
+    answers: [],
+    questions: extra.questions,
+  };
 
-    const newAttempt = await this.testAttemptsRepogitory.createTestAttempt(
-      attemptData
-    );
-    if (!newAttempt) {
-      throw new AppError("Error while starting the test", 500);
-    }
-    return newAttempt;
+  const newAttempt = await this.testAttemptsRepogitory.createTestAttempt(
+    attemptData
+  );
+
+  if (!newAttempt) {
+    throw new AppError("Error while starting the test", 500);
   }
+
+  return newAttempt;
+}
+
 
   async submitTest(attemptId, testResults) {
     const test = await this.testRepository.findTestById(testResults.testId);

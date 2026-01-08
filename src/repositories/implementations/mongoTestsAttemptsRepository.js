@@ -97,6 +97,21 @@ async findAttemptsByCandidate(testId, email) {           ///user specifuic test
     }
   }
 
+  async findById(id) {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) return null;
+
+    return await TestAttempts.findById(id).lean();
+  } catch (error) {
+    throw new AppError(
+      `Failed to find test attempt: ${error.message}`,
+      500,
+      error
+    );
+  }
+}
+
+
 
   async updateTestAttempt(id, updateData) {
     try {

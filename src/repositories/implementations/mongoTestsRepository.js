@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Tests from "../../models/Tests.js";
 import ItestsRepository from "../contracts/ITestsRepository.js";
 import { AppError } from "../../utils/errors.js";
+import TestAttempt from "../../models/TestAttempt.js";
 
 class MongoTestRepository extends ItestsRepository {
   async createTest(testData) {
@@ -91,8 +92,7 @@ class MongoTestRepository extends ItestsRepository {
   async findAttemptsByTest(testId) {
   try {
     return await TestAttempt.find({ testId })
-      .populate("userId", "name email") // Get candidate details
-      .sort({ createdAt: -1 })
+      .select("questions") 
       .lean();
   } catch (error) {
     throw new AppError("Failed to fetch test results", 500);

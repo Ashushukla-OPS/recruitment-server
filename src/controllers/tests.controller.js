@@ -1,4 +1,3 @@
-import { testGenerator } from "../agents/TestGenerator.js";
 import TestService from "../services/tests.service.js";
 
 class TestController {

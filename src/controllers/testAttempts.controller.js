@@ -15,52 +15,67 @@ class TestAttemptsController {
   }
 
   async startTest(req, res, next) {
-  try {
-    const { testId } = req.body;
-    const email = req.user.email;
+    try {
+      const { testId } = req.body;
+      const email = req.user.email;
 
-    // 1️⃣ Fetch test config
-    const testSummary = await this.testService.getTestById(testId);
+      const testSummary = await this.testService.getTestById(testId);
 
-    const testConfig = {
-      title: testSummary.title,
-      summury: testSummary.summury,
-      showResults: testSummary.showResults,
-      category: testSummary.category,
-      status: testSummary.status,
-      duration: testSummary.duration,
-      passingScore: testSummary.passingScore,
-      prompt: testSummary.prompt,
-    };
+      const allPreviousAttempts = await this.testService.testRepository.findAttemptsByTest(testId) || [];
+     const usedQuestions = allPreviousAttempts.flatMap((attempt) =>
+      attempt.questions ? attempt.questions.map((q) => q.questionText) : []
+    );
 
-    // 2️⃣ Generate questions from AI (already normalized)
-    const aiResult = await testGenerator(testConfig);
+      const testConfig = {
+        title: testSummary.title,
+        summury: testSummary.summury,
+        showResults: testSummary.showResults,
+        category: testSummary.category,
+        status: testSummary.status,
+        duration: testSummary.duration,
+        passingScore: testSummary.passingScore,
+        prompt: testSummary.prompt,
 
-    // 3️⃣ Create attempt
-    const attempt = await this.testAttemptsService.startTest(testId, email);
+        userSeed: `${req.user.email}-${testId}`,
+        excludeQuestions: usedQuestions.slice(-40),
+      };
 
-    // 4️⃣ EXACT RESPONSE SHAPE (CLIENT SAFE)
-    return res.status(201).json({
-      success: true,
-      data: attempt,
-      questions: {
-        test: {
-          questions: aiResult.questions,
-          duration: aiResult.duration,
-          passingScore: aiResult.passingScore,
+      const aiResult = await testGenerator(testConfig);
+      const attempt = await this.testAttemptsService.startTest(testId, email, {
+        questions: aiResult.questions,
+      });
+
+      // 4️⃣ EXACT RESPONSE SHAPE (CLIENT SAFE)
+      return res.status(201).json({
+        success: true,
+        data: attempt,
+        questions: {
+          test: {
+            questions: aiResult.questions,
+            duration: aiResult.duration,
+            passingScore: aiResult.passingScore,
+          },
         },
-      },
-    });
-  } catch (error) {
-    next(error);
+      });
+    } catch (error) {
+      next(error);
+    }
   }
-}
 
+  async getAttemptById(attemptId) {
+    const attempt = await this.testAttemptsRepogitory.findById(att);
+
+    if (!attempt) {
+      throw new AppError("Test attempt not found", 404);
+    }
+
+    return attempt;
+  }
 
   async submitTest(req, res, next) {
     try {
       const attemptId = req.params.attemptId;
-      const { testId, questions ,answers, isDisqualified  = false } = req.body;
+      const { testId, answers, isDisqualified = false } = req.body;
 
       if (!testId) {
         return res
@@ -69,26 +84,34 @@ class TestAttemptsController {
       }
 
       if (isDisqualified) {
-        const updatedAttempt = await this.testAttemptsService.submitTest(attemptId, {
-          testId,
-          answers,
-          score: 0,
-          percentage: 0,
-          isPassed: false,
-          status: "Disqualified",
+        const updatedAttempt = await this.testAttemptsService.submitTest(
+          attemptId,
+          {
+            testId,
+            answers,
+            score: 0,
+            percentage: 0,
+            isPassed: false,
+            status: "Disqualified",
+          }
+        );
+        return res.status(200).json({
+          success: true,
+          message: "Attempt recorded as disqualified",
+          attempt: updatedAttempt,
         });
-        return res.status(200).json({ success: true, message: "Attempt recorded as disqualified", attempt: updatedAttempt });
       }
 
       const test = await this.testService.getTestById(testId);
 
+      const attempt = await this.testAttemptsService.getAttemptById(attemptId);
+
       const evaluation = await evaluateTest({
-        questions: questions,
+        questions: attempt.questions,
         answers,
         passingScore: test.passingScore,
-        testPrompt:test.prompt
+        testPrompt: test.prompt,
       });
-
       const updatedAttempt = await this.testAttemptsService.submitTest(
         attemptId,
         {
@@ -134,19 +157,19 @@ class TestAttemptsController {
       const { testId } = req.params;
       const email = req.user.email; // 🔐 from JWT
 
-      const attempts =
-        await this.testAttemptsService.getAttemptsForCandidate(testId, email);
+      const attempts = await this.testAttemptsService.getAttemptsForCandidate(
+        testId,
+        email
+      );
 
       res.status(200).json({
         success: true,
         data: attempts,
       });
     } catch (error) {
-      next(error);  
-    } 
+      next(error);
+    }
   }
-
-  
 }
 
 export default new TestAttemptsController();
