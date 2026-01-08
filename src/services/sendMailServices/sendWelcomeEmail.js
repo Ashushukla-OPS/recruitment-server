@@ -1,5 +1,6 @@
 import axios from "axios"
 
+
 const FRONTEND_URL = "https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app"
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY
