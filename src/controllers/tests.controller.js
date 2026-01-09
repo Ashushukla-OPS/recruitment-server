@@ -39,7 +39,7 @@ class TestController {
 
   async updateTest(req, res, next) {
     try {
-      const updated = await this.testService.testRepository.updateTest(
+      const updated = await this.testService.updateTest(
         req.params.testId,
         req.body
       );

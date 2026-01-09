@@ -135,7 +135,7 @@ async findAttemptsByCandidate(testId, email) {           ///user specifuic test
         {
           $match: {
             testId: new mongoose.Types.ObjectId(testId),
-            status: "Graded",
+            status: { $in : ["Graded", "Disqualified", "disqualified", "failed", "Failed"]},
           },
         },
 
