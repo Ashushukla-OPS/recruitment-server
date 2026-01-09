@@ -30,9 +30,6 @@ class jobApplicationQuestionService {
   async updateApplicationQuestion(jobId,
           questionId,
           questionData) {
-    // if (!questionId) {
-    //   throw new AppError("QuestionId must be provided",500)
-    // }
     return await this.jobApplicationQuesRepo.updateApplicationQuestion(
       jobId,
           questionId,
@@ -40,16 +37,7 @@ class jobApplicationQuestionService {
     );
   }
 
-  async updateApplicationAnsers(Aid, ansers, Cid) {
-    if(!Aid){
-      throw new AppError("Application Id must be provided",500);
-    }
-    return await this.jobApplicationQuesRepo.updateApplicationAnswers(
-      Aid,
-      ansers,
-      Cid
-    );
-  }
+
 }
 
 export default new jobApplicationQuestionService();

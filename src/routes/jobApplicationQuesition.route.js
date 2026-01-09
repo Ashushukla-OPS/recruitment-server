@@ -6,13 +6,11 @@ import jobApplicationQuestionController from "../controllers/jobApplicatonQuesti
 const router = express.Router();
 
 
-router.post("/createJobQuestion/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.createApplicationQuestion);
+router.post("/createjobquestions/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.createApplicationQuestion);
 
 router.get("/getjobquestions/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.getApplicationQuestion);
 
 router.post("/updatejobquestion/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.updateApplicationQuestion)
-
-router.post("/updatejobanswers/:id",authenticateJWT,jobApplicationQuestionController.updateApplicationAnsers);
 
 
 export default router;

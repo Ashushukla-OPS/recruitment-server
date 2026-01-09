@@ -74,20 +74,6 @@ class jobApplicationQuestionController {
     }
   });
 
-  updateApplicationAnsers = asyncHandler(async(req,res,next)=>{
-    try {
-    const ApplicationId = req.params.id;
-    const { answers } = req.body;
-    const candidateId = req.user.id;
-    
-    const updatedApplication = await jobApplicationQuestionService.updateApplicationAnsers(ApplicationId,answers,candidateId);
-
-    res.status(200).json({message:"answers of jobApplication of candidate get saved",data:updatedApplication});
-    } catch (error) {
-      // console.log(error);
-      next(error)
-    }
-  })
 }
 
 export default new jobApplicationQuestionController();

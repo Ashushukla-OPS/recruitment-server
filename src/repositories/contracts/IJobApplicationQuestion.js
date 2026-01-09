@@ -9,9 +9,6 @@ export class IJobApplicationQuestion{
         throw new Error("Method updateApplicationQuestion must be implemented");
         
     }
-    async updateApplicationAnswers(ApplicationId,data,CandidateaId){
-        throw new Error("Method updateApplicationAnswers must be implemented");
 
-    }
 
 }

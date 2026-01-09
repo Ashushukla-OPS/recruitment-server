@@ -22,10 +22,6 @@ const jobApplicationSchema = new mongoose.Schema(
 
     answers: [
       {
-        questionId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "JobApplicationQuestion",
-        },
         question: {
           type: String,
           trim: true,
