@@ -2,13 +2,19 @@
 import { Worker } from 'bullmq';
 import connection from '../config/config/bullmq-connection.js';
 import logger from '../utils/logger.js';
-import { sendWelcomeEmail } from '../services/sendMailServices/sendWelcomeEmail.js';
-import { sendVerificationEmail } from '../services/sendMailServices/sendVerificationEmail.js';
-import { sendEnrollEmail } from '../services/sendMailServices/sendEnrollEmail.js';
-import { sendInterviewEmail } from '../services/sendMailServices/sendInterviewEmail.js';
-import { sendInterviewerEmail } from '../services/sendMailServices/sendInterviewerEmail.js';
-import { sendResetPasswordEmail } from '../services/sendMailServices/sendResetPasswordEmail.js';
-import { sendApplicationStatusUpdateEmail } from '../services/sendMailServices/sendApplicationStatusUpdateEmail.js';
+import {
+  sendEnrollEmail,
+  sendVerificationEmail,
+  sendWelcomeEmail,
+  sendScheduleInterviewEmail,
+  sendScheduleInterviewerEmail,
+  sendResetPasswordEmail,
+  sendApplicationStatusUpdateEmail,
+  sendRescheduledInterviewEmail,
+  sendRescheduledInterviewerEmail,
+  sendCancelledInterviewEmail,
+  sendCancelledInterviewerEmail
+} from '../services/sendMail.js';
 
 // NO QueueScheduler needed in BullMQ v5+
 // BullMQ automatically handles delayed jobs, retries, etc. when Worker is active
@@ -30,14 +36,28 @@ const worker = new Worker(
       } 
       else if (job.name === 'schedule-interview') {
         // Send to both candidate and interviewer
-        await sendInterviewEmail(job.data);
-        await sendInterviewerEmail(job.data);
+        await sendScheduleInterviewEmail(job.data);
+        await sendScheduleInterviewerEmail(job.data);
+      } 
+      else if (job.name === 'reschedule-interview') {
+        // Send to both candidate and interviewer
+        await sendRescheduledInterviewEmail(job.data);
+        await sendRescheduledInterviewerEmail(job.data);
       } 
       else if (job.name === 'reset-password') {
         await sendResetPasswordEmail(job.data);
       } else if (job.name === "application-status-update") {
         await sendApplicationStatusUpdateEmail(job.data);
       } 
+      else if (job.name === "cancel-interview") {
+        await sendCancelledInterviewEmail(job.data);
+      }
+
+      else if (job.name === "cancel-interview-interviewer") {
+        await sendCancelledInterviewerEmail(job.data);
+      } 
+
+      
       else {
         logger.warn(`Unknown job type: ${job.name}`);
       }
