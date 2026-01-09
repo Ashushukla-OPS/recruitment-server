@@ -62,6 +62,10 @@ const jobRoleSchema = new mongoose.Schema(
     location: {
       type: locationSchema,
       required: true,
+    },
+    hasQuestions:{
+      type:Boolean,
+      default:false               // Added Property //
     }
   },
   {

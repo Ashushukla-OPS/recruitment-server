@@ -25,6 +25,7 @@ import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
+import jobapplyques from "./routes/jobApplicationQuesition.route.js";
 
 
 const app = express();
@@ -57,6 +58,7 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
+app.use("/api/jobapplyques",jobapplyques)
 
 
 app.use(errorHandler);
