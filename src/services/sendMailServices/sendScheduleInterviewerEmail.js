@@ -1,21 +1,14 @@
 import axios from "axios"
 
-const FRONTEND_URL = "https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app"
-
 const BREVO_API_KEY = process.env.BREVO_API_KEY
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 
-/**
- * Send password reset email
- */
-export async function sendResetPasswordEmail(data) {
+export async function sendScheduleInterviewerEmail(data) {
   try {
-    const resetLink = `${FRONTEND_URL}/reset-password?token=${data.token}`
-
     const payload = {
   sender: { name: "Sheriyansh Recruitment", email: "anshur9608837@gmail.com" },
-  to: [{ email: data.to, name: data.name || "User" }],
-  subject: "Reset Your Password",
+  to: [{ email: data.interviewer }],
+  subject: `Interview Scheduled: ${data.jobTitle}`,
 
   htmlContent: `
   <div style="font-family: Inter, Arial, sans-serif; background:#ffffff; padding:40px;">
@@ -26,16 +19,38 @@ export async function sendResetPasswordEmail(data) {
       </p>
 
       <h1 style="font-size:22px; font-weight:600; margin:0 0 20px;">
-        Reset Your Password
+        Interview Scheduled
       </h1>
 
       <p style="font-size:15px; line-height:1.7; color:#374151; margin-bottom:24px;">
-        Hello ${data.name || "User"},<br/><br/>
-        We received a request to reset your password. Click the button below to
-        set a new password. This link is valid for a limited time.
+        Dear Interviewer,<br/><br/>
+        This is to inform you that an interview has been scheduled.
+        Please find the interview details below.
       </p>
 
-      <a href="${resetLink}"
+      <div style="
+        border-left:4px solid #111827;
+        padding:16px 20px;
+        margin-bottom:32px;
+        background:#fafafa;
+      ">
+        <p style="margin:0; font-size:13px; color:#6b7280;">
+          Interview Details
+        </p>
+
+        <p style="margin:8px 0 0; font-size:14px;">
+          <strong>Candidate Name:</strong> ${data.candidateName}
+        </p>
+        <p style="margin:4px 0; font-size:14px;">
+          <strong>Position:</strong> ${data.jobTitle}
+        </p>
+        <p style="margin:4px 0; font-size:14px;">
+          <strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}
+        </p>
+      </div>
+
+      <a href="${data.meetingLink}"
+         target="_blank"
          style="
            display:inline-block;
            padding:12px 28px;
@@ -46,7 +61,7 @@ export async function sendResetPasswordEmail(data) {
            font-weight:500;
            border-radius:6px;
          ">
-        Reset Password
+        Join Interview
       </a>
 
       <p style="font-size:13px; color:#6b7280; margin:24px 0 6px;">
@@ -54,7 +69,7 @@ export async function sendResetPasswordEmail(data) {
       </p>
 
       <p style="font-size:13px; color:#111827; word-break:break-all;">
-        ${resetLink}
+        ${data.meetingLink}
       </p>
 
       <div style="
@@ -64,8 +79,8 @@ export async function sendResetPasswordEmail(data) {
         margin:32px 0;
       ">
         <p style="margin:0; font-size:14px; color:#374151;">
-          This reset link will expire in <strong>15 minutes</strong>.
-          If you did not request a password reset, you can safely ignore this email.
+          If the scheduled time does not work for you, please reply to this email
+          so we can assist with rescheduling.
         </p>
       </div>
 
@@ -84,14 +99,16 @@ export async function sendResetPasswordEmail(data) {
   `,
 
   textContent: `
-Hello ${data.name || "User"},
+Dear Interviewer,
 
-We received a request to reset your password.
+An interview has been scheduled with the following details:
 
-Reset your password using the link below (valid for 15 minutes):
-${resetLink}
+Candidate Name: ${data.candidateName}
+Position: ${data.jobTitle}
+Date & Time: ${new Date(data.Timing).toLocaleString()}
+Meeting Link: ${data.meetingLink}
 
-If you did not request this, you can safely ignore this email.
+If the scheduled time does not work for you, please reply to this email.
 
 Regards,
 Sheriyansh Recruitment Team
@@ -104,16 +121,16 @@ Sheriyansh Recruitment Team
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    })
+    });
 
-    console.log("RESET PASSWORD EMAIL SENT:", response.data.messageId)
-    return response.data
+    console.log("SCHEDULE EMAIL SENT (INTERVIEWER):", response.data.messageId);
+    return response.data;
   } catch (error) {
-    console.error("Reset password email failed:", {
+    console.error("Brevo reschedule interviewer email failed:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-    })
-    throw error
+    });
+    throw error;
   }
 }
