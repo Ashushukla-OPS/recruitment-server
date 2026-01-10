@@ -10,41 +10,46 @@ class TestAttemptsService {
     this.testRepository = new MongoTestRepository()
   }
 
-  async startTest(testId, email) {
-    const enrollment = await this.enrollmentReposetory.findEnrollment(testId, email)
+ async startTest(testId, email, extra = {}) {
+   const enrollment = await this.enrollmentReposetory.findEnrollment(testId, email)
     console.log(enrollment)
 
     if (!enrollment) {
       throw new AppError("you are not enrolled for this test.", 409)
     }
-
-    // if (enrollment.status === "Started") {
-      //   throw new AppError("You have already started this test. Re-attempt is not allowed.", 409)
-      // }
       
     // 2️⃣ Block re-attempt
     if (enrollment.status === "Completed") {
       throw new AppError("You have already completed this test.", 409)
     }
 
+    // 3️⃣ Block Disqualified users
+if (enrollment.status === "Disqualified" || enrollment.status === "disqualified") {
+  throw new AppError("You have been disqualified from this test and cannot restart.", 403);
+}
+
     await this.enrollmentReposetory.updateEnrollmentStatus(enrollment._id, "Started")
+  const attemptData = {
+    testId,
+    email,
+    score: 0,
+    percentage: 0,
+    startTime: new Date(),
+    status: "Started",
+    answers: [],
+    questions: extra.questions,
+  };
 
-    const attemptData = {
-      testId,
-      email,
-      score: 0,
-      percentage: 0,
-      startTime: new Date(),
-      status: "Started",
-      answers: [],
-    }
+  const newAttempt = await this.testAttemptsRepogitory.createTestAttempt(
+    attemptData
+  );
 
-    const newAttempt = await this.testAttemptsRepogitory.createTestAttempt(attemptData)
-    if (!newAttempt) {
-      throw new AppError("Error while starting the test", 500)
+  if (!newAttempt) {
+    throw new AppError("Error while starting the test", 500);
     }
     return newAttempt
   }
+
 
   async submitTest(attemptId, testResults) {
     const test = await this.testRepository.findTestById(testResults.testId)
@@ -75,7 +80,8 @@ class TestAttemptsService {
       throw new AppError("Enrollment not found", 404)
     }
 
-    await this.enrollmentReposetory.updateEnrollmentStatus(enrollment._id, "Completed")
+    const finalStatus = testResults.status || "Completed";
+    await this.enrollmentReposetory.updateEnrollmentStatus(enrollment._id, finalStatus)
 
     return updatedAttempt
   }
