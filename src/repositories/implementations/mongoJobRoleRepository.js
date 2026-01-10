@@ -175,7 +175,7 @@ class MongoJobRoleRepository extends IJobRoleRepository {
       const pipeline = this.buildJobRolePipeline({
         match,
         userId,
-        includeApplicantsCount: true
+        includeQuestions: true
       });
 
       return await paginateAggregation(JobRole, pipeline, { page, limit });
@@ -188,7 +188,8 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     try {
       const pipeline = this.buildJobRolePipeline({
         match: { category: new mongoose.Types.ObjectId(categoryId) },
-        userId
+        userId,
+        includeQuestions: true
       });
 
       return await paginateAggregation(JobRole, pipeline, { page, limit });
@@ -214,7 +215,8 @@ class MongoJobRoleRepository extends IJobRoleRepository {
 
       const pipeline = this.buildJobRolePipeline({
         match,
-        userId
+        userId,
+        includeQuestions: true
       });
 
       return await paginateAggregation(JobRole, pipeline, { page, limit });
