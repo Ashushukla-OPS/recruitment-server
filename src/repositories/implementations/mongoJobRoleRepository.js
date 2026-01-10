@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 class MongoJobRoleRepository extends IJobRoleRepository {
 
 
-  buildJobRolePipeline({
+ buildJobRolePipeline({
     match = {},
     userId = null,
     includeQuestions = false,
@@ -94,17 +94,29 @@ class MongoJobRoleRepository extends IJobRoleRepository {
         }
       },
 
-      // Questions (optional)
+      // --- UPDATED QUESTIONS LOGIC ---
       ...(includeQuestions
-        ? [{
-            $lookup: {
-              from: "jobapplicationquestion",
-              localField: "_id",
-              foreignField: "jobId",
-              as: "questions"
-            }
-          }]
+        ? [
+            {
+              $lookup: {
+                from: "jobapplicationquestions", // Check your collection name (usually plural)
+                localField: "_id",
+                foreignField: "jobId",
+                as: "questionDoc"
+              }
+            },
+            {
+              $addFields: {
+                // Extracts the 'questions' array from the first matching document
+                questions: { 
+                  $ifNull: [{ $arrayElemAt: ["$questionDoc.questions", 0] }, []] 
+                }
+              }
+            },
+            { $project: { questionDoc: 0 } } // Clean up the temporary field
+          ]
         : []),
+      // -------------------------------
 
       { $unwind: { path: "$createdBy", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },

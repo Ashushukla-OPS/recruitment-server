@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
   "/createjobquestions/:id",
   authenticateJWT,
-  authorize("admin"),
+  // authorize("admin"),
   createQuestionsValidator,
   jobApplicationQuestionController.createApplicationQuestion
 );
