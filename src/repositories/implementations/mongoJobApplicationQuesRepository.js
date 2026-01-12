@@ -77,6 +77,18 @@ class mongoJobApplicationQuesRepository extends IJobApplicationQuestion {
       throw new AppError("Error in updating question", 500);
     }
   }
+
+  async deleteApplicationQuestion(jobId, questionId) {
+    try {
+      const deleted = await JobApplicationQuestions.findOneAndDelete({ _id: questionId, jobId });
+      if (!deleted) {
+        throw new AppError("Question not found", 404);
+      }
+      return deleted;
+    } catch (error) {
+      throw new AppError("Error in deleting question", 500);
+    }
+  }
 }
 
 export default mongoJobApplicationQuesRepository;

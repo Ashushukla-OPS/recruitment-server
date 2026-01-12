@@ -11,6 +11,8 @@ router.post("/createjobquestions/:id",authenticateJWT,authorize("admin"),jobAppl
 router.get("/getjobquestions/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.getApplicationQuestion);
 
 router.post("/updatejobquestion/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.updateApplicationQuestion)
+ 
+router.post("/deletejobquestion/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.deleteApplicationQuestion)
 
 
 export default router;

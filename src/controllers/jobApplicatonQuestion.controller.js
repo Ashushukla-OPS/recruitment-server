@@ -74,6 +74,25 @@ class jobApplicationQuestionController {
     }
   });
 
+  deleteApplicationQuestion = asyncHandler(async (req, res, next) => {
+    try {
+      const jobId = req.params.id;
+      const { questionId } = req.body;
+      if (!jobId) {
+        throw new AppError("Job id is required for deleting question", 400);
+      }
+      if (!questionId) {
+        throw new AppError("questionId is required to delete a question", 400);
+      }
+
+      await jobApplicationQuestionService.deleteApplicationQuestion(jobId, questionId);
+
+      return res.status(200).json({ message: "Question deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  });
+
 }
 
 export default new jobApplicationQuestionController();

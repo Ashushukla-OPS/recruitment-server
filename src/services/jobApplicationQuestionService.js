@@ -37,6 +37,17 @@ class jobApplicationQuestionService {
     );
   }
 
+  async deleteApplicationQuestion(jobId, questionId) {
+    const jobExists = await jobRoleModel.findById(jobId);
+    if (!jobExists) {
+      throw new AppError("Job not found for deleting question", 400);
+    }
+    return await this.jobApplicationQuesRepo.deleteApplicationQuestion(
+      jobId,
+      questionId
+    );
+  }
+
 
 }
 
