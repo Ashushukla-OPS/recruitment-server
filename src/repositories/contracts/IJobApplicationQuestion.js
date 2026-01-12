@@ -10,5 +10,9 @@ export class IJobApplicationQuestion{
         
     }
 
+    async deleteApplicationQuestion(jobId, questionId){
+        throw new Error("Method deleteApplicationQuestion must be implemented");
+    }
+
 
 }

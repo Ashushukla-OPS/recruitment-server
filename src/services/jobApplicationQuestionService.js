@@ -22,7 +22,7 @@ class jobApplicationQuestionService {
   async getApplicationQuestion(jobId) {
     const jobExists = await jobRoleModel.findById(jobId);
     if (!jobExists) {
-      return res.status(404).json({ message: "Job not found" });
+      throw new AppError("Job not found", 404);
     }
     return await this.jobApplicationQuesRepo.getApplicationQuestion(jobId);
   }
