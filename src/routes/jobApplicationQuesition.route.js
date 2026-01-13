@@ -21,7 +21,7 @@ router.get(
   jobApplicationQuestionController.getApplicationQuestion
 );
 
-router.post(
+router.patch(
   "/updatejobquestion/:id",
   authenticateJWT,
   authorize("admin"),
