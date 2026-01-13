@@ -8,7 +8,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
 
 
   async createJobApplication(jobAppData) {
-    try {
+    try {      
       const jobApplication = new jobAppModel(jobAppData);
       const savedApplication = await jobApplication.save();
       return savedApplication;
