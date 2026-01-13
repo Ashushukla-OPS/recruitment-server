@@ -22,7 +22,7 @@ class jobApplicationQuestionService {
   async getApplicationQuestion(jobId) {
     const jobExists = await jobRoleModel.findById(jobId);
     if (!jobExists) {
-      return res.status(404).json({ message: "Job not found" });
+      throw new AppError("Job not found", 404);
     }
     return await this.jobApplicationQuesRepo.getApplicationQuestion(jobId);
   }
@@ -34,6 +34,17 @@ class jobApplicationQuestionService {
       jobId,
           questionId,
           questionData
+    );
+  }
+
+  async deleteApplicationQuestion(jobId, questionId) {
+    const jobExists = await jobRoleModel.findById(jobId);
+    if (!jobExists) {
+      throw new AppError("Job not found for deleting question", 400);
+    }
+    return await this.jobApplicationQuesRepo.deleteApplicationQuestion(
+      jobId,
+      questionId
     );
   }
 

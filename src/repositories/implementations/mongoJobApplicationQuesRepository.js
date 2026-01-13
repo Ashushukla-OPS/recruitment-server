@@ -1,37 +1,38 @@
-import jobApplicationModel from "../../models/jobApplication.model.js";
 import JobApplicationQuestions from "../../models/JobApplicationQuestions.js";
-import jobRoleModel from "../../models/jobRole.model.js";
 import { AppError } from "../../utils/errors.js";
 import { IJobApplicationQuestion } from "../contracts/IJobApplicationQuestion.js";
 
 class mongoJobApplicationQuesRepository extends IJobApplicationQuestion {
   
+  // Creates or Overwrites the entire list of questions for a job
   async createApplicationQuestion(jobId, questions) {
     try {
       const formattedQuestions = questions.map((q, index) => ({
         ...q,
-        jobId,
         order: q.order ?? index + 1,
       }));
 
-      const createdQuestions = await JobApplicationQuestions.insertMany(
-        formattedQuestions,
-        { ordered: true }
+      // Find the document for this jobId and update it, or create if it doesn't exist (upsert)
+      const result = await JobApplicationQuestions.findOneAndUpdate(
+        { jobId },
+        { $set: { questions: formattedQuestions } },
+        { new: true, upsert: true, runValidators: true }
       );
 
-
-      return createdQuestions;
+      return result.questions;
     } catch (error) {
-      throw new AppError("Error in Creating job application Question", 500);
+      console.error(error);
+      throw new AppError("Error in Creating job application Questions", 500);
     }
   }
 
   async getApplicationQuestion(jobId) {
     try {
-      let questions = await JobApplicationQuestions.find({ jobId }).sort({
-        order: 1,
-      });
-      return questions;
+      const doc = await JobApplicationQuestions.findOne({ jobId });
+      if (!doc) return [];
+      
+      // Sort the sub-documents by order manually or via logic
+      return doc.questions.sort((a, b) => a.order - b.order);
     } catch (error) {
       throw new AppError("Error in fetching job application Question", 500);
     }
@@ -39,42 +40,53 @@ class mongoJobApplicationQuesRepository extends IJobApplicationQuestion {
 
   async updateApplicationQuestion(jobId, questionId, data) {
     try {
-      const questionExists = await JobApplicationQuestions.findById(questionId);
-      if (questionExists) {
-        //Update Question
-        const updated = await JobApplicationQuestions.findOneAndUpdate(
-          { _id: questionId, jobId },
-          data,
-          { new: true, runValidators: true }
-        );
+      // 1. Try to update an existing question within the array
+      const updatedDoc = await JobApplicationQuestions.findOneAndUpdate(
+        { jobId, "questions._id": questionId },
+        { 
+          $set: { "questions.$": { ...data, _id: questionId } } 
+        },
+        { new: true, runValidators: true }
+      );
 
-        if (!updated) {
-          throw new AppError("Question not found", 404);
-        }
-        console.log("upper");
-        return updated;
-      } else {
-
-        // Add new Question
-        const lastQuestion = await JobApplicationQuestions.findOne({ jobId })
-          .sort({ order: -1 })
-          .select("order");
-
-        const nextOrder = lastQuestion ? lastQuestion.order + 1 : 1;
-
-        const newQuestion = await JobApplicationQuestions.create({
-          jobId,
-          ...data,
-          order: nextOrder,
-        });
-        console.log("lower");
-        
-
-        return newQuestion;
-
+      if (updatedDoc) {
+        // Return only the specific updated question
+        return updatedDoc.questions.id(questionId);
       }
+
+      // 2. If questionId wasn't found in the array, treat it as "Add New"
+      const parentDoc = await JobApplicationQuestions.findOne({ jobId });
+      
+      if (!parentDoc) {
+        throw new AppError("Job Questions document not found", 404);
+      }
+
+      const nextOrder = parentDoc.questions.length > 0 
+        ? Math.max(...parentDoc.questions.map(q => q.order)) + 1 
+        : 1;
+
+      const newQuestion = { ...data, order: nextOrder };
+      
+      parentDoc.questions.push(newQuestion);
+      await parentDoc.save();
+
+      return parentDoc.questions[parentDoc.questions.length - 1];
+
     } catch (error) {
-      throw new AppError("Error in updating question", 500);
+      console.error(error);
+      throw new AppError(error.message || "Error in updating question", 500);
+    }
+  }
+
+  async deleteApplicationQuestion(jobId, questionId) {
+    try {
+      const deleted = await JobApplicationQuestions.findOneAndDelete({ _id: questionId, jobId });
+      if (!deleted) {
+        throw new AppError("Question not found", 404);
+      }
+      return deleted;
+    } catch (error) {
+      throw new AppError("Error in deleting question", 500);
     }
   }
 }

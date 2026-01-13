@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
 
-const JobApplicationQuestionsSchema = new mongoose.Schema(
+const questionSchema  = new mongoose.Schema(
   {
-    jobId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: [true, "Job ID is required"],
-      ref: "JobRole",
-      index: true,
-    },
+   
     title: {
       type: String,
       required: [true, "Question title is required"],
@@ -84,7 +79,20 @@ const JobApplicationQuestionsSchema = new mongoose.Schema(
   }
 );
 
-JobApplicationQuestionsSchema.index({ jobId: 1, order: 1 });
+
+ const JobApplicationQuestionsSchema = new mongoose.Schema(
+  {
+      jobId:{
+          type:mongoose.Schema.Types.ObjectId,
+          required:true , 
+          ref:"JobRole",
+          index:true 
+      }, 
+      questions:[questionSchema]
+  }
+ )
+
+JobApplicationQuestionsSchema.index({ jobId: 1 });
 
 const JobApplicationQuestions = mongoose.model(
   "JobApplicationQuestion", 

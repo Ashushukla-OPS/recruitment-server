@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
   "/createjobquestions/:id",
   authenticateJWT,
-  authorize("admin"),
+  // authorize("admin"),
   createQuestionsValidator,
   jobApplicationQuestionController.createApplicationQuestion
 );
@@ -28,5 +28,8 @@ router.patch(
   updateQuestionValidator,
   jobApplicationQuestionController.updateApplicationQuestion
 );
+ 
+router.post("/deletejobquestion/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.deleteApplicationQuestion)
+
 
 export default router;
