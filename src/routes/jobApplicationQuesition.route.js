@@ -29,7 +29,7 @@ router.patch(
   jobApplicationQuestionController.updateApplicationQuestion
 );
  
-router.post("/deletejobquestion/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.deleteApplicationQuestion)
+router.delete("/deletejobquestion/:id",authenticateJWT,authorize("admin"),jobApplicationQuestionController.deleteApplicationQuestion)
 
 
 export default router;
