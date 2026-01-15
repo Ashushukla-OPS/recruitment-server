@@ -27,9 +27,10 @@ import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 
 import ViolationRoutes  from "./routes/testViolation.routes.js";
+import shareCandidate from "./routes/shareCandidate.routes.js";
 
 const app = express();
-app.set("trust proxy", 1);  
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
@@ -60,6 +61,8 @@ app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
 
 app.use('/api/ai/', ViolationRoutes)
+app.use('/api/share', shareCandidate);
+
 
 app.use(errorHandler);
 export default app;
