@@ -41,10 +41,13 @@ const TestAttemptSchema = new mongoose.Schema(
     durationTaken: {
       type: Number,
     },
-
-    answers: {
+    questions: {
       type: [mongoose.Schema.Types.Mixed],
       required: true,
+    },
+    answers: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: [],
     },
     tabSwitches: {
     type: Number,
