@@ -1,7 +1,7 @@
 import axios from "axios"
 
 
-const FRONTEND_URL = "https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app"
+const FRONTEND_URL = "https://hire.sheryians.com"
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
