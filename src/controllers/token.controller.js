@@ -1,4 +1,8 @@
 import TokenService from "../services/token.service.js";
+import jwt from "jsonwebtoken"
+import config from "../config/environment.js"
+
+const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
 class TokenController {
   constructor() {
@@ -7,8 +11,16 @@ class TokenController {
 
   createToken = async (req, res, next) => {
     try {
-      const userId = req.userId;
+      // const userId = req.userId;
 
+      const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+      console.log("get the token from cookie check the user id  ===>", token)
+
+      let decode = await jwt.verify(token, JWT_SECRET)
+      console.log("check the decode of token ===>", decode.id)
+
+      const userId = decode?.id
+      console.log("user id for comparison ==>", userId)
       const response = await this.tokenController.createToken(userId);
 
 
