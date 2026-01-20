@@ -3,12 +3,14 @@ import axios from "axios"
 const BREVO_API_KEY = process.env.BREVO_API_KEY
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 
+const FRONTEND_URL = "https://hire.sheryians.com"
+
 /**
  * Send test assignment/enrollment email to candidate
  */
 export async function sendEnrollEmail(data) {
   try {
-    const testLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}`
+    const testLink = `${FRONTEND_URL}/test/${data.testId}`
 
     const payload = {
       sender: { name: "Sheriyansh Recruitment", email: "anshur9608837@gmail.com" },
