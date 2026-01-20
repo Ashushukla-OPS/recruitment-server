@@ -54,7 +54,7 @@ class TokenService {
     });
 
     return {
-      user: user,
+      user,
       token,
       refreshToken,
     };

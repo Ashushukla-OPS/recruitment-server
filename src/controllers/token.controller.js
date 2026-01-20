@@ -1,6 +1,7 @@
 import TokenService from "../services/token.service.js";
 import jwt from "jsonwebtoken"
 import config from "../config/environment.js"
+import { AppError } from "../utils/errors.js";
 
 const { JWT_SECRET, REFRESH_SECRET, REFRESH_EXPIRES_IN } = config;
 
@@ -22,6 +23,12 @@ class TokenController {
       const userId = decode?.id
       console.log("user id for comparison ==>", userId)
       const response = await this.tokenController.createToken(userId);
+
+      if(response.user.isVerified===false){
+        return res.status(500).json({
+          message:"User is not verified yet"
+        })
+      }
 
 
       res.cookie("token", response.token, {

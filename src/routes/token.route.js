@@ -6,6 +6,6 @@ const router = express.Router()
 
 const tokenRoute = new TokenController ()
 
-router.post("/",authenticateJWT,tokenRoute.createToken)
+router.post("/",tokenRoute.createToken);
 
 export default router;
