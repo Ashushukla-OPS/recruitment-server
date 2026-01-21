@@ -28,7 +28,7 @@ import passwordRoutes from "./routes/password.routes.js";
 
 import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
-
+import tokenRoutes from "./routes/token.route.js"
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
@@ -62,7 +62,7 @@ app.use("/api/password", passwordRoutes);
 
 app.use('/api/ai/', ViolationRoutes)
 app.use('/api/share', shareCandidate);
-
+app.use("/api/token",tokenRoutes)
 
 app.use(errorHandler);
 export default app;
