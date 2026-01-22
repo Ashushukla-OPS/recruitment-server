@@ -7,7 +7,7 @@ const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 export async function sendCancelledInterviewEmail(data) {
   try {
     const payload = {
-  sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
+  sender: { name: "Sheriyansh Recruitment", email: "anshur9608837@gmail.com" },
   to: [{ email: data.candidateEmail, name: data.candidateName || "Candidate" }],
   subject: `Interview Cancelled: ${data.jobTitle}`,
 
@@ -16,7 +16,7 @@ export async function sendCancelledInterviewEmail(data) {
     <div style="max-width:620px; margin:0 auto; color:#111827;">
 
       <p style="font-size:14px; color:#6b7280; margin-bottom:8px;">
-        Sheryians Recruitment
+        Sheriyansh Recruitment
       </p>
 
       <h1 style="font-size:22px; font-weight:600; margin:0 0 20px;">
@@ -63,7 +63,7 @@ export async function sendCancelledInterviewEmail(data) {
 
       <p style="font-size:13px; color:#6b7280; line-height:1.6;">
         Best regards,<br/>
-        <strong style="color:#111827;">Sheryians Recruitment Team</strong><br/>
+        <strong style="color:#111827;">Sheriyansh Recruitment Team</strong><br/>
         <span style="font-size:12px;">
           This is an automated message. Please do not reply.
         </span>
@@ -81,7 +81,7 @@ Your interview for the ${data.jobTitle} position has been cancelled.
 If rescheduling is required, our recruitment team will contact you.
 
 Regards,
-Sheryians Recruitment Team
+Sheriyansh Recruitment Team
   `,
 }
 

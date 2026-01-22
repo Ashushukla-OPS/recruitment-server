@@ -8,7 +8,7 @@ const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 export async function sendTestResultEmail(data) {
   try {
    const payload = {
-  sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
+  sender: { name: "Sheriyansh Recruitment", email: "anshur9608837@gmail.com" },
   to: [{ email: data.to, name: data.name || "Candidate" }],
   subject: `Test Result Published: ${data.testTitle}`,
 
@@ -17,7 +17,7 @@ export async function sendTestResultEmail(data) {
     <div style="max-width:620px; margin:0 auto; color:#111827;">
 
       <p style="font-size:14px; color:#6b7280; margin-bottom:8px;">
-        Sheryians Recruitment
+        Sheriyansh Recruitment
       </p>
 
       <h1 style="font-size:22px; font-weight:600; margin:0 0 20px;">
@@ -78,7 +78,7 @@ export async function sendTestResultEmail(data) {
 
       <p style="font-size:13px; color:#6b7280; line-height:1.6;">
         Best regards,<br/>
-        <strong style="color:#111827;">Sheryians Recruitment Team</strong><br/>
+        <strong style="color:#111827;">Sheriyansh Recruitment Team</strong><br/>
         <span style="font-size:12px;">
           This is an automated message. Please do not reply.
         </span>
@@ -101,7 +101,7 @@ View detailed result:
 ${data.resultLink}
 
 Regards,
-Sheryians Recruitment Team
+Sheriyansh Recruitment Team
   `,
 }
 

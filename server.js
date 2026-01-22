@@ -20,7 +20,7 @@ async function startServer() {
     await connectRedis();
     logger.info("Redis connected successfully");
         //  console.log(await jobApplicationModel.deleteMany({}))
-          // console.log(await userModel.deleteOne({email:"hr@sheryians.com"}))
+          // console.log(await userModel.deleteOne({email:"anshur9608837@gmail.com"}))
 
 
 
