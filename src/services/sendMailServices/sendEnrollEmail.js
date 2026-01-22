@@ -3,15 +3,17 @@ import axios from "axios"
 const BREVO_API_KEY = process.env.BREVO_API_KEY
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 
+const FRONTEND_URL = "https://hire.sheryians.com"
+
 /**
  * Send test assignment/enrollment email to candidate
  */
 export async function sendEnrollEmail(data) {
   try {
-    const testLink = `https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app/test/${data.testId}`
+    const testLink = `${FRONTEND_URL}/test/${data.testId}`
 
     const payload = {
-      sender: { name: "Sheriyansh Recruitment", email: "anshur9608837@gmail.com" },
+      sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
       to: [{ email: data.to, name: data.name || "Candidate" }],
       subject: `Test Assigned: ${data.testTitle || "Assessment"}`,
       htmlContent: `
@@ -20,7 +22,7 @@ export async function sendEnrollEmail(data) {
     <div style="max-width:620px; margin:0 auto; color:#111827;">
       
       <p style="font-size:14px; color:#6b7280; margin-bottom:8px;">
-        Sheriyansh Recruitment
+        Sheryians Recruitment
       </p>
 
       <h1 style="font-size:22px; font-weight:600; margin:0 0 20px;">
@@ -78,7 +80,7 @@ export async function sendEnrollEmail(data) {
       <ul style="padding-left:18px; font-size:14px; color:#374151; line-height:1.7; margin:0 0 28px;">
         <li>The assessment can be attempted <strong>only once</strong>. Re-attempts are not allowed.</li>
         <li>Please ensure a stable internet connection before starting the test.</li>
-        <li>If you face any technical issues, contact the Sheriyansh Recruitment Team at 
+        <li>If you face any technical issues, contact the Sheryians Recruitment Team at 
           <a href="mailto:anshur9608837@gmail.com" style="color:#111827; text-decoration:underline;">
             anshur9608837@gmail.com
           </a>.
@@ -97,9 +99,9 @@ export async function sendEnrollEmail(data) {
   <p style="margin:0; font-size:14px; color:#111827;">
     Visit our recruitment portal for more job openings and updates:
     <br/>
-    <a href="https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app"
+    <a href="${FRONTEND_URL}"
        style="color:#111827; text-decoration:underline;">
-      recruitment-client-git-dev-anshu-pandeys-projects.vercel.app
+      hire.sheryians.com
     </a>
   </p>
 </div>
@@ -109,7 +111,7 @@ export async function sendEnrollEmail(data) {
 
       <p style="font-size:13px; color:#6b7280; line-height:1.6;">
         Best regards,<br/>
-        <strong style="color:#111827;">Sheriyansh Recruitment Team</strong><br/>
+        <strong style="color:#111827;">Sheryians Recruitment Team</strong><br/>
         <span style="font-size:12px;">
           This is an automated message. Please do not reply.
         </span>
@@ -127,7 +129,7 @@ Test Title: ${data.testTitle || "Assessment Test"}
 Start here: ${testLink}
 
 Best of luck,
-Sheriyansh Recruitment Team
+Sheryians Recruitment Team
       `,
     }
 

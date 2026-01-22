@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const FRONTEND_URL = "https://recruitment-client-git-dev-anshu-pandeys-projects.vercel.app"
+const FRONTEND_URL = "https://hire.sheryians.com"
 
 const BREVO_API_KEY = process.env.BREVO_API_KEY
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
@@ -9,7 +9,7 @@ export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, sta
   try {
     const payload = {
   sender: {
-    name: "Sheriyansh Recruitment",
+    name: "Sheryians Recruitment",
     email: "anshur9608837@gmail.com",
   },
   to: [
@@ -25,7 +25,7 @@ export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, sta
     <div style="max-width:620px; margin:0 auto; color:#111827;">
 
       <p style="font-size:14px; color:#6b7280; margin-bottom:8px;">
-        Sheriyansh Recruitment
+        Sheryians Recruitment
       </p>
 
       <h1 style="font-size:22px; font-weight:600; margin:0 0 20px;">
@@ -78,7 +78,7 @@ export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, sta
 
       <p style="font-size:13px; color:#6b7280; line-height:1.6;">
         Best regards,<br/>
-        <strong style="color:#111827;">Sheriyansh Recruitment Team</strong><br/>
+        <strong style="color:#111827;">Sheryians Recruitment Team</strong><br/>
         <span style="font-size:12px;">
           This is an automated message. Please do not reply.
         </span>
@@ -99,7 +99,7 @@ You can explore more job opportunities here:
 ${FRONTEND_URL}
 
 Regards,
-Sheriyansh Recruitment Team
+Sheryians Recruitment Team
   `,
 }
 
