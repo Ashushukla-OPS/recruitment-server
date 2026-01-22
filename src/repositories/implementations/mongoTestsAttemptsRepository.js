@@ -111,6 +111,17 @@ async findAttemptsByCandidate(testId, email) {           ///user specifuic test
   }
 }
 
+async findActiveAttempt(testId, email) {
+  try {
+    return await TestAttempts.findOne({
+      testId: new mongoose.Types.ObjectId(testId),
+      email,
+      status: "Started"
+    }).lean();
+  } catch (error) {
+    throw new AppError("Failed to find active attempt", 500, error);
+  }
+}
 
 
   async updateTestAttempt(id, updateData) {
