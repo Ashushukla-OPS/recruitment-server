@@ -11,7 +11,7 @@ class MongoShareCandidate extends IshareCandidate {
       selectedUsers: users,
     });
 
-    const shareLink = `http://localhost:9000/api/share/${share._id}`;
+    const shareLink = `hire.sheriyans.com/api/share/${share._id}`;
     return shareLink
 
    } catch (error) {
