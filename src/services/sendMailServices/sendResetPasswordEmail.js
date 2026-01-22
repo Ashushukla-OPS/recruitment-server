@@ -13,7 +13,7 @@ export async function sendResetPasswordEmail(data) {
     const resetLink = `${FRONTEND_URL}/reset-password?token=${data.token}`
 
     const payload = {
-  sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
+  sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
   to: [{ email: data.to, name: data.name || "User" }],
   subject: "Reset Your Password",
 
