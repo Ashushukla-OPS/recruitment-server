@@ -1,21 +1,14 @@
 import axios from "axios"
 
-const FRONTEND_URL = "https://hire.sheryians.com"
-
 const BREVO_API_KEY = process.env.BREVO_API_KEY
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 
-/**
- * Send email verification email
- */
-export async function sendVerificationEmail(user) {
-  const verificationLink = `${FRONTEND_URL}/user-verification/${user.id}`
-
+export async function sendScheduleInterviewerEmail(data) {
   try {
     const payload = {
   sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
-  to: [{ email: user.email, name: user.name || "Candidate" }],
-  subject: "Verify Your Email Address",
+  to: [{ email: data.interviewer }],
+  subject: `Interview Scheduled: ${data.jobTitle}`,
 
   htmlContent: `
   <div style="font-family: Inter, Arial, sans-serif; background:#ffffff; padding:40px;">
@@ -26,16 +19,38 @@ export async function sendVerificationEmail(user) {
       </p>
 
       <h1 style="font-size:22px; font-weight:600; margin:0 0 20px;">
-        Verify Your Email
+        Interview Scheduled
       </h1>
 
       <p style="font-size:15px; line-height:1.7; color:#374151; margin-bottom:24px;">
-        Hello ${user.name || "there"},<br/><br/>
-        Thank you for signing up. To complete your registration and secure your
-        account, please verify your email address by clicking the button below.
+        Dear Interviewer,<br/><br/>
+        This is to inform you that an interview has been scheduled.
+        Please find the interview details below.
       </p>
 
-      <a href="${verificationLink}"
+      <div style="
+        border-left:4px solid #111827;
+        padding:16px 20px;
+        margin-bottom:32px;
+        background:#fafafa;
+      ">
+        <p style="margin:0; font-size:13px; color:#6b7280;">
+          Interview Details
+        </p>
+
+        <p style="margin:8px 0 0; font-size:14px;">
+          <strong>Candidate Name:</strong> ${data.candidateName}
+        </p>
+        <p style="margin:4px 0; font-size:14px;">
+          <strong>Position:</strong> ${data.jobTitle}
+        </p>
+        <p style="margin:4px 0; font-size:14px;">
+          <strong>Date & Time:</strong> ${new Date(data.Timing).toLocaleString()}
+        </p>
+      </div>
+
+      <a href="${data.meetingLink}"
+         target="_blank"
          style="
            display:inline-block;
            padding:12px 28px;
@@ -46,7 +61,7 @@ export async function sendVerificationEmail(user) {
            font-weight:500;
            border-radius:6px;
          ">
-        Verify Email Address
+        Join Interview
       </a>
 
       <p style="font-size:13px; color:#6b7280; margin:24px 0 6px;">
@@ -54,7 +69,7 @@ export async function sendVerificationEmail(user) {
       </p>
 
       <p style="font-size:13px; color:#111827; word-break:break-all;">
-        ${verificationLink}
+        ${data.meetingLink}
       </p>
 
       <div style="
@@ -64,7 +79,8 @@ export async function sendVerificationEmail(user) {
         margin:32px 0;
       ">
         <p style="margin:0; font-size:14px; color:#374151;">
-          If you did not create an account, you can safely ignore this email.
+          If the scheduled time does not work for you, please reply to this email
+          so we can assist with rescheduling.
         </p>
       </div>
 
@@ -83,14 +99,16 @@ export async function sendVerificationEmail(user) {
   `,
 
   textContent: `
-Hello ${user.name || "there"},
+Dear Interviewer,
 
-Please verify your email address to complete your registration.
+An interview has been scheduled with the following details:
 
-Verification link:
-${verificationLink}
+Candidate Name: ${data.candidateName}
+Position: ${data.jobTitle}
+Date & Time: ${new Date(data.Timing).toLocaleString()}
+Meeting Link: ${data.meetingLink}
 
-If you did not create an account, you can ignore this email.
+If the scheduled time does not work for you, please reply to this email.
 
 Regards,
 Sheryians Recruitment Team
@@ -103,12 +121,16 @@ Sheryians Recruitment Team
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    })
+    });
 
-    console.log("VERIFICATION EMAIL SENT:", response.data.messageId)
-    return response.data
+    console.log("SCHEDULE EMAIL SENT (INTERVIEWER):", response.data.messageId);
+    return response.data;
   } catch (error) {
-    console.error("Brevo verification email failed:", error.response?.data || error.message)
-    throw error
+    console.error("Brevo reschedule interviewer email failed:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    throw error;
   }
 }

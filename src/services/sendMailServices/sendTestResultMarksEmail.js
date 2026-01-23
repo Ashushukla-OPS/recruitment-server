@@ -1,24 +1,16 @@
 import axios from "axios"
 
-const FRONTEND_URL = "https://hire.sheryians.com"
-
 const BREVO_API_KEY = process.env.BREVO_API_KEY
 const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 
-export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, status }) => {
+// Test Result Email //
+
+export async function sendTestResultEmail(data) {
   try {
-    const payload = {
-  sender: {
-    name: "Sheryians Recruitment",
-    email: "hr@sheryians.com",
-  },
-  to: [
-    {
-      email: to,
-      name: name || "Candidate",
-    },
-  ],
-  subject: `Application Status Update: ${jobTitle}`,
+   const payload = {
+  sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
+  to: [{ email: data.to, name: data.name || "Candidate" }],
+  subject: `Test Result Published: ${data.testTitle}`,
 
   htmlContent: `
   <div style="font-family: Inter, Arial, sans-serif; background:#ffffff; padding:40px;">
@@ -29,13 +21,13 @@ export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, sta
       </p>
 
       <h1 style="font-size:22px; font-weight:600; margin:0 0 20px;">
-        Application Status Update
+        Assessment Result
       </h1>
 
       <p style="font-size:15px; line-height:1.7; color:#374151; margin-bottom:24px;">
-        Hello ${name || "Candidate"},<br/><br/>
-        We would like to inform you that the status of your application for the
-        <strong>${jobTitle}</strong> position has been updated.
+        Hello ${data.name || "Candidate"},<br/><br/>
+        The result for your assessment <strong>${data.testTitle}</strong> has
+        been published. Please find your performance details below.
       </p>
 
       <div style="
@@ -45,24 +37,28 @@ export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, sta
         background:#fafafa;
       ">
         <p style="margin:0; font-size:13px; color:#6b7280;">
-          Current Application Status
+          Result Summary
         </p>
 
-        <p style="margin:6px 0 0; font-size:16px; font-weight:600; text-transform:capitalize;">
-          ${status}
+        <p style="margin:8px 0 0; font-size:14px;">
+          <strong>Score:</strong> ${data.score}
+        </p>
+        <p style="margin:4px 0; font-size:14px;">
+          <strong>Percentage:</strong> ${data.percentage}%
+        </p>
+        <p style="margin:4px 0; font-size:14px;">
+          <strong>Status:</strong>
+          ${
+            data.isPassed
+              ? "<span style='color:#15803d; font-weight:600;'>Passed</span>"
+              : "<span style='color:#b91c1c; font-weight:600;'>Not Cleared</span>"
+          }
         </p>
       </div>
 
-      <p style="font-size:14px; color:#374151; line-height:1.6;">
-        We truly appreciate the time and effort you invested in applying.
-        If there are any further steps, our recruitment team will reach out to you.
-      </p>
-
-      <a href="${FRONTEND_URL}"
-         target="_blank"
+      <a href="${data.resultLink}"
          style="
            display:inline-block;
-           margin-top:24px;
            padding:12px 28px;
            border:1.5px solid #111827;
            color:#111827;
@@ -71,8 +67,12 @@ export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, sta
            font-weight:500;
            border-radius:6px;
          ">
-        Explore More Job Opportunities
+        View Detailed Result
       </a>
+
+      <p style="font-size:13px; color:#6b7280; margin-top:24px;">
+        If shortlisted, our recruitment team will contact you with next steps.
+      </p>
 
       <hr style="border:none; border-top:1px solid #e5e7eb; margin:40px 0;" />
 
@@ -89,14 +89,16 @@ export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, sta
   `,
 
   textContent: `
-Hello ${name || "Candidate"},
+Hello ${data.name || "Candidate"},
 
-The status of your application for the "${jobTitle}" position has been updated.
+Your result for the assessment "${data.testTitle}" has been published.
 
-Current Status: ${status}
+Score: ${data.score}
+Percentage: ${data.percentage}%
+Status: ${data.isPassed ? "Passed" : "Not Cleared"}
 
-You can explore more job opportunities here:
-${FRONTEND_URL}
+View detailed result:
+${data.resultLink}
 
 Regards,
 Sheryians Recruitment Team
@@ -109,16 +111,14 @@ Sheryians Recruitment Team
         "api-key": BREVO_API_KEY,
         "Content-Type": "application/json",
       },
-    })
+    });
 
-    console.log("APPLICATION STATUS UPDATE EMAIL SENT:", response.data?.messageId)
-
-    return response.data
+    console.log("TEST RESULT EMAIL SENT:", response.data.messageId);
+    return response.data;
   } catch (error) {
     console.error(
-      "Brevo application status update email failed:",
+      "Brevo test result email failed:",
       error.response?.data || error.message
-    )
-    throw error
+    );
   }
 }
