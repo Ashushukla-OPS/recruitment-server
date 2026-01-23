@@ -28,6 +28,17 @@ if (enrollment.status === "Disqualified" || enrollment.status === "disqualified"
   throw new AppError("You have been disqualified from this test and cannot restart.", 403);
 }
 
+// 🔥 CHECK FOR ACTIVE ATTEMPT
+  const existingAttempt = await this.testAttemptsRepogitory.findActiveAttempt(
+    testId,
+    email
+  );
+
+  if (existingAttempt) {
+    console.log("Resuming existing attempt");
+    return existingAttempt; // ✅ Resume instead of creating new
+  }
+
     await this.enrollmentReposetory.updateEnrollmentStatus(enrollment._id, "Started")
   const attemptData = {
     testId,
