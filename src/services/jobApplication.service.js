@@ -134,6 +134,11 @@ class JobApplicationService {
     return await this.jobAppRepo.getApplicantsByJobId(jobId);
   }
 
+  async getShortlistedCounts() {
+    const shortlistedApplications = await this.jobAppRepo.countByStatus("shortlisted");
+    return { shortlistedApplications };
+  }
+
    async bulkUpdateApplicationStatus(applicationIds, status) {
   // 1️⃣ Fetch applicants for mail
   const applications =

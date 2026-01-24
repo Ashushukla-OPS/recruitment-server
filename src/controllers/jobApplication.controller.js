@@ -115,6 +115,14 @@ class JobApplicationController {
     applicants: result.applicants,
   });
 });
+
+    getShortlistedCount = asyncHandler(async (req, res) => {
+        const result = await jobApplicationService.getShortlistedCounts();
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    });
 }
 
 export default new JobApplicationController();

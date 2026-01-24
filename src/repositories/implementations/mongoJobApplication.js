@@ -413,6 +413,7 @@ class MongoApplicationRespository extends IJobApplicationRepository {
       {
         $project: {
           _id: 1,
+          candidateId: 1, 
           resumeUrl: 1,
           status: 1,
           createdAt: 1,
@@ -441,6 +442,16 @@ class MongoApplicationRespository extends IJobApplicationRepository {
     throw new AppError("Failed to fetch applicants by job id", 500);
   }
 }
+
+  // Minimal counts used by admin KPIs
+  async countByStatus(status) {
+    try {
+      return await jobAppModel.countDocuments({ status });
+    } catch (error) {
+      console.error(error);
+      throw new AppError("Failed to count applications by status", 500);
+    }
+  }
 }
 
 export default MongoApplicationRespository;
