@@ -153,6 +153,25 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
+  async updateJobRole(id, jobRoleData) {
+    try {
+      const updatedJobRole = await JobRole.findByIdAndUpdate(
+        id,
+        jobRoleData,
+        { new: true, runValidators: true }
+      );
+      
+      if (!updatedJobRole) {
+        throw new AppError("Job role not found", 404);
+      }
+      
+      return updatedJobRole;
+    } catch (error) {
+      if (error.message === "Job role not found") throw error;
+      throw new AppError("Failed to update job role", 500);
+    }
+  }
+
   async findAllJobRoles(filter = {}, userId, page = 1, limit = 10) {
     try {
       const match = {};
@@ -198,6 +217,21 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
+  async deleteJobRole(id) {
+    try {
+      const deletedJobRole = await JobRole.findByIdAndDelete(id);
+      
+      if (!deletedJobRole) {
+        throw new AppError("Job role not found", 404);
+      }
+      
+      return deletedJobRole;
+    } catch (error) {
+      if (error.message === "Job role not found") throw error;
+      throw new AppError("Failed to delete job role", 500);
+    }
+  }
+
   async findJobRolesBySearch(q, location, page, limit, userId) {
     try {
       const match = {};
@@ -222,6 +256,47 @@ class MongoJobRoleRepository extends IJobRoleRepository {
       return await paginateAggregation(JobRole, pipeline, { page, limit });
     } catch {
       throw new AppError("Failed to fetch jobs", 500);
+    }
+  }
+
+  async findJobRolesByClient(clientId, page = 1, limit = 10) {
+    try {
+      const pipeline = this.buildJobRolePipeline({
+        match: { clientId: new mongoose.Types.ObjectId(clientId) },
+        includeQuestions: true
+      });
+
+      return await paginateAggregation(JobRole, pipeline, { page, limit });
+    } catch {
+      throw new AppError("Failed to fetch client job roles", 500);
+    }
+  }
+
+  async getActiveJobRoles(page = 1, limit = 10) {
+    try {
+      const now = new Date();
+      const pipeline = this.buildJobRolePipeline({
+        match: { expiry: { $gte: now } },
+        includeQuestions: true
+      });
+
+      return await paginateAggregation(JobRole, pipeline, { page, limit });
+    } catch {
+      throw new AppError("Failed to fetch active job roles", 500);
+    }
+  }
+
+  async getExpiredJobRoles(page = 1, limit = 10) {
+    try {
+      const now = new Date();
+      const pipeline = this.buildJobRolePipeline({
+        match: { expiry: { $lt: now } },
+        includeQuestions: true
+      });
+
+      return await paginateAggregation(JobRole, pipeline, { page, limit });
+    } catch {
+      throw new AppError("Failed to fetch expired job roles", 500);
     }
   }
 
