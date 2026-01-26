@@ -27,6 +27,7 @@ async function startServer() {
     // ← Worker is already running in background from the import above
     // You will see: "BullMQ Email Worker started and waiting for jobs..."
 
+    
     app.listen(PORT, () => {
       logger.info(`Server + BullMQ Worker running on http://localhost:${PORT}`);
       logger.info(`Admin panel (optional): http://localhost:${PORT}/admin/queues`);
