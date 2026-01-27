@@ -108,11 +108,6 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     try {
       const matchStage = {};
 
-      if (filter.jobType) {
-  matchStage.jobType = filter.jobType;
-}
-
-
       if (filter.clientId) {
         matchStage.clientId = new mongoose.Types.ObjectId(filter.clientId);
       }
@@ -124,23 +119,6 @@ class MongoJobRoleRepository extends IJobRoleRepository {
       if (filter.title) {
         matchStage.title = { $regex: filter.title, $options: "i" };
       }
-
-      if (filter.minSalary || filter.maxSalary) {
-  matchStage.$and = [];
-
-  if (filter.minSalary) {
-    matchStage.$and.push({
-      "salary.max": { $gte: Number(filter.minSalary) }
-    });
-  }
-
-  if (filter.maxSalary) {
-    matchStage.$and.push({
-      "salary.min": { $lte: Number(filter.maxSalary) }
-    });
-  }
-}
-
 
       const now = new Date();
       if (filter.expiry === "active") {
@@ -356,16 +334,11 @@ class MongoJobRoleRepository extends IJobRoleRepository {
 
 
 
-async findJobRolesBySearch(q, location, page, limit, userId, jobType) {
+async findJobRolesBySearch(q, location, page, limit, userId) {
 
   try {
     const pipeline = [];
     const matchStage = {};
-
-    if (jobType) {
-  matchStage.jobType = jobType;
-}
-
 
     if (q) {
       matchStage.title = { $regex: q, $options: "i" };
