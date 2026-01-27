@@ -108,16 +108,6 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     try {
       const matchStage = {};
 
- if (filter.jobType?.length) {
-  matchStage.jobType = {
-    $in: filter.jobType.map(t => new RegExp(t, "i"))
-  };
-}
-
-
-
-
-
       if (filter.clientId) {
         matchStage.clientId = new mongoose.Types.ObjectId(filter.clientId);
       }
@@ -129,33 +119,6 @@ class MongoJobRoleRepository extends IJobRoleRepository {
       if (filter.title) {
         matchStage.title = { $regex: filter.title, $options: "i" };
       }
-
-      if (filter.minSalary || filter.maxSalary) {
-  matchStage.$and = [];
-
-  const min = Number(filter.minSalary) || 0;
-  const max = Number(filter.maxSalary) || Number.MAX_SAFE_INTEGER;
-
-  matchStage.$and.push({
-    $or: [
-      // Case 1: salary is a number
-      {
-        salary: {
-          $gte: min,
-          $lte: max
-        }
-      },
-
-      // Case 2: salary is an object
-      {
-        "salary.min": { $lte: max },
-        "salary.max": { $gte: min }
-      }
-    ]
-  });
-}
-
-
 
       const now = new Date();
       if (filter.expiry === "active") {
@@ -375,72 +338,13 @@ async findJobRolesByCategory(categoryId, page, limit, userId) {
 }
 
 
-async findJobRolesBySearch(
-  q,
-  location,
-  jobType = [],
-  experience = [],
-  minSalary,
-  maxSalary,
-  page,
-  limit,
-  userId
-) {
+
+async findJobRolesBySearch(q, location, page, limit, userId) {
+
   try {
     const pipeline = [];
     
     const now = new Date(); // ✅ ADDED
-
-    // ✅ ADDED: ONLY ACTIVE JOBS
- const matchStage = {
-  $and: [
-    {
-      $or: [
-        { expiry: { $exists: false } },
-        { expiry: { $gte: now } },
-      ],
-    },
-  ],
-};
-
-
-
-
-  if (jobType.length) {
-  matchStage.$and.push({
-    jobType: {
-      $regex: jobType[0],
-      $options: "i"
-    }
-  });
-}
-
-
-if (experience.length) {
-  matchStage.$and.push({
-    requiredExperience: {
-      $in: experience.map(
-        (e) => new RegExp(`^${e}$`, "i")
-      ),
-    },
-  });
-}
-
-if (minSalary || maxSalary) {
-  const min = Number(minSalary) || 0;
-  const max = Number(maxSalary) || Number.MAX_SAFE_INTEGER;
-
-  matchStage.$and.push({
-    $or: [
-      { salary: { $gte: min, $lte: max } },
-      {
-        "salary.min": { $lte: max },
-        "salary.max": { $gte: min },
-      },
-    ],
-  });
-}
-
 
     if (q) {
   matchStage.$and.push({
