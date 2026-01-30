@@ -12,7 +12,7 @@ class MongoJobCategoryRepository extends IJobCategoryRepository {
         throw { status: 400, message: "Category name already exists" };
       }
       throw err;
-    }
+    } 
   }
 
   async findById(id) {
