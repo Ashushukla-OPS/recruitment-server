@@ -10,7 +10,7 @@ export const sendApplicationStatusUpdateEmail = async ({ to, name, jobTitle, sta
     const payload = {
   sender: {
     name: "Sheryians Recruitment",
-    email: "anshur9608837@gmail.com",
+    email: "hr@sheryians.com",
   },
   to: [
     {

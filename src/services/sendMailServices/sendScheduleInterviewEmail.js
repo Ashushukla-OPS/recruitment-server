@@ -7,7 +7,7 @@ const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 export async function sendScheduleInterviewEmail(data) {
   try {
     const payload = {
-  sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
+  sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
   to: [{ email: data.candidateEmail, name: data.candidateName || "Candidate" }],
   subject: `Interview Scheduled: ${data.jobTitle}`,
 

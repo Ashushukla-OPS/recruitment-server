@@ -13,7 +13,7 @@ export async function sendEnrollEmail(data) {
     const testLink = `${FRONTEND_URL}/test/${data.testId}`
 
     const payload = {
-      sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
+      sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
       to: [{ email: data.to, name: data.name || "Candidate" }],
       subject: `Test Assigned: ${data.testTitle || "Assessment"}`,
       htmlContent: `
@@ -81,8 +81,8 @@ export async function sendEnrollEmail(data) {
         <li>The assessment can be attempted <strong>only once</strong>. Re-attempts are not allowed.</li>
         <li>Please ensure a stable internet connection before starting the test.</li>
         <li>If you face any technical issues, contact the Sheryians Recruitment Team at 
-          <a href="mailto:anshur9608837@gmail.com" style="color:#111827; text-decoration:underline;">
-            anshur9608837@gmail.com
+          <a href="mailto:hr@sheryians.com" style="color:#111827; text-decoration:underline;">
+            hr@sheryians.com
           </a>.
         </li>
       </ul>

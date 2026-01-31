@@ -13,7 +13,7 @@ export async function sendVerificationEmail(user) {
 
   try {
     const payload = {
-  sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
+  sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
   to: [{ email: user.email, name: user.name || "Candidate" }],
   subject: "Verify Your Email Address",
 

@@ -12,7 +12,7 @@ const BREVO_URL = "https://api.brevo.com/v3/smtp/email"
 export async function sendWelcomeEmail(data) {
   try {
     const payload = {
-  sender: { name: "Sheryians Recruitment", email: "anshur9608837@gmail.com" },
+  sender: { name: "Sheryians Recruitment", email: "hr@sheryians.com" },
   to: [{ email: data.to, name: data.name || "Candidate" }],
   subject: `Application Received: ${data.jobTitle || "Job Position"}`,
 

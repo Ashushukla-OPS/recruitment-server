@@ -12,7 +12,7 @@ class MongoJobCategoryRepository extends IJobCategoryRepository {
         throw { status: 400, message: "Category name already exists" };
       }
       throw err;
-    }
+    } 
   }
 
   async findById(id) {
@@ -24,11 +24,31 @@ class MongoJobCategoryRepository extends IJobCategoryRepository {
   }
 
   async findAll(page = 1, limit = 10) {
-    const pipeline = [
-      { $sort: { name: 1 } }
-    ];
-    return await paginateAggregation(JobCategory, pipeline, { page, limit });
-  }
+  const pipeline = [
+    {
+      $lookup: {
+        from: "jobroles",        // collection name
+        localField: "_id",
+        foreignField: "category",
+        as: "jobs"
+      }
+    },
+    {
+      $addFields: {
+        jobCount: { $size: "$jobs" }
+      }
+    },
+    {
+      $project: {
+        jobs: 0
+      }
+    },
+    { $sort: { name: 1 } }
+  ];
+
+  return await paginateAggregation(JobCategory, pipeline, { page, limit });
+}
+
 
   async updateById(id, updateData) {
     try {
