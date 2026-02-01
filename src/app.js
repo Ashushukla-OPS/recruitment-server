@@ -22,7 +22,7 @@ import testAttemptRoutes from "./routes/testAttempts.routes.js";
 import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
 import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
-
+import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 
@@ -63,6 +63,11 @@ app.use("/api/password", passwordRoutes);
 app.use('/api/ai/', ViolationRoutes)
 app.use('/api/share', shareCandidate);
 app.use("/api/token",tokenRoutes)
+
+
+
+app.use("/api/blogs", blogPostRoutes);
+
 
 app.use(errorHandler);
 export default app;
