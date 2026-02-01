@@ -23,27 +23,39 @@ class MongoJobCategoryRepository extends IJobCategoryRepository {
     return await JobCategory.findOne({ name });
   }
 
-  async findAll(page = 1, limit = 10) {
+async findAll(page = 1, limit = 10) {
   const pipeline = [
     {
       $lookup: {
-        from: "jobroles",        // collection name
-        localField: "_id",
-        foreignField: "category",
-        as: "jobs"
-      }
+        from: "jobroles",
+        let: { categoryId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$category", "$$categoryId"],
+              },
+              $or: [
+                { expiry: { $exists: false } },
+                { expiry: { $gte: new Date() } },
+              ],
+            },
+          },
+        ],
+        as: "activeJobs",
+      },
     },
     {
       $addFields: {
-        jobCount: { $size: "$jobs" }
-      }
+        jobCount: { $size: "$activeJobs" },
+      },
     },
     {
       $project: {
-        jobs: 0
-      }
+        activeJobs: 0,
+      },
     },
-    { $sort: { name: 1 } }
+    { $sort: { name: 1 } },
   ];
 
   return await paginateAggregation(JobCategory, pipeline, { page, limit });
