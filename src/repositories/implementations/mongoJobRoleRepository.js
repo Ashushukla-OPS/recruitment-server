@@ -362,25 +362,35 @@ async findJobRolesByCategory(categoryId, page, limit, userId) {
 
 
 async findJobRolesBySearch(q, location, page, limit, userId, jobType) {
-
   try {
     const pipeline = [];
     const matchStage = {};
+    const now = new Date(); // ✅ ADDED
+
+    // ✅ ADDED: ONLY ACTIVE JOBS
+    matchStage.$or = [
+      { expiry: { $exists: false } },
+      { expiry: { $gte: now } },
+    ];
 
     if (jobType) {
-  matchStage.jobType = jobType;
-}
-
+      matchStage.jobType = jobType;
+    }
 
     if (q) {
       matchStage.title = { $regex: q, $options: "i" };
     }
 
     if (location) {
-      matchStage.$or = [
-        { "location.city": { $regex: location, $options: "i" } },
-        { "location.state": { $regex: location, $options: "i" } },
-        { "location.country": { $regex: location, $options: "i" } },
+      matchStage.$and = [
+        ...(matchStage.$and || []),
+        {
+          $or: [
+            { "location.city": { $regex: location, $options: "i" } },
+            { "location.state": { $regex: location, $options: "i" } },
+            { "location.country": { $regex: location, $options: "i" } },
+          ],
+        },
       ];
     }
 
@@ -422,7 +432,6 @@ async findJobRolesBySearch(q, location, page, limit, userId, jobType) {
       }
     );
 
-    // Lookups
     pipeline.push(
       {
         $lookup: {
