@@ -1,4 +1,4 @@
-import BlogPostRepository from '../../repositories/contracts/IAITestRepository.js';
+import BlogPostRepository from '../../repositories/contracts/blogPost.Repository.js';
 import BlogPostModel from '../../models/blogPost.model.js';
 
 class BlogPostRepositoryImpl extends BlogPostRepository {
