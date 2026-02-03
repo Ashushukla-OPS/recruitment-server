@@ -1,14 +1,15 @@
 import BlogPostService from "../services/blogPost.service.js";
+import { successResponse } from "../utils/apiResponse.js";
 
 class BlogPostController {
   constructor() {
-    this.blogService = BlogPostService; 
+    this.blogService = BlogPostService;
   }
 
   createBlogPost = async (req, res, next) => {
     try {
       const blogPost = await this.blogService.createBlogPost(req.body);
-      res.status(201).json(blogPost);
+      successResponse(res, blogPost, "Blog created successfully", 201);
     } catch (error) {
       next(error);
     }
@@ -16,16 +17,9 @@ class BlogPostController {
 
   getBlogPosts = async (req, res, next) => {
     try {
-      const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
-      const filter = {};
-
-      if (req.query.category) {
-        filter.category = req.query.category;
-      }
-
-      const result = await this.blogService.getBlogPosts(filter, page, limit);
-      res.status(200).json(result);
+      
+      const result = await this.blogService.getBlogPosts(req.query);
+      successResponse(res, result, "Blog posts retrieved successfully");
     } catch (error) {
       next(error);
     }
@@ -34,7 +28,7 @@ class BlogPostController {
   getBlogPostById = async (req, res, next) => {
     try {
       const blogPost = await this.blogService.getBlogPostById(req.params.id);
-      res.status(200).json(blogPost);
+      successResponse(res, blogPost, "Blog retrieved successfully");
     } catch (error) {
       next(error);
     }
@@ -43,7 +37,7 @@ class BlogPostController {
   getBlogPostBySlug = async (req, res, next) => {
     try {
       const blogPost = await this.blogService.getBlogPostBySlug(req.params.slug);
-      res.status(200).json(blogPost);
+      successResponse(res, blogPost, "Blog retrieved successfully");
     } catch (error) {
       next(error);
     }
@@ -53,9 +47,9 @@ class BlogPostController {
     try {
       const blogPost = await this.blogService.updateBlogPost(
         req.params.id,
-        req.body// data is not directly
+        req.body
       );
-      res.status(200).json(blogPost);
+      successResponse(res, blogPost, "Blog updated successfully");
     } catch (error) {
       next(error);
     }
@@ -64,7 +58,7 @@ class BlogPostController {
   deleteBlogPost = async (req, res, next) => {
     try {
       const result = await this.blogService.deleteBlogPost(req.params.id);
-      res.status(200).json(result);
+      successResponse(res, result, "Blog deleted successfully");
     } catch (error) {
       next(error);
     }

@@ -14,7 +14,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
   }
 
   async findPaginated(filter, skip, limit) {
-    // 🔒 ENFORCE LIMIT: 1–10
+    
     limit = Number(limit);
     if (!limit || limit < 1) limit = 1;
     if (limit > 10) limit = 10;

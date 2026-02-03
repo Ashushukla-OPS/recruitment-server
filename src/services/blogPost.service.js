@@ -7,44 +7,69 @@ class BlogPostService {
     this.blogRepo = new MongoBlogPostRepository();
   }
 
-    async createBlogPost(data) {
-    return await this.blogRepo.create(data);
-  }
+   async createBlogPost(data) {
+    const blogData = {
+    title: data.title,
+    slug: data.slug,
+    author: data.author,
 
-  async getBlogPosts(filter = {}, page = 1, limit = 10) {
-    const MAX_LIMIT = 50;
+    subtitle: data.subtitle ?? "",
+    readingTime: data.readingTime ?? "0 min read",
+    category: data.category ?? [],
 
-    page = Number(page);
-    limit = Number(limit);
+    hero: {
+      imageUrl: data.hero?.imageUrl,
+      caption: data.hero?.caption ?? "",
+      altText: data.hero?.altText ?? ""
+    },
 
-    if (!page || page < 1) page = 1;
-    if (!limit || limit < 1) limit = 10;
-    if (limit > MAX_LIMIT) limit = MAX_LIMIT;
+    content: data.content ?? {},
 
-    const skip = (page - 1) * limit;
+    seo: {
+      metaTitle: data.seo?.metaTitle ?? data.title,
+      metaDescription: data.seo?.metaDescription ?? "",
+      keywords: data.seo?.keywords ?? [],
+      ogImage: data.seo?.ogImage ?? ""
+    },
 
-    const finalFilter = {
-      isPublished: true,
-      ...filter
-    };
+    isPublished: data.isPublished ?? false,
+    allowNewsletter: data.allowNewsletter ?? true,
+    publishedAt: data.isPublished ? new Date() : null
+  };
 
-    const [blogs, total] = await Promise.all([
-      this.blogRepo.findPaginated(finalFilter, skip, limit),
-      this.blogRepo.count(finalFilter)
-    ]);
+  return await this.blogRepo.create(blogData);
+}
 
-    return {
-      blogs,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-        hasNextPage: page * limit < total,
-        hasPrevPage: page > 1
-      }
-    };
-  }
+  async getBlogPosts(query) {
+  const { page, limit, category } = query;
+
+  
+  const filter = {
+    isPublished: true,
+    ...(category && { category })
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [blogs, total] = await Promise.all([
+    this.blogRepo.findPaginated(filter, skip, limit),
+    this.blogRepo.count(filter)
+  ]);
+
+  return {
+    blogs,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page * limit < total,
+      hasPrevPage: page > 1
+    }
+  };
+}
+
+  
 
   
   async getBlogPostById(id) {
@@ -66,7 +91,7 @@ class BlogPostService {
         views: (blogPost.views || 0) + 1
       });
     } catch (error) {
-      // view count failure should NOT break API
+      
       logger.warn("Failed to update blog view count", {
         blogId: blogPost._id,
         error: error.message
@@ -76,13 +101,45 @@ class BlogPostService {
     return blogPost;
   }
 
-  
   async updateBlogPost(id, data) {
-    const blog = await this.blogRepo.updateById(id, data);//check implement karne ga
-    if (!blog) throw new AppError("Blog not found", 404);
-    return blog;
+  const existingBlog = await this.blogRepo.findById(id);
+  if (!existingBlog) {
+    throw new AppError("Blog not found", 404);
   }
 
+  const ALLOWED_FIELDS = [
+    "title",
+    "subtitle",
+    "content",
+    "category",
+    "hero",
+    "seo",
+    "isPublished"
+  ];
+
+  const updates = {};
+  for (const key of ALLOWED_FIELDS) {
+    if (data[key] !== undefined) {
+      updates[key] = data[key];
+    }
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new AppError("No valid fields provided for update", 400);
+  }
+
+  if (updates.isPublished === true && !existingBlog.publishedAt) {
+    updates.publishedAt = new Date();
+  }
+
+  if (updates.isPublished === false) {
+    updates.publishedAt = null;
+  }
+
+  return await this.blogRepo.updateById(id, updates);
+ }
+
+  
  
   async deleteBlogPost(id) {
     const blog = await this.blogRepo.deleteById(id);
