@@ -1,31 +1,17 @@
 class BlogPostRepository {
-    create(data){
-        throw new Error('Method Not Implemented');
-    }
+  async create(data) {}
 
-    findPaginated(filter,skip,limit){
-        throw new Error('Method Not Implemented');
-    }
+  async findPaginated(filter, skip, limit) {}
 
-    count(filter){
-        throw new Error('Method Not Implemented');
-    }
+  async count(filter) {}
 
-    findById(id){
-        throw new Error('Method Not Implemented');
-    }
+  async findById(id) {}
 
-    findBySlug(slug){
-        throw new Error('Method Not Implemented');
-    }
+  async findBySlug(slug) {}
 
-    updateById(id, data){
-        throw new Error('Method Not Implemented');
-    }
+  async updateById(id, data) {}
 
-    deleteById(id){
-        throw new Error('Method Not Implemented');
-    }
+  async deleteById(id) {}
 }
 
 export default BlogPostRepository;

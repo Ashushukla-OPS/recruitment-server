@@ -1,10 +1,20 @@
 import mongoose from 'mongoose';
+import slugify from 'slugify';
+
+
 
 const BlogPostSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
     trim: true
+  },
+  
+  slug: {
+    type: String,
+    unique: true,
+    lowercase: true,
+    sparse: true
   },
 
   subtitle: {
@@ -33,6 +43,11 @@ const BlogPostSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: {}
   },
+  author: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User', 
+  required: false
+ },
 
   seo: {
     metaTitle: { type: String, default: "" },
@@ -57,6 +72,16 @@ const BlogPostSchema = new mongoose.Schema({
     default: true
   }
 }, { timestamps: true });
+
+
+
+
+BlogPostSchema.pre('validate', function(next) {
+  if (this.title && !this.slug) {
+    this.slug = slugify(this.title, { lower: true, strict: true });
+  }
+  next();
+});
 const BlogPost = mongoose.model('BlogPost', BlogPostSchema);
 
 export default BlogPost;

@@ -1,82 +1,56 @@
 import BlogPostRepository from "../contracts/IBlogPostRepository.js";
 import BlogPostModel from "../../models/blogPost.model.js";
-import { AppError } from "../../utils/errors.js";
 
 class MongoBlogPostRepository extends BlogPostRepository {
 
   async create(data) {
-    try {
-      const blogPost = new BlogPostModel(data);
-      return await blogPost.save();
-    } catch (error) {
-      throw new AppError("Failed to create blog post", 500);
-    }
+    const blogPost = new BlogPostModel(data);
+    return await blogPost.save();
   }
 
   async findPaginated(filter, skip, limit) {
-    
-    limit = Number(limit);
-    if (!limit || limit < 1) limit = 1;
-    if (limit > 10) limit = 10;
+  
+  const finalSkip = Number(skip) || 0;
+  const finalLimit = Number(limit) || 10;
 
-    try {
-      return await BlogPostModel.find(filter)
-        .populate("author", "name email")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
-    } catch (error) {
-      throw new AppError("Failed to fetch blog posts", 500);
-    }
-  }
+  
+  return await BlogPostModel.find(filter)
+    .populate({
+      path: "author",
+      select: "firstName lastName email"
+    })
+    .sort({ createdAt: -1 })
+    .skip(finalSkip)   
+    .limit(finalLimit) 
+    .lean(); 
+}
 
   async count(filter) {
-    try {
-      return await BlogPostModel.countDocuments(filter);
-    } catch (error) {
-      throw new AppError("Failed to count blog posts", 500);
-    }
+    return await BlogPostModel.countDocuments(filter);
   }
 
   async findById(id) {
-    try {
-      return await BlogPostModel.findById(id)
-        .populate("author", "name email");
-    } catch (error) {
-      throw new AppError("Failed to find blog post", 500);
-    }
+    return await BlogPostModel.findById(id)
+      .populate("author", "firstName lastName email");
   }
 
   async findBySlug(slug) {
-    try {
-      return await BlogPostModel.findOne({ slug })
-        .populate("author", "name");
-    } catch (error) {
-      throw new AppError("Failed to find blog post", 500);
-    }
+    return await BlogPostModel.findOne({ slug })
+      .populate("author", "firstName lastName email");
   }
 
   async updateById(id, data) {
-    try {
-      return await BlogPostModel.findByIdAndUpdate(
-        id,
-        data,
-        { new: true, runValidators: true }
-      );
-    } catch (error) {
-      throw new AppError("Failed to update blog post", 500);
-    }
+    return await BlogPostModel.findByIdAndUpdate(
+      id,
+      data,
+      { new: true, runValidators: true }
+    );
   }
 
   async deleteById(id) {
-    try {
-      return await BlogPostModel.findByIdAndDelete(id);
-    } catch (error) {
-      throw new AppError("Failed to delete blog post", 500);
-    }
+    return await BlogPostModel.findByIdAndDelete(id);
   }
 }
 
 export default MongoBlogPostRepository;
-
 

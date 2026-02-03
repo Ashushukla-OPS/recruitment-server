@@ -1,10 +1,12 @@
 import { AppError } from "../../utils/errors.js";
 
+
+
 const validateRequest = (schema, property = "body") => {
   return (req, res, next) => {
     const { error, value } = schema.validate(req[property], {
-      abortEarly: false,      // collect all errors
-      stripUnknown: true      // remove unwanted fields
+      abortEarly: false,
+      stripUnknown: true
     });
 
     if (error) {
@@ -12,8 +14,15 @@ const validateRequest = (schema, property = "body") => {
       return next(new AppError(message, 400));
     }
 
-    // overwrite request with validated & sanitized data
-    req[property] = value;
+    if (property === "body" || property === "params") {
+      req[property] = value;
+    }
+
+    
+    if (property === "query") {
+      req.validatedQuery = value;
+    }
+
     next();
   };
 };

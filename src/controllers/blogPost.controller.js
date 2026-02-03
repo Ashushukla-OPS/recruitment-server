@@ -16,15 +16,24 @@ class BlogPostController {
   };
 
   getBlogPosts = async (req, res, next) => {
-    try {
-      
-      const result = await this.blogService.getBlogPosts(req.query);
-      successResponse(res, result, "Blog posts retrieved successfully");
-    } catch (error) {
-      next(error);
-    }
-  };
+  try {
+    const query = req.validatedQuery || req.query;
+    
+    
+    const options = {
+      page: Number(query.page) || 1,
+      limit: Number(query.limit) || 10,
+      ...query
+    };
 
+    const result = await this.blogService.getBlogPosts(options);
+    successResponse(res, result, "Blog posts retrieved successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
+  
   getBlogPostById = async (req, res, next) => {
     try {
       const blogPost = await this.blogService.getBlogPostById(req.params.id);
@@ -45,10 +54,7 @@ class BlogPostController {
 
   updateBlogPost = async (req, res, next) => {
     try {
-      const blogPost = await this.blogService.updateBlogPost(
-        req.params.id,
-        req.body
-      );
+      const blogPost = await this.blogService.updateBlogPost(req.params.id, req.body);
       successResponse(res, blogPost, "Blog updated successfully");
     } catch (error) {
       next(error);
