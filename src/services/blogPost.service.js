@@ -1,49 +1,100 @@
-import blogRepo  from "../repositories/implementations/blogPostRepository.js"
+import { AppError } from "../utils/errors.js";
+import MongoBlogPostRepository from "../repositories/implementations/mongoBlogPostRepository.js";
+import logger from "../utils/logger.js";
 
-export const createBlogPost = async (data) => {
-    return await blogRepo.create(data);
-};
+class BlogPostService {
+  constructor() {
+    this.blogRepo = new MongoBlogPostRepository();
+  }
 
-export const getBlogPosts = async (filter, page, limit) => {
+    async createBlogPost(data) {
+    return await this.blogRepo.create(data);
+  }
+
+  async getBlogPosts(filter = {}, page = 1, limit = 10) {
+    const MAX_LIMIT = 50;
+
+    page = Number(page);
+    limit = Number(limit);
+
+    if (!page || page < 1) page = 1;
+    if (!limit || limit < 1) limit = 10;
+    if (limit > MAX_LIMIT) limit = MAX_LIMIT;
+
     const skip = (page - 1) * limit;
-    const finalfilter = { isPublished: true, ...filter };
+
+    const finalFilter = {
+      isPublished: true,
+      ...filter
+    };
 
     const [blogs, total] = await Promise.all([
-        blogRepo.findPaginated(finalfilter, skip, limit),
-        blogRepo.count(filter)
+      this.blogRepo.findPaginated(finalFilter, skip, limit),
+      this.blogRepo.count(finalFilter)
     ]);
 
     return {
-        blogs,
-        pagination: {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit)
-        }
+      blogs,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page * limit < total,
+        hasPrevPage: page > 1
+      }
     };
+  }
 
-};
+  
+  async getBlogPostById(id) {
+    const blog = await this.blogRepo.findById(id);
+    if (!blog) throw new AppError("Blog not found", 404);
+    return blog;
+  }
 
-export const getBlogPostById = async (id) => {
-    return await blogRepo.findById(id);
-};
+ 
+  async getBlogPostBySlug(slug) {
+    const blogPost = await this.blogRepo.findBySlug(slug);
 
-export const getBlogPostBySlug = async (slug) => {
-    const blogPost = await blogRepo.findBySlug(slug);
-    if (blogPost) {
-        blogPost.views += 1;
-        await blogRepo.updateById(blogPost._id, { views: blogPost.views });
+    if (!blogPost) {
+      throw new AppError("Blog not found", 404);
     }
+
+    try {
+      await this.blogRepo.updateById(blogPost._id, {
+        views: (blogPost.views || 0) + 1
+      });
+    } catch (error) {
+      // view count failure should NOT break API
+      logger.warn("Failed to update blog view count", {
+        blogId: blogPost._id,
+        error: error.message
+      });
+    }
+
     return blogPost;
-};
+  }
 
-export const updateBlogPost = async (id, data) => {
-    return await blogRepo.updateById(id, data);
-};
+  
+  async updateBlogPost(id, data) {
+    const blog = await this.blogRepo.updateById(id, data);//check implement karne ga
+    if (!blog) throw new AppError("Blog not found", 404);
+    return blog;
+  }
 
-export const deleteBlogPost = async (id) => {
-    return await blogRepo.deleteById(id);
-};
+ 
+  async deleteBlogPost(id) {
+    const blog = await this.blogRepo.deleteById(id);
+    if (!blog) throw new AppError("Blog not found", 404);
+    return {
+      success: true,
+      message: "Blog deleted successfully"
+    };
+  }
+}
+
+export default new BlogPostService();
+
 
 

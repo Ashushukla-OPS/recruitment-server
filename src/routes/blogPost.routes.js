@@ -1,16 +1,37 @@
-import { Router } from 'express';
-import * as blogController from '../controllers/blogPost.controller.js';
-import authhenticateJWT from '../middlewares/auth.middleware.js';
-import authorizeRoles from '../middlewares/role.middleware.js';
-
+import { Router } from "express";
+import BlogPostController from "../controllers/blogPost.controller.js";
+import authenticateJWT from "../middlewares/auth.middleware.js";
+import authorizeRoles from "../middlewares/role.middleware.js";
 
 const router = Router();
 
-router.post('/', authhenticateJWT, authorizeRoles('ADMIN'), blogController.createBlogPost);
-router.get('/', blogController.getBlogPosts);
-router.get('/slug/:slug', blogController.getBlogPostBySlug);
-router.get('/:id', blogController.getBlogPostById);
-router.put('/:id', authhenticateJWT, authorizeRoles('ADMIN'), blogController.updateBlogPost);
-router.delete('/:id', authhenticateJWT, authorizeRoles('ADMIN'), blogController.deleteBlogPost);
+
+router.post(
+  "/",
+  authenticateJWT,
+  authorizeRoles("ADMIN"),
+  BlogPostController.createBlogPost
+);
+
+
+router.get("/", BlogPostController.getBlogPosts);
+router.get("/slug/:slug", BlogPostController.getBlogPostBySlug);
+router.get("/:id", BlogPostController.getBlogPostById);
+
+
+router.put(
+  "/:id",
+  authenticateJWT,
+  authorizeRoles("ADMIN"),
+  BlogPostController.updateBlogPost
+);
+
+
+router.delete(
+  "/:id",
+  authenticateJWT,
+  authorizeRoles("ADMIN"),
+  BlogPostController.deleteBlogPost
+);
 
 export default router;
