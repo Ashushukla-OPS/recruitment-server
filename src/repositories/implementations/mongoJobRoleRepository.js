@@ -108,9 +108,14 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     try {
       const matchStage = {};
 
-      if (filter.jobType) {
-  matchStage.jobType = filter.jobType;
+ if (filter.jobType?.length) {
+  matchStage.jobType = {
+    $in: filter.jobType.map(t => new RegExp(t, "i"))
+  };
 }
+
+
+
 
 
       if (filter.clientId) {
@@ -128,18 +133,28 @@ class MongoJobRoleRepository extends IJobRoleRepository {
       if (filter.minSalary || filter.maxSalary) {
   matchStage.$and = [];
 
-  if (filter.minSalary) {
-    matchStage.$and.push({
-      "salary.max": { $gte: Number(filter.minSalary) }
-    });
-  }
+  const min = Number(filter.minSalary) || 0;
+  const max = Number(filter.maxSalary) || Number.MAX_SAFE_INTEGER;
 
-  if (filter.maxSalary) {
-    matchStage.$and.push({
-      "salary.min": { $lte: Number(filter.maxSalary) }
-    });
-  }
+  matchStage.$and.push({
+    $or: [
+      // Case 1: salary is a number
+      {
+        salary: {
+          $gte: min,
+          $lte: max
+        }
+      },
+
+      // Case 2: salary is an object
+      {
+        "salary.min": { $lte: max },
+        "salary.max": { $gte: min }
+      }
+    ]
+  });
 }
+
 
 
       const now = new Date();
@@ -360,39 +375,89 @@ async findJobRolesByCategory(categoryId, page, limit, userId) {
 }
 
 
-
-async findJobRolesBySearch(q, location, page, limit, userId, jobType) {
+async findJobRolesBySearch(
+  q,
+  location,
+  jobType = [],
+  experience = [],
+  minSalary,
+  maxSalary,
+  page,
+  limit,
+  userId
+) {
   try {
     const pipeline = [];
-    const matchStage = {};
+    
     const now = new Date(); // ✅ ADDED
 
     // ✅ ADDED: ONLY ACTIVE JOBS
-    matchStage.$or = [
-      { expiry: { $exists: false } },
-      { expiry: { $gte: now } },
-    ];
+ const matchStage = {
+  $and: [
+    {
+      $or: [
+        { expiry: { $exists: false } },
+        { expiry: { $gte: now } },
+      ],
+    },
+  ],
+};
 
-    if (jobType) {
-      matchStage.jobType = jobType;
+
+
+
+  if (jobType.length) {
+  matchStage.$and.push({
+    jobType: {
+      $regex: jobType[0],
+      $options: "i"
     }
+  });
+}
+
+
+if (experience.length) {
+  matchStage.$and.push({
+    requiredExperience: {
+      $in: experience.map(
+        (e) => new RegExp(`^${e}$`, "i")
+      ),
+    },
+  });
+}
+
+if (minSalary || maxSalary) {
+  const min = Number(minSalary) || 0;
+  const max = Number(maxSalary) || Number.MAX_SAFE_INTEGER;
+
+  matchStage.$and.push({
+    $or: [
+      { salary: { $gte: min, $lte: max } },
+      {
+        "salary.min": { $lte: max },
+        "salary.max": { $gte: min },
+      },
+    ],
+  });
+}
+
 
     if (q) {
-      matchStage.title = { $regex: q, $options: "i" };
-    }
+  matchStage.$and.push({
+    title: { $regex: q, $options: "i" },
+  });
+}
 
-    if (location) {
-      matchStage.$and = [
-        ...(matchStage.$and || []),
-        {
-          $or: [
-            { "location.city": { $regex: location, $options: "i" } },
-            { "location.state": { $regex: location, $options: "i" } },
-            { "location.country": { $regex: location, $options: "i" } },
-          ],
-        },
-      ];
-    }
+
+if (location) {
+  matchStage.$and.push({
+    $or: [
+      { "location.city": { $regex: location, $options: "i" } },
+      { "location.state": { $regex: location, $options: "i" } },
+      { "location.country": { $regex: location, $options: "i" } },
+    ],
+  });
+}
 
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
