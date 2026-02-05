@@ -25,6 +25,7 @@ import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
+import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
 import ViolationRoutes  from "./routes/testViolation.routes.js";
