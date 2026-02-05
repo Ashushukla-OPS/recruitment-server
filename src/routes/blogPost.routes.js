@@ -3,10 +3,14 @@ import BlogPostController from "../controllers/blogPost.controller.js";
 import authenticateJWT from "../middlewares/auth.middleware.js";
 import authorizeRoles from "../middlewares/role.middleware.js";
 import validateRequest from "../middlewares/validators/validateRequest.js";
-import { createBlogPostSchema, updateBlogPostSchema } from "../middlewares/validators/blogPost.validator.js";
+import { createBlogPostSchema } from "../middlewares/validators/blogPost.validator.js";
 import { blogListQuerySchema } from "../middlewares/validators/blogPost.query.validator.js";
+import { updateBlogPostSchema } from "../middlewares/validators/blogPost.validator.js";
 
 const router = Router();
+
+router.use(authenticateJWT);
+
 
 
 router.get(
@@ -32,7 +36,7 @@ router.post(
   BlogPostController.createBlogPost
 );
 
-router.put(
+router.patch(
   "/:id",
   authenticateJWT,
   authorizeRoles("admin"),
@@ -48,4 +52,3 @@ router.delete(
 );
 
 export default router;
-

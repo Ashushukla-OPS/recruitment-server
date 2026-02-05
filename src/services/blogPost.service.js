@@ -13,6 +13,7 @@ class BlogPostService {
     
     const blogData = {
       title: data.title,
+      slug: data.slug,
       author: data.author,
       subtitle: data.subtitle ?? "",
       readingTime: data.readingTime ?? "0 min read",
@@ -39,12 +40,20 @@ class BlogPostService {
 
   
   async getBlogPosts(options = {}) {
- 
-  let { page = 1, limit = 10, ...filter } = options;
 
-  const skip = (page - 1) * limit;
+  let {
+    limit = 10,
+    skip = 0,
+    category,
+    isPublished
+  } = options;
 
   
+  const filter = {};
+
+  if (category) filter.category = category;
+  if (isPublished !== undefined) filter.isPublished = isPublished;
+
   const [blogs, total] = await Promise.all([
     this.blogRepo.findPaginated(filter, skip, limit),
     this.blogRepo.count(filter)
@@ -54,14 +63,15 @@ class BlogPostService {
     blogs,
     pagination: {
       total,
-      page,
+      skip,
       limit,
-      totalPages: Math.ceil(total / limit),
-      hasNextPage: page * limit < total,
-      hasPrevPage: page > 1
+      hasNext: skip + limit < total,
+      hasPrev: skip > 0
     }
   };
 }
+
+
 
   async getBlogPostById(id) {
     const blog = await this.blogRepo.findById(id);
@@ -82,24 +92,68 @@ class BlogPostService {
   }
 
   async updateBlogPost(id, data) {
-    const existingBlog = await this.blogRepo.findById(id);
-    if (!existingBlog) throw new AppError("Blog not found", 404);
 
-    const ALLOWED_FIELDS = ["title", "subtitle", "content", "category", "hero", "seo", "isPublished"];
-    const updates = {};
-    
-    for (const key of ALLOWED_FIELDS) {
-      if (data[key] !== undefined) updates[key] = data[key];
-    }
-
-    if (Object.keys(updates).length === 0) throw new AppError("No valid fields provided", 400);
-
-   
-    if (updates.isPublished === true && !existingBlog.publishedAt) updates.publishedAt = new Date();
-    if (updates.isPublished === false) updates.publishedAt = null;
-
-    return await this.blogRepo.updateById(id, updates);
+  const existingBlog = await this.blogRepo.findById(id);
+  if (!existingBlog) {
+    throw new AppError("Blog not found", 404);
   }
+
+  
+  if (data.createdAt || data.updatedAt) {
+    throw new AppError("Immutable fields cannot be updated", 400);
+  }
+
+  const updates = {};
+
+  
+  const flatFields = [
+    "title",
+    "subtitle",
+    "readingTime",
+    "category",
+    "content",
+    "isPublished"
+  ];
+
+  for (const field of flatFields) {
+    if (data[field] !== undefined) {
+      updates[field] = data[field];
+    }
+  }
+
+  
+  if (data.hero) {
+    for (const key in data.hero) {
+      updates[`hero.${key}`] = data.hero[key];
+    }
+  }
+
+  
+  if (data.seo) {
+    for (const key in data.seo) {
+      updates[`seo.${key}`] = data.seo[key];
+    }
+  }
+
+  
+  if (data.isPublished === true && !existingBlog.publishedAt) {
+    updates.publishedAt = new Date();
+  }
+
+  if (data.isPublished === false) {
+    updates.publishedAt = null;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    throw new AppError("No valid fields provided", 400);
+  }
+
+  return await this.blogRepo.updateById(
+    id,
+    { $set: updates }
+  );
+}
+
 
   async deleteBlogPost(id) {
     const blog = await this.blogRepo.deleteById(id);

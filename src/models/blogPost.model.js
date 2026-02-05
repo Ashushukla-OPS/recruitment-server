@@ -12,9 +12,11 @@ const BlogPostSchema = new mongoose.Schema({
   
   slug: {
     type: String,
+    required: true,
     unique: true,
+    trim: true,
     lowercase: true,
-    sparse: true
+    index: true
   },
 
   subtitle: {
@@ -73,15 +75,6 @@ const BlogPostSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-
-
-
-BlogPostSchema.pre('validate', function(next) {
-  if (this.title && !this.slug) {
-    this.slug = slugify(this.title, { lower: true, strict: true });
-  }
-  next();
-});
 const BlogPost = mongoose.model('BlogPost', BlogPostSchema);
 
 export default BlogPost;

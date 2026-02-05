@@ -15,23 +15,22 @@ class BlogPostController {
     }
   };
 
-  getBlogPosts = async (req, res, next) => {
+  async getBlogPosts(req, res, next) {
   try {
-    const query = req.validatedQuery || req.query;
-    
-    
-    const options = {
-      page: Number(query.page) || 1,
-      limit: Number(query.limit) || 10,
-      ...query
-    };
+    const options = req.validatedQuery || {};
 
-    const result = await this.blogService.getBlogPosts(options);
-    successResponse(res, result, "Blog posts retrieved successfully");
+    const data = await BlogPostService.getBlogPosts(options);
+
+    res.status(200).json({
+      success: true,
+      data,
+      message: "Blog posts retrieved successfully"
+    });
   } catch (error) {
     next(error);
   }
 };
+
 
   
   getBlogPostById = async (req, res, next) => {

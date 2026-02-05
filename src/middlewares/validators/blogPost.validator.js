@@ -7,6 +7,7 @@ export const createBlogPostSchema = Joi.object({
     .trim()
     .lowercase()
     .pattern(/^[a-z0-9-]+$/)
+    .allow( "",null)
     .optional(),
 
   subtitle: Joi.string().allow("").optional(),
