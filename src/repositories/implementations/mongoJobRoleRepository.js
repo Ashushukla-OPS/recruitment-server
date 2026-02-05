@@ -108,11 +108,6 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     try {
       const matchStage = {};
 
-      if (filter.jobType) {
-  matchStage.jobType = filter.jobType;
-}
-
-
       if (filter.clientId) {
         matchStage.clientId = new mongoose.Types.ObjectId(filter.clientId);
       }
@@ -124,23 +119,6 @@ class MongoJobRoleRepository extends IJobRoleRepository {
       if (filter.title) {
         matchStage.title = { $regex: filter.title, $options: "i" };
       }
-
-      if (filter.minSalary || filter.maxSalary) {
-  matchStage.$and = [];
-
-  if (filter.minSalary) {
-    matchStage.$and.push({
-      "salary.max": { $gte: Number(filter.minSalary) }
-    });
-  }
-
-  if (filter.maxSalary) {
-    matchStage.$and.push({
-      "salary.min": { $lte: Number(filter.maxSalary) }
-    });
-  }
-}
-
 
       const now = new Date();
       if (filter.expiry === "active") {
@@ -361,38 +339,29 @@ async findJobRolesByCategory(categoryId, page, limit, userId) {
 
 
 
-async findJobRolesBySearch(q, location, page, limit, userId, jobType) {
+async findJobRolesBySearch(q, location, page, limit, userId) {
+
   try {
     const pipeline = [];
-    const matchStage = {};
+    
     const now = new Date(); // ✅ ADDED
 
-    // ✅ ADDED: ONLY ACTIVE JOBS
-    matchStage.$or = [
-      { expiry: { $exists: false } },
-      { expiry: { $gte: now } },
-    ];
-
-    if (jobType) {
-      matchStage.jobType = jobType;
-    }
-
     if (q) {
-      matchStage.title = { $regex: q, $options: "i" };
-    }
+  matchStage.$and.push({
+    title: { $regex: q, $options: "i" },
+  });
+}
 
-    if (location) {
-      matchStage.$and = [
-        ...(matchStage.$and || []),
-        {
-          $or: [
-            { "location.city": { $regex: location, $options: "i" } },
-            { "location.state": { $regex: location, $options: "i" } },
-            { "location.country": { $regex: location, $options: "i" } },
-          ],
-        },
-      ];
-    }
+
+if (location) {
+  matchStage.$and.push({
+    $or: [
+      { "location.city": { $regex: location, $options: "i" } },
+      { "location.state": { $regex: location, $options: "i" } },
+      { "location.country": { $regex: location, $options: "i" } },
+    ],
+  });
+}
 
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
