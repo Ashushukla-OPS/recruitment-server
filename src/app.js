@@ -26,6 +26,7 @@ import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
+// import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
 import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
@@ -51,6 +52,7 @@ app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
+// app.use("/api/tests", deleteTestsRoutes);
 app.use("/api/interviews", ScheduleInterviewRoutes);
 //   to: "agr.rbih@gmail.com",
 //   name: "Rohan",

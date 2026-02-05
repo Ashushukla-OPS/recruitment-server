@@ -8,6 +8,7 @@ class AuthController {
     this.userService = new UserService();
     this.authService = new AuthService();
   }
+  
 
   get cookieOptions() {
     const isProd = process.env.NODE_ENV === "production";
@@ -23,6 +24,9 @@ class AuthController {
       path: "/",
     };
   }
+  
+  
+
 
   refreshTokenController = async (req, res, next) => {
     try {
@@ -171,6 +175,8 @@ class AuthController {
       }
       next(error);
     }
+    console.log("LOGIN API HIT", req.body);
+
   };
 }
 
