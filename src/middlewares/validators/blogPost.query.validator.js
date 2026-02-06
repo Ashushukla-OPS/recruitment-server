@@ -6,7 +6,11 @@ export const blogListQuerySchema = Joi.object({
   skip: Joi.number().integer().min(0).default(0),
 
   category: Joi.string().optional(),
+  search: Joi.string().optional(),
 
-  isPublished: Joi.boolean().optional()
+  isPublished: Joi.boolean().optional(),
+  technology: Joi.string()
+    .pattern(/^[a-f\d]{24}(,[a-f\d]{24})*$/i)  
+    .optional()
 }).unknown(false);
 

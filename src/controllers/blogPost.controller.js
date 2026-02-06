@@ -26,6 +26,9 @@ class BlogPostController {
       data,
       message: "Blog posts retrieved successfully"
     });
+
+    console.log("REQ BODY:", req.body); 
+
   } catch (error) {
     next(error);
   }

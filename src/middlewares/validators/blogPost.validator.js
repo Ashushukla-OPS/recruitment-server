@@ -10,11 +10,24 @@ export const createBlogPostSchema = Joi.object({
     .allow( "",null)
     .optional(),
 
+  author: Joi.string().optional(),
   subtitle: Joi.string().allow("").optional(),
 
   readingTime: Joi.string().optional(),
 
-  category: Joi.array().items(Joi.string()).default([]),
+  category: Joi.string()
+    .hex()
+    .length(24)
+    .required(),
+
+  
+  technologies: Joi.array()
+    .items(
+      Joi.string().hex().length(24)
+    )
+    .optional()
+    .default([]),
+
 
   hero: Joi.object({
     imageUrl: Joi.string().uri().required(),

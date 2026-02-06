@@ -1,6 +1,7 @@
 import { AppError } from "../utils/errors.js";
 import MongoBlogPostRepository from "../repositories/implementations/mongoBlogPostRepository.js";
 import logger from "../utils/logger.js";
+import Skill from "../models/skill.model.js";
 
 
 
@@ -17,7 +18,8 @@ class BlogPostService {
       author: data.author,
       subtitle: data.subtitle ?? "",
       readingTime: data.readingTime ?? "0 min read",
-      category: data.category ?? [],
+      category: data.category,
+      technologies: data.technologies,
       hero: {
         imageUrl: data.hero?.imageUrl,
         caption: data.hero?.caption ?? "",
@@ -45,18 +47,58 @@ class BlogPostService {
     limit = 10,
     skip = 0,
     category,
+    technology,
+    search,
     isPublished
   } = options;
 
   
-  const filter = {};
+  const query = {};
 
-  if (category) filter.category = category;
-  if (isPublished !== undefined) filter.isPublished = isPublished;
+  if (category) {
+    query.category = category;
+  }
+
+  
+  if (technology) {
+    const techArray = technology.split(",");
+
+    query.technologies = {
+      $in: techArray
+    };
+  }
+
+
+  if (search) {
+
+  
+  const skills = await Skill.find({
+    name: { $regex: search, $options: "i" }
+  }).select("_id");
+
+
+
+  const skillIds = skills.map(s => s._id);
+  
+
+ if (query.technologies) {
+      query.technologies.$in = [
+        ...query.technologies.$in,
+        ...skillIds
+      ];
+    } else {
+      query.technologies = { $in: skillIds };
+    }
+}
+
+
+
+  
+  if (isPublished !== undefined) query.isPublished = isPublished;
 
   const [blogs, total] = await Promise.all([
-    this.blogRepo.findPaginated(filter, skip, limit),
-    this.blogRepo.count(filter)
+    this.blogRepo.findPaginated(query, skip, limit),
+    this.blogRepo.count(query)
   ]);
 
   return {

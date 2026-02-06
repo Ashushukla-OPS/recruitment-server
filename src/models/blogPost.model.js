@@ -31,9 +31,17 @@ const BlogPostSchema = new mongoose.Schema({
   },
 
   category: {
-    type: [String],
-    default: []
+     type:mongoose.Schema.Types.ObjectId,
+     ref: 'JobCategory',
+     required: true,
+     index: true
   },
+
+  technologies: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Skill',
+  index: true
+  }],
 
   hero: {
     imageUrl: { type: String, required: true },

@@ -13,7 +13,7 @@ async create(data) {
 
   } catch (error) {
 
-    console.log("Mongo Error:", error); 
+    console.log("BLOG CREATE ERROR:", error); 
 
     
     if (error.code === 11000) {
@@ -35,10 +35,24 @@ async create(data) {
 }
 
  async findPaginated(filter, skip, limit) {
-  return await BlogPostModel.find(filter)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit);
+
+  const query = {...filter};
+
+ 
+  if (filter.category) {
+    query.category = filter.category;
+  }
+
+  
+
+
+  return await BlogPostModel.find(query)
+   .populate("category", "name")
+   .populate("technologies", "name")
+    .populate("author")
+   .sort({ createdAt: -1 })
+   .skip(skip)
+   .limit(limit);
 }
 
   async count(filter) {
