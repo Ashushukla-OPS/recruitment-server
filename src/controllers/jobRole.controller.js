@@ -211,14 +211,19 @@ searchJobsJobRoles = async (req, res, next) => {
         ? experience
         : [];
 
+        const cleanedExperienceArray =
+  experienceArray.filter(Boolean);
+
+
     const result =
       await this.jobRoleService.searchJobRoles(
   q,
   location,
   jobTypeArray,
   experienceArray,
-  minSalary,
-  maxSalary,
+   cleanedExperienceArray,
+    Number(minSalary,) || 0,
+     Number(maxSalary) || 0,
   Number(page),
   Number(limit),
   req.userId

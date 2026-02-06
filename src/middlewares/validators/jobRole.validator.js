@@ -47,6 +47,13 @@ const salarySchema = Joi.object({
 });
 
 
+const jobTypeSchema = Joi.string()
+  .valid("Remote", "Hybrid", "Full-Time", "Part-Time")
+  .messages({
+    "any.only": "Job type must be Remote, Hybrid, Full-Time or Part-Time",
+  });
+
+
 const createJobRoleSchema = Joi.object({
   title: Joi.string().min(3).max(100).required().messages({
     "string.min": "Title must be at least 3 characters long",
@@ -90,6 +97,10 @@ const createJobRoleSchema = Joi.object({
     "any.required": "Client ID is required",
   }),
   location: locationSchema.required(),
+  
+  // ✅ ADD
+  jobType: jobTypeSchema.required(),
+  salary: salarySchema.required(),
 });
 
 const updateJobRoleSchema = Joi.object({
@@ -127,6 +138,10 @@ const updateJobRoleSchema = Joi.object({
     "string.pattern.base": "Client ID must be a valid ObjectId",
   }),
   location: locationSchema.required(),
+
+    // ✅ ADD
+  jobType: jobTypeSchema,
+  salary: salarySchema,
 });
 
 const filterJobRolesSchema = Joi.object({
