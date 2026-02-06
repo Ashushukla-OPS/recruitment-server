@@ -81,6 +81,15 @@ const createJobRoleSchema = Joi.object({
     "array.max": "Cannot have more than 20 skills",
     "any.required": "Skills are required",
   }),
+  salary: Joi.object({
+    min: Joi.number().positive().required(),
+    max: Joi.number().positive().greater(Joi.ref("min")).required(),
+    currency: Joi.string().default("INR")
+  }).required(),
+
+  jobType: Joi.string()
+    .valid("Remote", "Full-Time", "Part-Time", "Hybrid")
+    .required(),  
   expiry: Joi.date().greater('now').required().messages({
     "date.greater": "Expiry date must be in the future",
     "any.required": "Expiry date is required",
