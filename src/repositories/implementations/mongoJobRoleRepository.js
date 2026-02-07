@@ -351,9 +351,12 @@ async findJobRolesBySearch(
   userId
 ) {
   try {
+    console.log("EXPERIENCE FILTER:", requiredExperience);
     const pipeline = [];
     const now = new Date();
     const matchStage = { $and: [] };
+
+
 
     // Active jobs
     matchStage.$and.push({
@@ -410,27 +413,52 @@ async findJobRolesBySearch(
     }
 
     // Experience
-    if (Array.isArray(requiredExperience) && requiredExperience.length > 0) {
-      const ranges = requiredExperience.map((exp) => {
-        if (exp === "0-1") return { $lte: 1 };
-        if (exp === "2-4") return { $gte: 2, $lte: 4 };
-        if (exp === "5+") return { $gte: 5 };
-      }).filter(Boolean);
+// Experience (STRICT matching)
+// Experience
+if (Array.isArray(requiredExperience) && requiredExperience.length > 0) {
+  console.log("EXPERIENCE FILTER:", requiredExperience);
 
-      if (ranges.length > 0) {
-        matchStage.$and.push({
-          $or: ranges.map(r => ({ requiredExperience: r })),
-        });
-      }
+  const ranges = [];
+
+  requiredExperience.forEach((exp) => {
+    switch (exp) {
+      case "Entry":
+        ranges.push({ requiredExperience: { $lte: 1 } });
+        break;
+
+      case "Mid":
+        ranges.push({ requiredExperience: { $gte: 2, $lte: 4 } });
+        break;
+
+      case "Senior":
+        ranges.push({ requiredExperience: { $gte: 5 } });
+        break;
     }
+  });
+
+  if (ranges.length > 0) {
+    matchStage.$and.push({ $or: ranges });
+  }
+}
+
 
     // Salary
-    if (typeof minSalary === "number" && typeof maxSalary === "number") {
-      matchStage.$and.push({
-        "salary.min": { $lte: maxSalary },
-        "salary.max": { $gte: minSalary },
-      });
-    }
+   // Salary (FIXED)
+// ✅ Salary filter (0–99 lakh)
+if (
+  typeof minSalary === "number" &&
+  typeof maxSalary === "number"
+) {
+  matchStage.$and.push({
+    salary: { $exists: true },
+    "salary.min": { $gte: minSalary },
+    "salary.max": {
+      $lte: maxSalary === 99 ? Number.MAX_SAFE_INTEGER : maxSalary,
+    },
+  });
+}
+
+
 
     pipeline.push({ $match: matchStage });
 
