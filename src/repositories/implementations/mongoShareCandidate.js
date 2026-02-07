@@ -2,7 +2,7 @@ import { CandidateProfile } from "../../models/candidateProfile.model.js";
 import shareCandidateModel from "../../models/shareCandidate.model.js";
 import IshareCandidate from "../contracts/IShareCandidate.js";
 import mongoose from 'mongoose';
-
+import {AppError} from "../../utils/errors.js";
 
 class MongoShareCandidate extends IshareCandidate {
 
@@ -36,9 +36,9 @@ class MongoShareCandidate extends IshareCandidate {
   async getAllGroups(){
     try {
 
-        return await shareCandidateModel.find()
-        .populate('selectedUsers', 'firstName lastname email role')  
-        .sort({ createdAt: -1 });
+          return await shareCandidateModel.find().select('-selectedUsers')
+       // .populate('selectedUsers', 'firstName lastname email role')  
+        .sort({ createdAt: -1 });  // Sort by creation date, newest first
 
 
     }
