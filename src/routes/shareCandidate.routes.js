@@ -14,6 +14,14 @@ const router = express.Router();
 const shareCandidateController = new ShareCandidateController();
 
 router.post('/', shareCandidateController.createShareCandidate);
+
+
+router.get('/', shareCandidateController.getAllGroups);
+
+router.put('/:id', shareCandidateController.updateGroup);
+
+router.delete('/:id', shareCandidateController.deleteGroup);
+
 router.get('/:shareId', shareCandidateController.shareShareCandidate);
 
 export default router;

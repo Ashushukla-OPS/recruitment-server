@@ -5,22 +5,94 @@ import mongoose from 'mongoose';
 
 
 class MongoShareCandidate extends IshareCandidate {
+
+  // create group and generate share linkk
   async createCandidate(users) {
    try {
-     const share = await shareCandidateModel.create({
-      selectedUsers: users,
+     const share = await shareCandidateModel.create({  //
+      groupName: users.groupName,
+      selectedUsers: users.selectedUsers, // Assuming this is an array of user IDs
     });
 
-    const shareLink = `hire.sheriyans.com/api/share/${share._id}`;
-    return shareLink
+    const shareLink = `hire.sheriyans.com/api/share/${share._id}`; // Construct the shareable link using the share ID
+    return {
+      shareLink, // You can also return the share ID if needed
+      group: share  // Return the created share document
 
-   } catch (error) {
+
+   } 
+  } 
+  catch (error) {
     throw new AppError(
-        `Failed to update test attempt: ${error.message}`,
+        `Failed to  create group: ${error.message}`,
         500,
         error
       );
    }
+  }
+
+  // get all group members
+
+  async getAllGroups(){
+    try {
+
+        return await shareCandidateModel.find()
+        .populate('selectedUsers', 'firstName lastname email role')  
+        .sort({ createdAt: -1 });
+
+
+    }
+    catch(error){
+
+      throw new AppError(
+        `Failed to  fetch groups: ${error.message}`,
+        500,
+        error
+      );
+
+    }
+  }
+
+  // update group
+
+  async updateGroup(id , users){
+    try{
+      const updatedGroup = await shareCandidateModel.findByIdAndUpdate(id, users,{new:true})
+      .populate('selectedUsers', 'firstName lastName email ');
+
+      if(!updatedGroup) throw new AppError('Group not found', 404);
+      return updatedGroup;
+
+
+    }
+    catch(error){
+      throw new AppError(
+        `Failed to update group: ${error.message}`,
+        500,
+        error
+      );
+    }
+  }
+
+
+  // delete group
+
+  async deleteGroup(id){
+    try{
+
+      const deleteGroup = await  shareCandidateModel.findByIdAndDelete(id);
+      if(!deleteGroup) throw new AppError('Group not found', 404);
+
+      return deleteGroup;
+      
+    }
+    catch(error){
+      throw new AppError(
+        `Failed to delete group: ${error.message}`,
+        500,
+        error
+      );
+    }
   }
 
   async shareCandidate(shareId) {
@@ -140,17 +212,10 @@ class MongoShareCandidate extends IshareCandidate {
 
       // 3. Send response
     
-      return ({
-        count :profiles.length,
-        data:profiles
-      })
+      return ({  count :profiles.length,  data:profiles  })  // Return count and data in the response because the frontend needs both to display the data and show the count of shared candidates.
     } catch (error) {
       console.error(error);
-      throw new AppError(
-              `Failed to update test attempt: ${error.message}`,
-              500,
-              error
-            );
+      throw new AppError(  `Failed to update test attempt: ${error.message}`,   500,  error );
     }
   }
 }
