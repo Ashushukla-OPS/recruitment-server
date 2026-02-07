@@ -1,6 +1,7 @@
 import { safeParseLLMJSON } from "../lib/cleanCode.js";
 import { llm } from "../services/ai.service.js";
 import prompt from "../lib/prompt/testGenerator.js";
+import validateQuestion from "../middlewares/validators/question.validator.js";
 
 export async function testGenerator(state) {
   try {
@@ -19,31 +20,8 @@ export async function testGenerator(state) {
       state.excludeQuestions && state.excludeQuestions.length > 0
         ? state.excludeQuestions.join("\n- ")
         : "None";
-    // const fullPrompt = `
-    // ${prompt}
 
-    // IMPORTANT RULES (STRICT):
-    // - Generate questions ONLY from this category: ${state.category}
-    // - Generate questions ONLY based on the following skills:
-    //   [${skillsList}]
-    // - EACH question must clearly test at least ONE of the listed skills.
-    // - AND MUST explicitly include a "skill" field using one of:
-    // - [${skillsList}].
-    // - If a question does NOT match the category OR skills, DO NOT generate it.
-    // - Questions must be UNIQUE.
-    // - DO NOT reuse any of the following questions:
-    // - ${forbiddenList}
-
-    // ${entropy}
-
-    // TEST CONFIG:
-    // ${JSON.stringify(state, null, 2)}
-
-    // OUTPUT FORMAT:
-    // Return valid JSON only.
-    // `;
-
-        const fullPrompt = `
+    const fullPrompt = `
         ${prompt}
         You are a strict test-question generation engine.
 
@@ -98,99 +76,13 @@ export async function testGenerator(state) {
       ${JSON.stringify(state, null, 2)}
 
     `;
-    //     const fullPrompt = `
-
-//     You are a strict question-generation engine.
-//     ${prompt}
-// You MUST generate questions using the runtime context below.
-// You MUST preserve context across all generated questions.
-
-// ────────────────────────────────────
-// RUNTIME CONTEXT (AUTHORITATIVE)
-// ────────────────────────────────────
-// Allowed category: ${state.category}
-// Allowed skills: [${skillsList}]
-// Question type to generate: ${state.questionType}
-// number of question to generate: ${state.questionCount} IMPORTANT
-
-// (${state.questionType} is ALWAYS one of: "MCQ" OR "THEORY")
-// VERY IMPORTANT :-
-// -if "type": "THEORY" ,then all the question should be of theory 
-// -else all the question should be of MCQ type
-// ────────────────────────────────────
-// GLOBAL RULES (ABSOLUTE)
-// ────────────────────────────────────
-// - Output VALID JSON only.
-// - Do NOT include markdown, explanations, or extra text.
-// - Do NOT wrap output in code blocks.
-// - Do NOT invent skills or categories.
-// - If rules cannot be satisfied, return {}.
-
-// ────────────────────────────────────
-// COMMON QUESTION RULES (ALL TYPES)
-// ────────────────────────────────────
-// - Generate questions ONLY from the allowed category.
-// - Generate questions ONLY using the allowed skills list.
-// - EACH question MUST test at least ONE allowed skill.
-// - EACH question MUST explicitly include a "skill" field.
-// - The "skill" value MUST be exactly one value from [${skillsList}].
-// - Questions MUST be unique.
-// - Forbidden questions MUST NOT be reused.
-
-// ────────────────────────────────────
-// TYPE-SPECIFIC RULES (CRITICAL)
-// ────────────────────────────────────
-
-// IF questionType = "mcq":
-// - Generate ONLY MCQ questions.
-// - DO NOT generate theory or code questions.
-
-// MCQ STRUCTURE (NON-NEGOTIABLE):
-// Each question object MUST contain:
-// - "type": "mcq"
-// - "question": string
-// - "options": array of EXACTLY 4 strings
-// - "correctAnswer": number (1 or 2 ONLY)
-// - "skill": string (from allowed skills)
-// - "source": "test"
-
-// FORBIDDEN (MCQ):
-// - DO NOT return options without a question.
-// - DO NOT omit any required field.
-
-// ────────────────────────────────────
-
-// IF questionType = "THEORY" :
-// - Generate ONLY theory or coding questions.
-// - DO NOT generate MCQs.
-
-// THEORY/CODE STRUCTURE:
-// Each question object MUST contain:
-// - "type": "theory" OR "code"
-// - "question": string
-// - "expectedAnswer": string
-//   (High-level explanation for theory, or correct approach/output for code)
-// - "skill": string (from allowed skills)
-// - "source": "test"
-
-// FORBIDDEN (THEORY/CODE):
-// - DO NOT include options or correctAnswer.
-// - DO NOT generate MCQ-style questions.
-
-// ${entropy}
-// ────────────────────────────────────
-// OUTPUT FORMAT (STRICT)
-// ────────────────────────────────────
-// {
-//   "questions": [
-//     { /* type-specific question object */ }
-//   ]
-// }
-//     `;
 
     const res = await llm.invoke(fullPrompt);
     const parsed = safeParseLLMJSON(res.content);
-
+    
+    //Question validator  
+    validateQuestion(parsed,state);
+    
     return parsed;
   } catch (err) {
     console.error("❌ Failed to generate test questions:", err);
