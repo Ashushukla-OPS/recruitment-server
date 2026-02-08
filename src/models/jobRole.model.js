@@ -22,6 +22,7 @@ const jobRoleSchema = new mongoose.Schema(
     },
     requiredExperience: {
   type: Number,
+  
   required: true,
   index: true,
 },

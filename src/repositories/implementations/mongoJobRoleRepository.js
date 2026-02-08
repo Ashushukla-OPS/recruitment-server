@@ -216,20 +216,7 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
-  async updateJobRole(id, jobRoleData) {
-    try {
-      return await JobRole.findByIdAndUpdate(id, jobRoleData, {
-        new: true,
-        runValidators: true
-      });
-    } catch (error) {
-      if (error.code === 11000) {
-        throw new AppError("Job role with this title already exists for this client", 409);
-      }
-      throw new AppError("Failed to update job role", 500);
-    }
-  }
-
+  
   async deleteJobRole(id) {
     try {
       return await JobRole.findByIdAndDelete(id);
@@ -445,18 +432,20 @@ if (Array.isArray(requiredExperience) && requiredExperience.length > 0) {
     // Salary
    // Salary (FIXED)
 // ✅ Salary filter (0–99 lakh)
-if (
-  typeof minSalary === "number" &&
-  typeof maxSalary === "number"
-) {
-  matchStage.$and.push({
-    salary: { $exists: true },
-    "salary.min": { $gte: minSalary },
-    "salary.max": {
-      $lte: maxSalary === 99 ? Number.MAX_SAFE_INTEGER : maxSalary,
-    },
-  });
+if (typeof minSalary === "number" && typeof maxSalary === "number") {
+  const upperLimit =
+    maxSalary === 99 ? Number.MAX_SAFE_INTEGER : maxSalary;
+
+ matchStage.$and.push({
+  salary: { $exists: true },
+  "salary.min": { $gte: minSalary },
+  "salary.max": {
+    $lte: maxSalary === 99 ? Number.MAX_SAFE_INTEGER : maxSalary,
+  },
+});
+
 }
+
 
 
 
