@@ -80,7 +80,14 @@ const BlogPostSchema = new mongoose.Schema({
   allowNewsletter: {
     type: Boolean,
     default: true
+  },
+  status :{
+    type: String,
+    enum: ['draft', 'published', 'archived'],
+    default: 'draft',
+    required: true
   }
+  
 }, { timestamps: true });
 
 const BlogPost = mongoose.model('BlogPost', BlogPostSchema);

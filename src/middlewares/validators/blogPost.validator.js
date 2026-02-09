@@ -46,7 +46,33 @@ export const createBlogPostSchema = Joi.object({
 
   isPublished: Joi.boolean().default(false),
   allowNewsletter: Joi.boolean().default(true),
+  status: Joi.string()
+  .valid("draft", "published", "archived")
+  .required(),
 }).unknown(false);
+
+
+export const searchBlogSchema = Joi.object({
+  search: Joi.string().optional(),
+
+  category: Joi.string()
+    .hex()
+    .length(24)
+    .optional(),
+
+  technologies: Joi.array()
+    .items(Joi.string().hex().length(24))
+    .optional(),
+
+  page: Joi.number().min(1).optional(),
+
+  limit: Joi.number().min(1).max(50).optional(),
+
+  sortBy: Joi.string().optional(),
+
+  sortOrder: Joi.string().valid("asc", "desc").optional()
+});
+
 
 
 

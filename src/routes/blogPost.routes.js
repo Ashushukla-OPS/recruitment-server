@@ -6,49 +6,57 @@ import validateRequest from "../middlewares/validators/validateRequest.js";
 import { createBlogPostSchema } from "../middlewares/validators/blogPost.validator.js";
 import { blogListQuerySchema } from "../middlewares/validators/blogPost.query.validator.js";
 import { updateBlogPostSchema } from "../middlewares/validators/blogPost.validator.js";
+import { searchBlogSchema } from "../middlewares/validators/blogPost.validator.js";
 
 const router = Router();
 
 router.use(authenticateJWT);
+
+const blogPostController = new BlogPostController();
+
 
 
 
 router.get(
   "/",
   validateRequest(blogListQuerySchema, "query"),
-  BlogPostController.getBlogPosts
+  blogPostController.getBlogPosts
 );
 
 
-router.get("/slug/:slug", BlogPostController.getBlogPostBySlug);
+router.get("/slug/:slug", blogPostController.getBlogPostBySlug);
 
 
-router.get("/:id", BlogPostController.getBlogPostById);
+router.get("/:id", blogPostController.getBlogPostById);
 
 
 
 
 router.post(
   "/",
-  authenticateJWT,
   authorizeRoles("admin"),
   validateRequest(createBlogPostSchema),
-  BlogPostController.createBlogPost
+  blogPostController.createBlogPost
+);
+
+ router.post(
+  "/search",
+  validateRequest(searchBlogSchema),
+  blogPostController.searchBlogs
+
 );
 
 router.patch(
   "/:id",
-  authenticateJWT,
   authorizeRoles("admin"),
   validateRequest(updateBlogPostSchema),
-  BlogPostController.updateBlogPost
+  blogPostController.updateBlogPost
 );
 
 router.delete(
   "/:id",
-  authenticateJWT,
   authorizeRoles("admin"),
-  BlogPostController.deleteBlogPost
+  blogPostController.deleteBlogPost
 );
 
 export default router;

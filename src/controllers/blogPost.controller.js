@@ -3,7 +3,7 @@ import { successResponse } from "../utils/apiResponse.js";
 
 class BlogPostController {
   constructor() {
-    this.blogService = BlogPostService;
+    this.blogService = new BlogPostService(); 
   }
 
   createBlogPost = async (req, res, next) => {
@@ -33,6 +33,30 @@ class BlogPostController {
     next(error);
   }
 };
+
+searchBlogs = async (req, res, next) => {
+  try {
+    const filters = req.body;
+
+    const options = {
+      limit: parseInt(req.query.limit) || 10,
+      skip: parseInt(req.query.skip) || 0,
+      page: parseInt(req.query.page) || 1
+    };
+
+    const data = await this.blogService.searchBlogs(filters, options);
+
+    res.status(200).json({
+      success: true,
+      data
+    });
+
+  } catch (error) {
+    next(error);
+  }
+}
+
+
 
 
   
@@ -73,7 +97,7 @@ class BlogPostController {
   };
 }
 
-export default new BlogPostController();
+export default  BlogPostController;
 
 
 
