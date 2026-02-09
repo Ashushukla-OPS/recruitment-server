@@ -166,6 +166,30 @@ class JobRoleService {
   }
 
   /* 🔍 SEARCH (single, correct version) */
+// async searchJobRoles(
+//   q,
+//   location,
+//   jobType = [],
+//   experience = [],
+//   minSalary,
+//   maxSalary,
+//   page,
+//   limit,
+//   userId
+// ) {
+//   return await this.jobRoleRepository.findJobRolesBySearch(
+//     q,
+//     location,
+//     jobType,
+//     experience,
+//     minSalary,
+//     maxSalary,
+//     category,
+//     page,
+//     limit,
+//     userId
+//   );
+// }
 async searchJobRoles(
   q,
   location,
@@ -173,22 +197,25 @@ async searchJobRoles(
   experience = [],
   minSalary,
   maxSalary,
+  category,
   page,
   limit,
   userId
 ) {
-  return await this.jobRoleRepository.findJobRolesBySearch(
+  return await this.jobRoleRepository.findJobRolesBySearch({
     q,
     location,
     jobType,
-    experience,
+    requiredExperience: experience,  // name must match
     minSalary,
     maxSalary,
+    category,
     page,
     limit,
-    userId
-  );
+    userId,
+  });
 }
+
 
 
   /* 📊 CATEGORY → JOB COUNT (for Explore by Category) */

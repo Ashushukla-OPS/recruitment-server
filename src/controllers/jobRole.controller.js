@@ -192,6 +192,7 @@ searchJobsJobRoles = async (req, res, next) => {
       experience,
       minSalary,
       maxSalary,
+      category,
       page = 1,
       limit = 10,
     } = req.query;
@@ -224,6 +225,7 @@ searchJobsJobRoles = async (req, res, next) => {
         cleanedExperienceArray,
         Number(minSalary) || 0,
         Number(maxSalary) || 0,
+        category,
         page,
         limit,
         req.userId

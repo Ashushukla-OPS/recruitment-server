@@ -327,16 +327,33 @@ async findJobRolesByCategory(categoryId, page, limit, userId) {
 
 
 async findJobRolesBySearch(
+  {
   q,
   location,
   jobType,
   requiredExperience,
   minSalary,
   maxSalary,
+  category,
   page,
   limit,
   userId
-) {
+  }
+) 
+{
+
+  console.log({
+  q,
+  location,
+  jobType,
+  requiredExperience,
+  minSalary,
+  maxSalary,
+  category,
+  page,
+  limit,
+});
+
   try {
     console.log("EXPERIENCE FILTER:", requiredExperience);
     const pipeline = [];
@@ -444,6 +461,13 @@ if (typeof minSalary === "number" && typeof maxSalary === "number") {
   },
 });
 
+}
+
+// Category
+if (category) {
+  matchStage.$and.push({
+    category: new mongoose.Types.ObjectId(category),
+  });
 }
 
 
