@@ -24,4 +24,6 @@ router.delete('/:id', shareCandidateController.deleteGroup);
 
 router.get('/:shareId', shareCandidateController.shareShareCandidate);
 
+router.delete('/:groupId/user/:userId', shareCandidateController.removeUserFromGroup);
+
 export default router;

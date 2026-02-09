@@ -11,11 +11,11 @@ class ShareCandidateController {
 
       const response = await this.shareCandidateService.createShareUsers({
         groupName,
-        selectedUsers: users //
+        selectedUsers: users 
       })
        res.status(201).json({
       message: 'Group created & Link generated',
-      shareLink:response.group,
+      shareLink:response.shareLink,  // Return the share link
        });
     } 
     catch (error) {
@@ -77,6 +77,27 @@ class ShareCandidateController {
     }
     catch(error){
       next(error)
+    }
+  }
+
+  // delete user from group
+
+  removeUserFromGroup = async(req, res, next)=>{
+    try{
+      const {groupId, userId} = req.params;
+
+      const updatedGroup = await this.shareCandidateService.removeUserFromGroup(groupId, userId);
+
+      res.status(200).json({
+        success: true,
+        message: "user removed from group successfully",
+        data: updatedGroup
+      })
+
+
+    }
+    catch(error){
+      next(error);
     }
   }
 

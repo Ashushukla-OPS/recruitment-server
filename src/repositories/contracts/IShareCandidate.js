@@ -7,6 +7,9 @@ class IshareCandidate {
     }
    
     // for update ,get, delete group
+    async getCandiateById(id){
+        throw Error ("method not implemented")
+    }
 
     async getAllGroups(){
         throw Error ("method not impleneted")
@@ -18,6 +21,9 @@ class IshareCandidate {
     async deleteGroup(id){
         throw Error ("method not impleneted")
     }
+
+    async removeUserFromGroup(groupId, userId)
+     { throw new Error('Method not implemented'); }
 
 
 }

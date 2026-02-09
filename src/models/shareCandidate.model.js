@@ -4,6 +4,7 @@ const shareCandidateSchema = new mongoose.Schema({
   groupName:{
      type: String,
      required: [true, "Group name is required"],
+     trim: true,
   }, 
   selectedUsers: [
     {

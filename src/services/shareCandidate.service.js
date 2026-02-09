@@ -35,6 +35,14 @@ class ShareCandidateService {
   async deleteGroup(id){
     return await this.shareCandidateRepository.deleteGroup(id);
   }
+
+  // delete user from group
+  async removeUserFromGroup(groupId, userId) {
+        if (!groupId || !userId) {
+            throw new Error('Group ID and User ID are required');
+        }
+        return await this.shareCandidateRepository.removeUserFromGroup(groupId, userId);
+    }
 }
 
 export default ShareCandidateService

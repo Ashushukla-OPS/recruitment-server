@@ -36,7 +36,7 @@ class MongoShareCandidate extends IshareCandidate {
   async getAllGroups(){
     try {
 
-          return await shareCandidateModel.find().select('-selectedUsers')
+          return await shareCandidateModel.find().select('-selectedUsers')  // Exclude selectedUsers from the response to avoid sending large user data in the list of groups
        // .populate('selectedUsers', 'firstName lastname email role')  
         .sort({ createdAt: -1 });  // Sort by creation date, newest first
 
@@ -95,11 +95,34 @@ class MongoShareCandidate extends IshareCandidate {
     }
   }
 
+
+  // delete user from group
+   async removeUserFromGroup(groupId, userId) {
+        try {
+            const updatedGroup = await shareCandidateModel.findByIdAndUpdate(
+                groupId,
+                { 
+                    $pull: { selectedUsers: userId }  //  The Magic: Removes ONLY this userId from the array
+                },
+                { new: true } // Return the updated group so we can see the change
+            ).populate('selectedUsers', 'firstName lastName email role');
+
+            if (!updatedGroup) {
+                throw new AppError('Group not found', 404);
+            }
+
+            return updatedGroup;
+        } catch (error) {
+            throw new AppError(`Failed to remove user: ${error.message}`, 500);
+        }
+    }
+
   async shareCandidate(shareId) {
     try {
 
 
-      const share = await shareCandidateModel.findById(shareId);
+      const share = await shareCandidateModel.findById(shareId)
+      .populate('selectedUsers', 'firstName lastName email role');
 
       if (!share) {
          throw new AppError('Invalid or expired link', 404);
@@ -212,7 +235,14 @@ class MongoShareCandidate extends IshareCandidate {
 
       // 3. Send response
     
-      return ({  count :profiles.length,  data:profiles  })  // Return count and data in the response because the frontend needs both to display the data and show the count of shared candidates.
+      return ({ 
+            groupName: share.groupName,
+            count: share.selectedUsers.length,
+            data: share.selectedUsers  
+        }) 
+      
+      
+      // Return count and data in the response because the frontend needs both to display the data and show the count of shared candidates.
     } catch (error) {
       console.error(error);
       throw new AppError(  `Failed to update test attempt: ${error.message}`,   500,  error );
