@@ -76,6 +76,10 @@ const BlogPostSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  publishedAt: {
+    type: Date,
+    default: null
+  },
 
   allowNewsletter: {
     type: Boolean,

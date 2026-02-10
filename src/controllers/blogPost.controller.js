@@ -15,19 +15,19 @@ class BlogPostController {
     }
   };
 
-  async getBlogPosts(req, res, next) {
+  getBlogPosts = async (req, res, next) => {
   try {
     const options = req.validatedQuery || {};
 
-    const data = await BlogPostService.getBlogPosts(options);
-
+    const data = await this.blogService.getBlogPosts(options);
+   
     res.status(200).json({
       success: true,
       data,
       message: "Blog posts retrieved successfully"
     });
 
-    console.log("REQ BODY:", req.body); 
+  
 
   } catch (error) {
     next(error);
