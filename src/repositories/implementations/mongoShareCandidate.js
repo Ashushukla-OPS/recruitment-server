@@ -102,7 +102,7 @@ class MongoShareCandidate extends IshareCandidate {
             const updatedGroup = await shareCandidateModel.findByIdAndUpdate(
                 groupId,
                 { 
-                    $pull: { selectedUsers: userId }  //  The Magic: Removes ONLY this userId from the array
+                    $pull: { selectedUsers: userId }  // Removes ONLY this userId from the array
                 },
                 { new: true } // Return the updated group so we can see the change
             ).populate('selectedUsers', 'firstName lastName email role');
@@ -233,6 +233,7 @@ class MongoShareCandidate extends IshareCandidate {
         },
       ]);
 
+      const finalData = profiles.length > 0 ? profiles : share.selectedUsers;
       // 3. Send response
     
       return ({ 
