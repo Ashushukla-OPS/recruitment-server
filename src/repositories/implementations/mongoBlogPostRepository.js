@@ -34,7 +34,7 @@ async create(data) {
   }
 }
 
- async findPaginated(filter, skip, limit) {
+async findPaginated(filter, skip, limit){
 
   const query = {...filter};
 
