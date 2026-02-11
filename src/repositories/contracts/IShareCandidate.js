@@ -26,6 +26,10 @@ class IshareCandidate {
      { throw new Error('Method not implemented'); }
 
 
+     async addUserToGroup(groupId, userId) {
+         throw new Error('Method not implemented'); }
+
+
 }
 
 export default IshareCandidate

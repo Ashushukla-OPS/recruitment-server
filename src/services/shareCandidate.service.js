@@ -43,6 +43,15 @@ class ShareCandidateService {
         }
         return await this.shareCandidateRepository.removeUserFromGroup(groupId, userId);
     }
+
+
+    // add user to existing group
+    async addUserToGroup(groupId, userId) {
+        if (!groupId || !userId) {
+            throw new Error('Group ID and User ID are required');
+        }
+        return await this.shareCandidateRepository.addUserToGroup(groupId, userId);
+    }
 }
 
 export default ShareCandidateService

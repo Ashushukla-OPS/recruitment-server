@@ -101,6 +101,23 @@ class ShareCandidateController {
     }
   }
 
+  // add user to existing group
+  addUserToGroup = async (req, res, next) => {
+        try {
+            const { groupId, userId } = req.params;
+
+            const updatedGroup = await this.shareCandidateService.addUserToGroup(groupId, userId);
+
+            res.status(200).json({
+                success: true,
+                message: "User added to group successfully",
+                data: updatedGroup
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
   shareShareCandidate = async (req,res,next)=>{
     try {
       const { shareId } = req.params;

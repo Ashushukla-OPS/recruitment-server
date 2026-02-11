@@ -18,12 +18,20 @@ router.post('/', authenticateJWT,authorize('admin'), shareCandidateController.cr
 
 router.get('/', shareCandidateController.getAllGroups);
 
+// for group name update
+
 router.put('/:id', authenticateJWT,authorize('admin'), shareCandidateController.updateGroup);
+// for group delete
 
 router.delete('/:id', authenticateJWT, authorize('admin'), shareCandidateController.deleteGroup);
 
 router.get('/:shareId', shareCandidateController.shareShareCandidate);
 
+// remove user from group
+
 router.delete('/:groupId/user/:userId', authenticateJWT, authorize('admin'), shareCandidateController.removeUserFromGroup);
+
+// add user to group
+router.put('/:groupId/user/:userId', authenticateJWT, authorize('admin'), shareCandidateController.addUserToGroup);
 
 export default router;

@@ -117,6 +117,28 @@ class MongoShareCandidate extends IshareCandidate {
         }
     }
 
+    // add user to existing group
+
+    async addUserToGroup(groupId, userId) {
+        try {
+            const updatedGroup = await shareCandidateModel.findByIdAndUpdate(
+                groupId,
+                { 
+                    $addToSet: { selectedUsers: userId } //  Key Logic: Adds only if not already there
+                },
+                { new: true }
+            ).populate('selectedUsers', 'firstName lastName email role');
+
+            if (!updatedGroup) {
+                throw new AppError('Group not found', 404);
+            }
+
+            return updatedGroup;
+        } catch (error) {
+            throw new AppError(`Failed to add user: ${error.message}`, 500);
+        }
+    }
+
   async shareCandidate(shareId) {
     try {
 
