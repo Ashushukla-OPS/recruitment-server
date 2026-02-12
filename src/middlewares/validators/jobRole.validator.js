@@ -88,6 +88,15 @@ const createJobRoleSchema = Joi.object({
     "array.max": "Cannot have more than 20 skills",
     "any.required": "Skills are required",
   }),
+  salary: Joi.object({
+    min: Joi.number().positive().required(),
+    max: Joi.number().positive().greater(Joi.ref("min")).required(),
+    currency: Joi.string().default("INR")
+  }).required(),
+
+  jobType: Joi.string()
+    .valid("Remote", "Full-Time", "Part-Time", "Hybrid")
+    .required(),  
   expiry: Joi.date().greater('now').required().messages({
     "date.greater": "Expiry date must be in the future",
     "any.required": "Expiry date is required",
@@ -102,6 +111,15 @@ const createJobRoleSchema = Joi.object({
   jobType: jobTypeSchema.required(),
   salary: salarySchema.required(),
 });
+
+const partialLocationSchema = Joi.object({
+  city: Joi.string().min(2).max(100),
+  state: Joi.string().min(2).max(100),
+  country: Joi.string().min(2).max(100),
+  pincode: Joi.string().pattern(/^[0-9]{4,10}$/).messages({
+    "string.pattern.base": "Pincode must be a valid numeric code",
+  }),
+}).min(1); // at least one field if location provided
 
 const updateJobRoleSchema = Joi.object({
   title: Joi.string().min(3).max(100).messages({
@@ -143,6 +161,7 @@ const updateJobRoleSchema = Joi.object({
   jobType: jobTypeSchema,
   salary: salarySchema,
 });
+
 
 const filterJobRolesSchema = Joi.object({
   clientId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).messages({
