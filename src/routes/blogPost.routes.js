@@ -10,7 +10,7 @@ import { searchBlogSchema } from "../middlewares/validators/blogPost.validator.j
 
 const router = Router();
 
-router.use(authenticateJWT);
+
 
 const blogPostController = new BlogPostController();
 
@@ -34,6 +34,7 @@ router.get("/:id", blogPostController.getBlogPostById);
 
 router.post(
   "/",
+  authenticateJWT,
   authorizeRoles("admin"),
   validateRequest(createBlogPostSchema),
   blogPostController.createBlogPost
@@ -48,6 +49,7 @@ router.post(
 
 router.patch(
   "/:id",
+  authenticateJWT,
   authorizeRoles("admin"),
   validateRequest(updateBlogPostSchema),
   blogPostController.updateBlogPost
@@ -55,6 +57,7 @@ router.patch(
 
 router.delete(
   "/:id",
+  authenticateJWT,
   authorizeRoles("admin"),
   blogPostController.deleteBlogPost
 );
