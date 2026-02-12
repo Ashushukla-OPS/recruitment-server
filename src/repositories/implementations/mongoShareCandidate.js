@@ -33,23 +33,34 @@ class MongoShareCandidate extends IshareCandidate {
 
   // get all group members
 
-  async getAllGroups(){
+  // Get all groups with member count
+  async getAllGroups() {
     try {
+      const groups = await shareCandidateModel.aggregate([
+        {
+          $project: {
+            _id: 1,
+            groupName: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            // 👇 THIS IS THE NEW PART
+            // It calculates the size of the 'selectedUsers' array instantly
+            memberCount: { $size: { $ifNull: ["$selectedUsers", []] } } 
+          }
+        },
+        { 
+          $sort: { createdAt: -1 } // Sort by newest first
+        }
+      ]);
 
-          return await shareCandidateModel.find().select('-selectedUsers')  // Exclude selectedUsers from the response to avoid sending large user data in the list of groups
-       // .populate('selectedUsers', 'firstName lastname email role')  
-        .sort({ createdAt: -1 });  // Sort by creation date, newest first
+      return groups;
 
-
-    }
-    catch(error){
-
+    } catch (error) {
       throw new AppError(
-        `Failed to  fetch groups: ${error.message}`,
+        `Failed to fetch groups: ${error.message}`,
         500,
         error
       );
-
     }
   }
 
