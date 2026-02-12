@@ -116,50 +116,8 @@ class BlogPostService {
 
 
 async searchBlogs(filters, options) {
-  const {
-    limit = 10,
-    skip = 0,
-    page = 1
-  } = options;
-
-  const query = {};
-
-  if (filters.category) {
-    query.category = filters.category;
+    return await this.blogRepo.searchBlogs(filters, options);
   }
-
-  if (filters.technologies?.length) {
-    query.technologies = { $in: filters.technologies };
-  }
-
-  if (filters.search) {
-    query.title = {
-      $regex: filters.search,
-      $options: "i"
-    };
-  }
-
-  const blogs = await BlogPostModel
-    .find(query)
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 });
-
-  const total = await BlogPostModel.countDocuments(query);
-
-  return {
-    blogs,
-    pagination: {
-      total,
-      page,
-      limit
-    }
-  };
-}
-
-
-
-
 
   async getBlogPostById(id) {
     const blog = await this.blogRepo.findById(id);

@@ -59,6 +59,46 @@ async findPaginated(filter, skip, limit){
     return await BlogPostModel.countDocuments(filter);
   }
 
+  async searchBlogs(filters, options) {
+    const { limit = 10, skip = 0, page = 1 } = options;
+
+    const query = {};
+
+    if (filters.category) {
+      query.category = filters.category;
+    }
+
+    if (filters.technologies?.length) {
+      query.technologies = { $in: filters.technologies };
+    }
+
+    if (filters.search) {
+      query.title = {
+        $regex: filters.search,
+        $options: "i"
+      };
+    }
+
+    const blogs = await BlogPostModel
+      .find(query)
+      .populate("category", "name")
+      .populate("technologies", "name")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await BlogPostModel.countDocuments(query);
+
+    return {
+      blogs,
+      pagination: {
+        total,
+        page,
+        limit
+      }
+    };
+  }
+
   async findById(id) {
     return await BlogPostModel.findById(id)
       .populate("author", "firstName lastName email");

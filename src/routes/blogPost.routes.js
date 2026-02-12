@@ -42,7 +42,6 @@ router.post(
 
  router.post(
   "/search",
-  authenticateJWT,
   validateRequest(searchBlogSchema),
   blogPostController.searchBlogs
 

@@ -3,6 +3,8 @@ class BlogPostRepository {
 
   async findPaginated(filter, skip, limit) {}
 
+  async searchBlogs(filters, options) {}
+
   async count(filter) {}
 
   async findById(id) {}
