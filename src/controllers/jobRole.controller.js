@@ -185,18 +185,21 @@ class JobRoleController {
 
 searchJobsJobRoles = async (req, res, next) => {
   try {
-    const {
+    let {
       q = "",
       location = "",
       jobType,
       experience,
       minSalary,
       maxSalary,
+      category,
       page = 1,
       limit = 10,
     } = req.query;
 
-    // ✅ IMPORTANT: convert query params to arrays
+    page = Math.max(1, Number(page) || 1);
+    limit = Math.max(1, Number(limit) || 10);
+
     const jobTypeArray =
       typeof jobType === "string"
         ? jobType.split(",")
@@ -211,19 +214,22 @@ searchJobsJobRoles = async (req, res, next) => {
         ? experience
         : [];
 
+    const cleanedExperienceArray =
+      experienceArray.filter(Boolean);
+
     const result =
       await this.jobRoleService.searchJobRoles(
-  q,
-  location,
-  jobTypeArray,
-  experienceArray,
-  minSalary,
-  maxSalary,
-  Number(page),
-  Number(limit),
-  req.userId
-);
-
+        q,
+        location,
+        jobTypeArray,
+        cleanedExperienceArray,
+        Number(minSalary) || 0,
+        Number(maxSalary) || 0,
+        category,
+        page,
+        limit,
+        req.userId
+      );
 
     res.status(200).json({
       success: true,
@@ -234,6 +240,7 @@ searchJobsJobRoles = async (req, res, next) => {
     next(error);
   }
 };
+
 
   /* 🔥 NEW: CATEGORY → JOB COUNT (Explore by Category) */
   getJobCountByCategory = async (req, res, next) => {

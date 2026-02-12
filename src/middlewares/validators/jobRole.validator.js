@@ -47,6 +47,13 @@ const salarySchema = Joi.object({
 });
 
 
+const jobTypeSchema = Joi.string()
+  .valid("Remote", "Hybrid", "Full-Time", "Part-Time")
+  .messages({
+    "any.only": "Job type must be Remote, Hybrid, Full-Time or Part-Time",
+  });
+
+
 const createJobRoleSchema = Joi.object({
   title: Joi.string().min(3).max(100).required().messages({
     "string.min": "Title must be at least 3 characters long",
@@ -99,6 +106,10 @@ const createJobRoleSchema = Joi.object({
     "any.required": "Client ID is required",
   }),
   location: locationSchema.required(),
+  
+  // ✅ ADD
+  jobType: jobTypeSchema.required(),
+  salary: salarySchema.required(),
 });
 
 const partialLocationSchema = Joi.object({
@@ -111,25 +122,44 @@ const partialLocationSchema = Joi.object({
 }).min(1); // at least one field if location provided
 
 const updateJobRoleSchema = Joi.object({
-  title: Joi.string().min(3).max(100),
-  requiredExperience: Joi.string().min(1).max(50),
-  category: Joi.string().pattern(/^[0-9a-fA-F]{24}$/),
-  education: Joi.string().min(3).max(100),
-  description: Joi.string().min(10).max(2000),
-  skills: Joi.array().items(Joi.string().pattern(/^[0-9a-fA-F]{24}$/)).min(1).max(20),
-  salary: Joi.object({
-    min: Joi.number().min(0),
-    max: Joi.number().min(0).greater(Joi.ref("min")),
-    currency: Joi.string().valid("INR", "USD", "EUR", "GBP"),
+  title: Joi.string().min(3).max(100).messages({
+    "string.min": "Title must be at least 3 characters long",
+    "string.max": "Title cannot exceed 100 characters",
   }),
-  jobType: Joi.string().valid("Remote", "Full-Time", "Part-Time", "Hybrid"),
-  expiry: Joi.date().greater("now"),
-  clientId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/),
+  requiredExperience: Joi.string().min(1).max(50).messages({
+    "string.min": "Required experience must be specified",
+    "string.max": "Required experience cannot exceed 50 characters",
+  }),
+  category: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).messages({
+    "string.pattern.base": "Category must be a valid ObjectId",
+  }),
+  education: Joi.string().min(3).max(100).messages({
+    "string.min": "Education must be at least 3 characters long",
+    "string.max": "Education cannot exceed 100 characters",
+  }),
+  description: Joi.string().min(10).max(2000).messages({
+    "string.min": "Description must be at least 10 characters long",
+    "string.max": "Description cannot exceed 2000 characters",
+  }),
+  skills: Joi.array().items(
+    Joi.string().pattern(/^[0-9a-fA-F]{24}$/).messages({
+      "string.pattern.base": "Each skill must be a valid ObjectId",
+    })
+  ).min(1).max(20).messages({
+    "array.min": "At least one skill is required",
+    "array.max": "Cannot have more than 20 skills",
+  }),
+  expiry: Joi.date().greater('now').messages({
+    "date.greater": "Expiry date must be in the future",
+  }),
+  clientId: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).messages({
+    "string.pattern.base": "Client ID must be a valid ObjectId",
+  }),
+  location: locationSchema.required(),
 
-  // ✅ optional + partial
-  location: partialLocationSchema,
-}).min(1).messages({
-  "object.min": "At least one field is required to update",
+    // ✅ ADD
+  jobType: jobTypeSchema,
+  salary: salarySchema,
 });
 
 
