@@ -13,10 +13,12 @@ const router = express.Router();
 // router.get('/:shareId', ShareCandidateController.shareShareCandidate);
 const shareCandidateController = new ShareCandidateController();
 
+router.get('/', shareCandidateController.getAllGroups);
+
 router.post('/', authenticateJWT,authorize('admin'), shareCandidateController.createShareCandidate);
 
 
-router.get('/', shareCandidateController.getAllGroups);
+
 
 // for group name update
 
@@ -25,7 +27,7 @@ router.put('/:id', authenticateJWT,authorize('admin'), shareCandidateController.
 
 router.delete('/:id', authenticateJWT, authorize('admin'), shareCandidateController.deleteGroup);
 
-router.get('/:shareId', shareCandidateController.shareShareCandidate);
+router.get('/:id', shareCandidateController.getSingleGroup); // This route is for fetching shared candidate details based on the groupId.
 
 // remove user from group
 
@@ -33,5 +35,8 @@ router.delete('/:groupId/user/:userId', authenticateJWT, authorize('admin'), sha
 
 // add user to group
 router.put('/:groupId/user/:userId', authenticateJWT, authorize('admin'), shareCandidateController.addUserToGroup);
+
+// share candidate details
+router.get("/share/:shareId", shareCandidateController.shareShareCandidate); // This route is for fetching shared candidate details based on the shareId.
 
 export default router;

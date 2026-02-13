@@ -52,6 +52,13 @@ class ShareCandidateService {
         }
         return await this.shareCandidateRepository.addUserToGroup(groupId, userId);
     }
+
+    async getSingleGroup(id){
+      if(!id){
+        throw new Error('Group ID is required');
+      }
+      return await this.shareCandidateRepository.getSingleGroup(id);
+    }
 }
 
 export default ShareCandidateService

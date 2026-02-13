@@ -31,7 +31,22 @@ class MongoShareCandidate extends IshareCandidate {
    }
   }
 
-  // get all group members
+  // get single group
+  async getSingleGroup(id) {
+    try {
+      const group = await shareCandidateModel.findById(id)
+        .populate('selectedUsers', 'firstName lastName email role');
+      return group;
+    } catch (error) {
+      throw new AppError(
+        `Failed to fetch single group: ${error.message}`,
+        500,
+        error
+      );
+    }
+  }
+
+  
 
   // Get all groups with member count
   async getAllGroups() {

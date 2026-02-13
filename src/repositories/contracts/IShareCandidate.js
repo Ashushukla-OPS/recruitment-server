@@ -29,6 +29,10 @@ class IshareCandidate {
      async addUserToGroup(groupId, userId) {
          throw new Error('Method not implemented'); }
 
+      async getSingleGroup(id){
+        throw new Error('Method not implemented');
+      }   
+
 
 }
 

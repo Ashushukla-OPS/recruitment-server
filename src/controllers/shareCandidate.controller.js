@@ -9,6 +9,13 @@ class ShareCandidateController {
     try {
      const { users, groupName } = req.body;
 
+     if(!groupName){
+      return res.status(400).json({
+        success: false,
+        message: "Group name is required"
+      })
+     }
+
       const response = await this.shareCandidateService.createShareUsers({
         groupName,
         selectedUsers: users 
@@ -34,6 +41,23 @@ class ShareCandidateController {
         count: groups.length,
         data: groups
       })
+
+    }
+    catch(error){
+      next(error)
+    }
+  }
+
+  // get single group 
+  getSingleGroup = async(req,res,next)=>{
+    try{
+      const {id} = req.params;
+      const group = await this.shareCandidateService.getSingleGroup(id);
+      res.status(200).json({
+        success: true,
+        data: group
+      })
+      
 
     }
     catch(error){
@@ -125,6 +149,7 @@ class ShareCandidateController {
         const response = await this.shareCandidateService.shareShareUser(shareId)
        return res.status(200).json({
        message: 'Shared candidates fetched successfully',
+       groupName: response.groupName,
        count: response.count,
        data: response.data,
     });
