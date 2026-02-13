@@ -49,6 +49,14 @@ export const createBlogPostSchema = Joi.object({
   status: Joi.string()
   .valid("draft", "published", "archived")
   .required(),
+
+  stats: Joi.object({
+  views: Joi.number(),
+  likes: Joi.number(),
+  shares: Joi.number()
+}),
+
+publishedAt: Joi.date().allow(null),
 }).unknown(false);
 
 
