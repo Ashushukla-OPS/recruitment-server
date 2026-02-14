@@ -100,6 +100,7 @@ async findPaginated(filter, skip, limit){
   }
 
   async findById(id) {
+    
     return await BlogPostModel.findById(id)
       .populate("author", "firstName lastName email");
   }
@@ -120,6 +121,26 @@ async findPaginated(filter, skip, limit){
     throw new AppError("Failed to update blog post", 500);
   }
 }
+
+async incrementViewsCount(blogId) {
+
+    if (!mongoose.Types.ObjectId.isValid(blogId)) {
+      throw new Error("Invalid Blog ID");
+    }
+
+    const blogPost = await BlogPostModel.findByIdAndUpdate(
+      blogId,
+      { $inc: { views: 1 } },   
+      { new: true }             
+    );
+
+    if (!blogPost) {
+      throw new Error("Blog post not found");
+    }
+
+    return blogPost;
+  }
+
 
 
 

@@ -57,6 +57,15 @@ searchBlogs = async (req, res, next) => {
 };
 
 
+ incresmentViewsCount = async (req, res, next) => {
+  try {
+    const blogPost = await this.blogService.incrementViewsCount(req.params.id);
+    successResponse(res, blogPost, "Blog views count incremented successfully");
+  } catch (error) {
+    next(error);
+  } };
+
+
 
 
 

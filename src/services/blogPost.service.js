@@ -137,9 +137,17 @@ async searchBlogs(filters, options) {
     return blogPost;
   }
 
+  async incrementViewsCount(id) {
+    const blog = await this.blogRepo.findById(id);
+    if (!blog) {
+      throw new AppError("Blog not found", 404);
+  }
+   return blog;
+  }
+
   async updateBlogPost(id, data) {
 
-  const existingBlog = await this.blogRepo.findById(id);
+  const existingBlog = await this.blogRepo.incrementViewsCount(id);
   if (!existingBlog) {
     throw new AppError("Blog not found", 404);
   }

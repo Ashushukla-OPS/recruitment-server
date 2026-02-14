@@ -29,6 +29,8 @@ router.get("/slug/:slug", blogPostController.getBlogPostBySlug);
 
 router.get("/:id", blogPostController.getBlogPostById);
 
+router.patch("/views-count/:id", blogPostController.incresmentViewsCount);
+
 
 
 
@@ -48,7 +50,7 @@ router.post(
 );
 
 router.patch(
-  "/:id",
+  "/update/:id",
   authenticateJWT,
   authorizeRoles("admin"),
   validateRequest(updateBlogPostSchema),

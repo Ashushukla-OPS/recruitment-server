@@ -23,6 +23,10 @@ throw new Error('Method not implemented.');
 throw new Error('Method not implemented.');
   }
 
+async incrementViewsCount(id) {
+  throw new Error("Method not implemented");
+}
+
   async updateById(id, data) {
 throw new Error('Method not implemented.');
   }
