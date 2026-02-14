@@ -13,7 +13,7 @@ class BlogPostService {
   }
 
   async createBlogPost(data) {
-    
+
     const blogData = {
       title: data.title,
       slug: data.slug,
@@ -42,81 +42,81 @@ class BlogPostService {
     return await this.blogRepo.create(blogData);
   }
 
-  
+
   async getBlogPosts(options = {}) {
 
-  let {
-    limit = 10,
-    skip = 0,
-    category,
-    technology,
-    search,
-    isPublished
-  } = options;
+    let {
+      limit = 10,
+      skip = 0,
+      category,
+      technology,
+      search,
+      isPublished
+    } = options;
 
-  
-  const query = {};
 
-  if (category) {
-    query.category = category;
-  }
+    const query = {};
 
-  
-  if (technology) {
-    const techArray = technology.split(",");
+    if (category) {
+      query.category = category;
+    }
 
-    query.technologies = {
-      $in: techArray
+
+    if (technology) {
+      const techArray = technology.split(",");
+
+      query.technologies = {
+        $in: techArray
+      };
+    }
+
+
+    if (search) {
+
+
+      const skills = await Skill.find({
+        name: { $regex: search, $options: "i" }
+      }).select("_id");
+
+
+
+      const skillIds = skills.map(s => s._id);
+
+
+      if (query.technologies) {
+        query.technologies.$in = [
+          ...query.technologies.$in,
+          ...skillIds
+        ];
+      } else {
+        query.technologies = { $in: skillIds };
+      }
+    }
+
+
+
+
+    if (isPublished !== undefined) query.isPublished = isPublished;
+
+    const [blogs, total] = await Promise.all([
+      this.blogRepo.findPaginated(query, skip, limit),
+      this.blogRepo.count(query)
+    ]);
+
+    return {
+      blogs,
+      pagination: {
+        total,
+        skip,
+        limit,
+        hasNext: skip + limit < total,
+        hasPrev: skip > 0
+      }
     };
   }
 
 
-  if (search) {
-
-  
-  const skills = await Skill.find({
-    name: { $regex: search, $options: "i" }
-  }).select("_id");
-
-
-
-  const skillIds = skills.map(s => s._id);
-  
-
- if (query.technologies) {
-      query.technologies.$in = [
-        ...query.technologies.$in,
-        ...skillIds
-      ];
-    } else {
-      query.technologies = { $in: skillIds };
-    }
-}
-
-
-
-  
-  if (isPublished !== undefined) query.isPublished = isPublished;
-
-  const [blogs, total] = await Promise.all([
-    this.blogRepo.findPaginated(query, skip, limit),
-    this.blogRepo.count(query)
-  ]);
-
-  return {
-    blogs,
-    pagination: {
-      total,
-      skip,
-      limit,
-      hasNext: skip + limit < total,
-      hasPrev: skip > 0
-    }
-  };
-}
-
-
-async searchBlogs(filters, options) {
+  async searchBlogs(filters, options) {
     return await this.blogRepo.searchBlogs(filters, options);
   }
 
@@ -130,9 +130,9 @@ async searchBlogs(filters, options) {
     const blogPost = await this.blogRepo.findBySlug(slug);
     if (!blogPost) throw new AppError("Blog not found", 404);
 
-    
+
     this.blogRepo.updateById(blogPost._id, {
-      $inc: { "stats.views": 1 } 
+      $inc: { "stats.views": 1 }
     }).catch(err => logger.warn("Failed to update view count", { error: err.message }));
 
     return blogPost;
@@ -142,72 +142,81 @@ async searchBlogs(filters, options) {
     const blog = await this.blogRepo.incrementViewsCount(id);
     if (!blog) {
       throw new AppError("Blog not found", 404);
+    }
+    return blog;
   }
-   return blog;
+
+  //top 4 most viewed blogs 
+  async getTopViewedBlogs(){
+    const blogs = await this.blogRepo.getTopViewedBlogs();
+    if(!blogs){
+      throw new AppError("Blog not found",404);
+    }
+    return blogs;
   }
 
   async updateBlogPost(id, data) {
 
-  const existingBlog = await this.blogRepo.findById(id);
-  if (!existingBlog) {
-    throw new AppError("Blog not found", 404);
-  }
-
-  
-  if (data.createdAt || data.updatedAt) {
-    throw new AppError("Immutable fields cannot be updated", 400);
-  }
-
-  const updates = {};
-
-  
-  const flatFields = [
-    "title",
-    "subtitle",
-    "readingTime",
-    "category",
-    "content",
-    "isPublished"
-  ];
-
-  for (const field of flatFields) {
-    if (data[field] !== undefined) {
-      updates[field] = data[field];
+    const existingBlog = await this.blogRepo.findById(id);
+    if (!existingBlog) {
+      throw new AppError("Blog not found", 404);
     }
-  }
 
-  
-  if (data.hero) {
-    for (const key in data.hero) {
-      updates[`hero.${key}`] = data.hero[key];
+
+    if (data.createdAt || data.updatedAt) {
+      throw new AppError("Immutable fields cannot be updated", 400);
     }
-  }
 
-  
-  if (data.seo) {
-    for (const key in data.seo) {
-      updates[`seo.${key}`] = data.seo[key];
+    const updates = {};
+
+
+    const flatFields = [
+      "title",
+      "subtitle",
+      "readingTime",
+      "category",
+      "content",
+      "isPublished"
+    ];
+
+    for (const field of flatFields) {
+      if (data[field] !== undefined) {
+        updates[field] = data[field];
+      }
     }
-  }
 
-  
-  if (data.isPublished === true && !existingBlog.publishedAt) {
-    updates.publishedAt = new Date();
-  }
 
-  if (data.isPublished === false) {
-    updates.publishedAt = null;
-  }
+    if (data.hero) {
+      for (const key in data.hero) {
+        updates[`hero.${key}`] = data.hero[key];
+      }
+    }
 
-  if (Object.keys(updates).length === 0) {
-    throw new AppError("No valid fields provided", 400);
-  }
 
-  return await this.blogRepo.updateById(
-    id,
-    { $set: updates }
-  );
-}
+    if (data.seo) {
+      for (const key in data.seo) {
+        updates[`seo.${key}`] = data.seo[key];
+      }
+    }
+
+
+    if (data.isPublished === true && !existingBlog.publishedAt) {
+      updates.publishedAt = new Date();
+    }
+
+    if (data.isPublished === false) {
+      updates.publishedAt = null;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      throw new AppError("No valid fields provided", 400);
+    }
+
+    return await this.blogRepo.updateById(
+      id,
+      { $set: updates }
+    );
+  }
 
 
   async deleteBlogPost(id) {
@@ -217,4 +226,4 @@ async searchBlogs(filters, options) {
   }
 }
 
-export default  BlogPostService;
+export default BlogPostService;

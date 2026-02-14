@@ -15,7 +15,7 @@ const router = Router();
 const blogPostController = new BlogPostController();
 
 
-
+//user routes 
 
 router.get(
   "/",
@@ -23,6 +23,7 @@ router.get(
   blogPostController.getBlogPosts
 );
 
+router.get("/highest-views",blogPostController.getTopViewedBlogs);
 
 router.get("/slug/:slug", blogPostController.getBlogPostBySlug);
 
@@ -32,7 +33,7 @@ router.get("/:id", blogPostController.getBlogPostById);
 router.patch("/views-count/:id", blogPostController.incresmentViewsCount);
 
 
-
+//admin routes
 
 router.post(
   "/",

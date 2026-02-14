@@ -4,7 +4,7 @@ class BlogPostRepository {
   }
 
   async findPaginated(filter, skip, limit) {
-throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 
   async searchBlogs(filters, options) {
@@ -12,27 +12,31 @@ throw new Error('Method not implemented.');
   }
 
   async count(filter) {
-throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 
   async findById(id) {
-throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 
   async findBySlug(slug) {
-throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 
-async incrementViewsCount(id) {
-  throw new Error("Method not implemented");
-}
+  async incrementViewsCount(id) {
+    throw new Error("Method not implemented");
+  }
+
+  async getTopViewedBlogs(){
+    throw new Error("Method not implemented");
+  }
 
   async updateById(id, data) {
-throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 
   async deleteById(id) {
-throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 }
 

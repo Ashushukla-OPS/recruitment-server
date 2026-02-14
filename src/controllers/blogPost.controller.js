@@ -3,7 +3,7 @@ import { successResponse } from "../utils/apiResponse.js";
 
 class BlogPostController {
   constructor() {
-    this.blogService = new BlogPostService(); 
+    this.blogService = new BlogPostService();
   }
 
   createBlogPost = async (req, res, next) => {
@@ -16,60 +16,68 @@ class BlogPostController {
   };
 
   getBlogPosts = async (req, res, next) => {
-  try {
-    const options = req.validatedQuery || {};
+    try {
+      const options = req.validatedQuery || {};
 
-    const data = await this.blogService.getBlogPosts(options);
-   
-    res.status(200).json({
-      success: true,
-      data,
-      message: "Blog posts retrieved successfully"
-    });
+      const data = await this.blogService.getBlogPosts(options);
 
-  
+      res.status(200).json({
+        success: true,
+        data,
+        message: "Blog posts retrieved successfully"
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 
-  } catch (error) {
-    next(error);
-  }
-};
+  getTopViewedBlogs = async(req,res,next) => {
+    try{
+      const data = await this.blogService.getTopViewedBlogs();
 
-searchBlogs = async (req, res, next) => {
-  try {
-    const filters = req.body;
+      res.status(200).json({
+        success: true,
+        data,
+        message: "Top viewed blog posts retrieved successfully"
+      });
+      
+    }catch(error){
+      next(error)
+    }
+  };
 
-    const options = {
-      limit: parseInt(req.query.limit) || 10,
-      skip: parseInt(req.query.skip) || 0,
-      page: parseInt(req.query.page) || 1
-    };
+  searchBlogs = async (req, res, next) => {
+    try {
+      const filters = req.body;
 
-    const data = await this.blogService.searchBlogs(filters, options);
+      const options = {
+        limit: parseInt(req.query.limit) || 10,
+        skip: parseInt(req.query.skip) || 0,
+        page: parseInt(req.query.page) || 1
+      };
 
-    res.status(200).json({
-      success: true,
-      data
-    });
+      const data = await this.blogService.searchBlogs(filters, options);
 
-  } catch (error) {
-    next(error);
-  }
-};
+      res.status(200).json({
+        success: true,
+        data
+      });
 
-
- incresmentViewsCount = async (req, res, next) => {
-  try {
-    const blogPost = await this.blogService.incrementViewsCount(req.params.id);
-    successResponse(res, blogPost, "Blog views count incremented successfully");
-  } catch (error) {
-    next(error);
-  } };
-
-
-
+    } catch (error) {
+      next(error);
+    }
+  };
 
 
-  
+  incresmentViewsCount = async (req, res, next) => {
+    try {
+      const blogPost = await this.blogService.incrementViewsCount(req.params.id);
+      successResponse(res, blogPost, "Blog views count incremented successfully");
+    } catch (error) {
+      next(error);
+    }
+  };
+
   getBlogPostById = async (req, res, next) => {
     try {
       const blogPost = await this.blogService.getBlogPostById(req.params.id);
@@ -107,7 +115,7 @@ searchBlogs = async (req, res, next) => {
   };
 }
 
-export default  BlogPostController;
+export default BlogPostController;
 
 
 
