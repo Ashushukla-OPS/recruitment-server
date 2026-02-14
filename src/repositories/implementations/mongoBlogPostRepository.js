@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import BlogPostRepository from "../contracts/IBlogPostRepository.js";
 import BlogPostModel from "../../models/blogPost.model.js";
 import {AppError} from "../../utils/errors.js";
@@ -130,7 +131,7 @@ async incrementViewsCount(blogId) {
 
     const blogPost = await BlogPostModel.findByIdAndUpdate(
       blogId,
-      { $inc: { views: 1 } },   
+      { $inc: { "stats.views": 1 } },   
       { new: true }             
     );
 

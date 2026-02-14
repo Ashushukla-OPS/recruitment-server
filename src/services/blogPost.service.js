@@ -2,6 +2,7 @@ import { AppError } from "../utils/errors.js";
 import MongoBlogPostRepository from "../repositories/implementations/mongoBlogPostRepository.js";
 import logger from "../utils/logger.js";
 import Skill from "../models/skill.model.js";
+import jobcategory from "../models/jobCategory.model.js";
 import BlogPostModel from "../models/blogPost.model.js";
 
 
@@ -138,7 +139,7 @@ async searchBlogs(filters, options) {
   }
 
   async incrementViewsCount(id) {
-    const blog = await this.blogRepo.findById(id);
+    const blog = await this.blogRepo.incrementViewsCount(id);
     if (!blog) {
       throw new AppError("Blog not found", 404);
   }
@@ -147,7 +148,7 @@ async searchBlogs(filters, options) {
 
   async updateBlogPost(id, data) {
 
-  const existingBlog = await this.blogRepo.incrementViewsCount(id);
+  const existingBlog = await this.blogRepo.findById(id);
   if (!existingBlog) {
     throw new AppError("Blog not found", 404);
   }
