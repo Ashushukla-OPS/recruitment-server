@@ -23,10 +23,6 @@ class BlogPostRepository {
     throw new Error('Method not implemented.');
   }
 
-  async incrementViewsCount(id) {
-    throw new Error("Method not implemented");
-  }
-
   async getTopViewedBlogs(){
     throw new Error("Method not implemented");
   }

@@ -1,3 +1,4 @@
+
 import BlogPostService from "../services/blogPost.service.js";
 import { successResponse } from "../utils/apiResponse.js";
 
@@ -8,7 +9,9 @@ class BlogPostController {
 
   createBlogPost = async (req, res, next) => {
     try {
+      console.log("Request Body:", req.body);
       const blogPost = await this.blogService.createBlogPost(req.body);
+      console.log("Created Blog Post:", blogPost);
       successResponse(res, blogPost, "Blog created successfully", 201);
     } catch (error) {
       next(error);
@@ -69,14 +72,7 @@ class BlogPostController {
   };
 
 
-  incresmentViewsCount = async (req, res, next) => {
-    try {
-      const blogPost = await this.blogService.incrementViewsCount(req.params.id);
-      successResponse(res, blogPost, "Blog views count incremented successfully");
-    } catch (error) {
-      next(error);
-    }
-  };
+  
 
   getBlogPostById = async (req, res, next) => {
     try {

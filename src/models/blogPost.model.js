@@ -97,4 +97,3 @@ const BlogPostSchema = new mongoose.Schema({
 const BlogPost = mongoose.model('BlogPost', BlogPostSchema);
 
 export default BlogPost;
-

@@ -30,7 +30,7 @@ router.get("/slug/:slug", blogPostController.getBlogPostBySlug);
 
 router.get("/:id", blogPostController.getBlogPostById);
 
-router.patch("/views-count/:id", blogPostController.incresmentViewsCount);
+
 
 
 //admin routes

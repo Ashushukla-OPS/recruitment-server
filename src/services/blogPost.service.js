@@ -38,6 +38,7 @@ class BlogPostService {
       allowNewsletter: data.allowNewsletter ?? true,
       publishedAt: data.isPublished ? new Date() : null
     };
+    console.log("Blog Data to be created:", blogData);
 
     return await this.blogRepo.create(blogData);
   }
@@ -128,23 +129,13 @@ class BlogPostService {
 
   async getBlogPostBySlug(slug) {
     const blogPost = await this.blogRepo.findBySlug(slug);
-    if (!blogPost) throw new AppError("Blog not found", 404);
-
-
-    this.blogRepo.updateById(blogPost._id, {
-      $inc: { "stats.views": 1 }
-    }).catch(err => logger.warn("Failed to update view count", { error: err.message }));
-
-    return blogPost;
-  }
-
-  async incrementViewsCount(id) {
-    const blog = await this.blogRepo.incrementViewsCount(id);
-    if (!blog) {
+    if (!blogPost) {
       throw new AppError("Blog not found", 404);
     }
-    return blog;
+   return blogPost;
   }
+
+ 
 
   //top 4 most viewed blogs 
   async getTopViewedBlogs(){

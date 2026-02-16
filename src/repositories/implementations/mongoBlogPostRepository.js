@@ -44,10 +44,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
       query.category = filter.category;
     }
 
-
-
-
-    return await BlogPostModel.find(query)
+      return await BlogPostModel.find(query)
       .populate("category", "name")
       .populate("technologies", "name")
       .populate("author")
@@ -107,8 +104,20 @@ class MongoBlogPostRepository extends BlogPostRepository {
   }
 
   async findBySlug(slug) {
-    return await BlogPostModel.findOne({ slug })
-      .populate("author", "firstName lastName email");
+    const blog = await BlogPostModel.findOneAndUpdate(
+    { slug: slug },                     
+    { $inc: { "stats.views": 1 } },     
+    { new: true }                       
+  )
+  .populate("category", "name")
+  .populate("technologies", "name")
+  .populate("author");
+
+  if (!blog) {
+    throw new Error("Blog not found");
+  }
+
+  return blog;
   }
 
   async updateById(id, data) {
@@ -123,26 +132,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
     }
   }
 
-  async incrementViewsCount(blogId) {
-
-    if (!mongoose.Types.ObjectId.isValid(blogId)) {
-      throw new Error("Invalid Blog ID");
-    }
-
-    const blogPost = await BlogPostModel.findByIdAndUpdate(
-      blogId,
-      { $inc: { "stats.views": 1 } },
-      { new: true }
-    );
-
-    if (!blogPost) {
-      throw new Error("Blog post not found");
-    }
-
-    return blogPost;
-  }
-
-  //get top 4 most viewed blogs 
+  
   async getTopViewedBlogs() {
     return await BlogPostModel.aggregate([
       {
