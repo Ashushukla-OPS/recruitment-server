@@ -146,6 +146,14 @@ class MongoJobRoleRepository extends IJobRoleRepository {
           }
         },
         {
+            $lookup: {
+              from: "jobapplicationquestions",
+              localField: "_id",  
+              foreignField: "jobId",
+              as: "questions"
+            }
+        }, 
+        {
           $addFields: {
              applicantsCount: { $size: "$applications" },
             applied: {
