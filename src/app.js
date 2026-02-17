@@ -25,11 +25,13 @@ import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
+import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
 import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js"
+import categoryRoutes from "./routes/category.routes.js";
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
@@ -61,10 +63,14 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
+app.use("/api/job-questions",jobApplicationQuesition)
 
 app.use('/api/ai/', ViolationRoutes)
 app.use('/api/share', shareCandidate);
 app.use("/api/token",tokenRoutes)
+
+
+app.use("/api/categories", categoryRoutes);
 
 app.use(errorHandler);
 export default app;
