@@ -89,6 +89,22 @@ class MongoTestRepository extends ItestsRepository {
     }
   }
 
+  
+
+async deleteTest(id) {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) return null;
+
+    const deletedTest = await Tests.findByIdAndDelete(id).lean();
+    return deletedTest;
+  } catch (error) {
+    throw new AppError(`Failed to delete test: ${error.message}`, 500, error);
+  }
+}
+
+
+
+
   async findAttemptsByTest(testId) {
   try {
     return await TestAttempt.find({ testId })

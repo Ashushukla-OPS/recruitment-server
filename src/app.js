@@ -25,10 +25,13 @@ import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
 import blogPostRoutes from "./routes/blogPost.routes.js";
 import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
+import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
+// import deleteTestsRoutes from "./routes/delete-tests.routes.js";
 
 import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js"
+import categoryRoutes from "./routes/category.routes.js";
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
@@ -50,6 +53,7 @@ app.use("/api/test-attempts", testAttemptRoutes);
 app.use('/api/candidate-profile', candidateProfileRoutes);
 app.use('/api/aws' , awsRouter)
 app.use("/api/auth", resendMailRoutes);
+// app.use("/api/tests", deleteTestsRoutes);
 app.use("/api/interviews", ScheduleInterviewRoutes);
 //   to: "agr.rbih@gmail.com",
 //   name: "Rohan",
@@ -59,6 +63,7 @@ app.use("/api/interviews", ScheduleInterviewRoutes);
 
 app.use("/api/saved-jobs", savedJobRoutes);
 app.use("/api/password", passwordRoutes);
+app.use("/api/job-questions",jobApplicationQuesition)
 
 app.use('/api/ai/', ViolationRoutes)
 app.use('/api/share', shareCandidate);
@@ -67,6 +72,9 @@ app.use("/api/token",tokenRoutes)
 
 
 app.use("/api/blogs", blogPostRoutes);
+
+
+app.use("/api/categories", categoryRoutes);
 
 
 app.use(errorHandler);
