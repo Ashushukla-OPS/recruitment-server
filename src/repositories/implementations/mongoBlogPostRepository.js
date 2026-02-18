@@ -40,12 +40,6 @@ class MongoBlogPostRepository extends BlogPostRepository {
   async findPaginated(filter, skip, limit) {
 
     const query = { ...filter };
-
-
-    if (filter.category) {
-      query.category = filter.category;
-    }
-
       return await BlogPostModel.find(query)
       .populate("category", "name")
       .populate("technologies", "name")
@@ -59,96 +53,118 @@ class MongoBlogPostRepository extends BlogPostRepository {
     return await BlogPostModel.countDocuments(filter);
   }
 
-  async searchBlogs(filters, options) {
-    const { limit = 10, skip = 0, page = 1 } = options;
+   async searchBlogs(filters = {}, options = {}) {
+  const { limit = 10, page = 1 } = options;
 
-    const query = {};
-    const resolvedFilters = { ...filters };
+  // Always derive skip from page
+  const skip = (page - 1) * limit;
 
-  /* ---------------- CATEGORY ---------------- */
+  const query = {};
+
+  /* -------------------------------------------------- */
+  /* CATEGORY RESOLVER (id / name / slug)               */
+  /* -------------------------------------------------- */
 
   if (filters.category) {
+    let categoryId = null;
 
-    // If already ObjectId → keep
-    if (filters.category.match(/^[0-9a-fA-F]{24}$/)) {
-
-      resolvedFilters.category = filters.category;
-
+    if (mongoose.isValidObjectId(filters.category)) {
+      categoryId = filters.category;
     } else {
-
-      // Convert name → id
       const categoryDoc = await CategoryModel.findOne({
-        name: { $regex: `^${filters.category}$`, $options: "i" }
-      });
+        $or: [
+          { name: new RegExp(`^${filters.category}$`, "i") },
+          { slug: filters.category }
+        ]
+      }).select("_id");
 
-      if (categoryDoc) {
-        resolvedFilters.category = categoryDoc._id;
-      } else {
-        resolvedFilters.category = null; // no match
-      }
-    }
-  }
-    
-
-  //Resolve category if name/slug sent
-  if (filters.category && !mongoose.isValidObjectId(filters.category)) {
-  const cat = await CategoryModel.findOne({
-    $or: [
-      { name: filters.category },
-      { slug: filters.category }
-    ]
-    });
-
-  if (cat) {
-    query.category = cat._id;
-  }
-  }
-  
-  if (filters.technologies?.length) {
-
-    const techIds = [];
-
-    for (const tech of filters.technologies) {
-
-      if (tech.match(/^[0-9a-fA-F]{24}$/)) {
-
-        techIds.push(tech);
-
-      } else {
-
-        const techDoc = await TechnologyModel.findOne({
-          name: { $regex: `^${tech}$`, $options: "i" }
-        });
-
-        if (techDoc) techIds.push(techDoc._id);
-      }
+      if (categoryDoc) categoryId = categoryDoc._id;
     }
 
-    resolvedFilters.technologies = techIds;
-  }
-
-  if (filters.technologies?.length) {
-  const techIds = await TechnologyModel.find({
-    $or: [
-      { name: { $in: filters.technologies } },
-      { slug: { $in: filters.technologies } }
-    ]
-  }).distinct("_id");
-
-  query.technologies = { $in: techIds };
-}
-
-
-    if (filters.search) {
-      query.title = {
-        $regex: filters.search,
-        $options: "i"
+    // If category sent but not found → return empty result
+    if (!categoryId) {
+      return {
+        blogs: [],
+        pagination: { total: 0, page, limit }
       };
     }
 
-    const blogs = await BlogPostModel
-      .find(query)
-      .select(`
+    query.category = categoryId;
+  }
+
+  /* -------------------------------------------------- */
+  /* TECHNOLOGY RESOLVER (bulk lookup)                  */
+  /* -------------------------------------------------- */
+
+  if (filters.technologies?.length) {
+    const techInputs = filters.technologies;
+
+    const objectIds = techInputs.filter(id =>
+      mongoose.isValidObjectId(id)
+    );
+
+    const namesOrSlugs = techInputs.filter(
+      t => !mongoose.isValidObjectId(t)
+    );
+
+    let resolvedIds = [...objectIds];
+
+    if (namesOrSlugs.length) {
+      const techDocs = await TechnologyModel.find({
+        $or: [
+          { name: { $in: namesOrSlugs } },
+          { slug: { $in: namesOrSlugs } }
+        ]
+      }).select("_id");
+
+      resolvedIds.push(...techDocs.map(t => t._id));
+    }
+
+    if (!resolvedIds.length) {
+      return {
+        blogs: [],
+        pagination: { total: 0, page, limit }
+      };
+    }
+
+    query.technologies = { $in: resolvedIds };
+  }
+
+  /* -------------------------------------------------- */
+  /* GLOBAL SEARCH                                      */
+  /* -------------------------------------------------- */
+
+  if (filters.search) {
+    const searchRegex = new RegExp(filters.search, "i");
+
+    // Category search match
+    const categories = await CategoryModel.find({
+      name: searchRegex
+    }).select("_id");
+
+    const categoryIds = categories.map(c => c._id);
+
+    // Technology search match
+    const technologies = await TechnologyModel.find({
+      name: searchRegex
+    }).select("_id");
+
+    const techIds = technologies.map(t => t._id);
+
+    query.$or = [
+      { title: searchRegex },
+      { slug: searchRegex },
+      { category: { $in: categoryIds } },
+      { technologies: { $in: techIds } }
+    ];
+  }
+
+  /* -------------------------------------------------- */
+  /* EXECUTION                                          */
+  /* -------------------------------------------------- */
+
+  const blogs = await BlogPostModel.find(query)
+    .select(`
       title
       slug
       subtitle
@@ -159,25 +175,25 @@ class MongoBlogPostRepository extends BlogPostRepository {
       stats
       seo
       createdAt
-  `)
-      .populate("category", "name")
-      .populate("technologies", "name")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    `)
+    .populate("category", "name slug")
+    .populate("technologies", "name slug")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
-    const total = await BlogPostModel.countDocuments(query);
-   
+  const total = await BlogPostModel.countDocuments(query);
 
-    return {
-      blogs,
-      pagination: {
-        total,
-        page,
-        limit
-      }
-    };
-  }
+  return {
+    blogs,
+    pagination: {
+      total,
+      page,
+      limit
+    }
+  };
+}
+
 
   async findById(id) {
 

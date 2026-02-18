@@ -135,9 +135,7 @@ class BlogPostService {
    return blogPost;
   }
 
- 
-
-  //top 4 most viewed blogs 
+  
   async getTopViewedBlogs(){
     const blogs = await this.blogRepo.getTopViewedBlogs();
     if(!blogs){
