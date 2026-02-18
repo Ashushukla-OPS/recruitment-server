@@ -41,6 +41,21 @@ class MongoBlogPostRepository extends BlogPostRepository {
 
     const query = { ...filter };
       return await BlogPostModel.find(query)
+      .select(`
+      title
+      slug
+      subtitle
+      readingTime
+      hero
+      author
+      stats
+      category
+      technologies
+      isPublished
+      status
+      createdAt
+      updatedAt
+     `)
       .populate("category", "name")
       .populate("technologies", "name")
       .populate("author")
@@ -175,7 +190,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
       stats
       seo
       createdAt
-    `)
+     `)
     .populate("category", "name slug")
     .populate("technologies", "name slug")
     .sort({ createdAt: -1 })
