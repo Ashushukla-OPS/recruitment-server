@@ -224,6 +224,43 @@ class MongoJobRoleRepository extends IJobRoleRepository {
     }
   }
 
+  async updateJobRole(id, jobRoleData) {
+    try {
+      const updatedJobRole = await JobRole.findByIdAndUpdate(
+        id,
+        jobRoleData,
+        { new: true, runValidators: true }
+      ).populate([
+        {
+          path: "category",
+          select: "name"
+        },
+        {
+          path: "skills",
+          select: "name"
+        },
+        {
+          path: "createdBy",
+          select: "name email"
+        },
+        {
+          path: "clientId",
+          select: "name email company"
+        }
+      ]);
+
+      if (!updatedJobRole) {
+        throw new AppError("Job role not found", 404);
+      }
+
+      return updatedJobRole;
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new AppError("Job role with this title already exists for this client", 409);
+      }
+      throw error instanceof AppError ? error : new AppError("Failed to update job role", 500);
+    }
+  }
   
   async deleteJobRole(id) {
     try {
