@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import BlogPostRepository from "../contracts/IBlogPostRepository.js";
 import BlogPostModel from "../../models/blogPost.model.js";
 import { AppError } from "../../utils/errors.js";
+import CategoryModel from "../../models/jobCategory.model.js";
+import TechnologyModel from "../../models/skill.model.js";
 
 class MongoBlogPostRepository extends BlogPostRepository {
 
@@ -61,14 +63,81 @@ class MongoBlogPostRepository extends BlogPostRepository {
     const { limit = 10, skip = 0, page = 1 } = options;
 
     const query = {};
+    const resolvedFilters = { ...filters };
 
-    if (filters.category) {
-      query.category = filters.category;
+  /* ---------------- CATEGORY ---------------- */
+
+  if (filters.category) {
+
+    // If already ObjectId → keep
+    if (filters.category.match(/^[0-9a-fA-F]{24}$/)) {
+
+      resolvedFilters.category = filters.category;
+
+    } else {
+
+      // Convert name → id
+      const categoryDoc = await CategoryModel.findOne({
+        name: { $regex: `^${filters.category}$`, $options: "i" }
+      });
+
+      if (categoryDoc) {
+        resolvedFilters.category = categoryDoc._id;
+      } else {
+        resolvedFilters.category = null; // no match
+      }
+    }
+  }
+    
+
+  //Resolve category if name/slug sent
+  if (filters.category && !mongoose.isValidObjectId(filters.category)) {
+  const cat = await CategoryModel.findOne({
+    $or: [
+      { name: filters.category },
+      { slug: filters.category }
+    ]
+    });
+
+  if (cat) {
+    query.category = cat._id;
+  }
+  }
+  
+  if (filters.technologies?.length) {
+
+    const techIds = [];
+
+    for (const tech of filters.technologies) {
+
+      if (tech.match(/^[0-9a-fA-F]{24}$/)) {
+
+        techIds.push(tech);
+
+      } else {
+
+        const techDoc = await TechnologyModel.findOne({
+          name: { $regex: `^${tech}$`, $options: "i" }
+        });
+
+        if (techDoc) techIds.push(techDoc._id);
+      }
     }
 
-    if (filters.technologies?.length) {
-      query.technologies = { $in: filters.technologies };
-    }
+    resolvedFilters.technologies = techIds;
+  }
+
+  if (filters.technologies?.length) {
+  const techIds = await TechnologyModel.find({
+    $or: [
+      { name: { $in: filters.technologies } },
+      { slug: { $in: filters.technologies } }
+    ]
+  }).distinct("_id");
+
+  query.technologies = { $in: techIds };
+}
+
 
     if (filters.search) {
       query.title = {
@@ -79,6 +148,18 @@ class MongoBlogPostRepository extends BlogPostRepository {
 
     const blogs = await BlogPostModel
       .find(query)
+      .select(`
+      title
+      slug
+      subtitle
+      readingTime
+      hero.imageUrl
+      category
+      technologies
+      stats
+      seo
+      createdAt
+  `)
       .populate("category", "name")
       .populate("technologies", "name")
       .sort({ createdAt: -1 })
@@ -86,6 +167,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
       .limit(limit);
 
     const total = await BlogPostModel.countDocuments(query);
+   
 
     return {
       blogs,
@@ -100,7 +182,11 @@ class MongoBlogPostRepository extends BlogPostRepository {
   async findById(id) {
 
     return await BlogPostModel.findById(id)
-      .populate("author", "firstName lastName email");
+      .populate("author", "firstName lastName email")
+      .populate("category", "name")
+      .populate("technologies", "name");
+
+
   }
 
   async findBySlug(slug) {

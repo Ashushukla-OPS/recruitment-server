@@ -16,15 +16,11 @@ export const createBlogPostSchema = Joi.object({
   readingTime: Joi.string().optional(),
 
   category: Joi.string()
-    .hex()
-    .length(24)
     .required(),
 
   
   technologies: Joi.array()
-    .items(
-      Joi.string().hex().length(24)
-    )
+    .items(Joi.string())
     .optional()
     .default([]),
 
@@ -64,12 +60,10 @@ export const searchBlogSchema = Joi.object({
   search: Joi.string().optional(),
 
   category: Joi.string()
-    .hex()
-    .length(24)
     .optional(),
 
   technologies: Joi.array()
-    .items(Joi.string().hex().length(24))
+    .items(Joi.string())
     .optional(),
 
   page: Joi.number().min(1).optional(),
