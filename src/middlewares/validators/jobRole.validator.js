@@ -60,9 +60,9 @@ const createJobRoleSchema = Joi.object({
     "string.max": "Title cannot exceed 100 characters",
     "any.required": "Title is required",
   }),
-  requiredExperience: Joi.string().min(1).max(50).required().messages({
-    "string.min": "Required experience must be specified",
-    "string.max": "Required experience cannot exceed 50 characters",
+  requiredExperience: Joi.number().min(0).required().messages({
+    "number.base": "Required experience must be a number",
+    "number.min": "Required experience cannot be negative",
     "any.required": "Required experience is required",
   }),
   category: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).required().messages({
@@ -126,9 +126,13 @@ const updateJobRoleSchema = Joi.object({
     "string.min": "Title must be at least 3 characters long",
     "string.max": "Title cannot exceed 100 characters",
   }),
-  requiredExperience: Joi.string().min(1).max(50).messages({
-    "string.min": "Required experience must be specified",
-    "string.max": "Required experience cannot exceed 50 characters",
+  requiredExperience: Joi.number()
+  .min(0)
+  .max(50)
+  .messages({
+    "number.base": "Required experience must be a number",
+    "number.min": "Required experience must be at least 0",
+    "number.max": "Required experience cannot exceed 50",
   }),
   category: Joi.string().pattern(/^[0-9a-fA-F]{24}$/).messages({
     "string.pattern.base": "Category must be a valid ObjectId",
