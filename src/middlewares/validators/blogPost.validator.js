@@ -83,6 +83,7 @@ export const updateBlogPostSchema = Joi.object({
   subtitle: Joi.string().allow("").optional(),
   readingTime: Joi.string().optional(),
   category: Joi.array().items(Joi.string()).optional(),
+  technologies: Joi.array().items(Joi.string()).optional(),
 
   hero: Joi.object({
     imageUrl: Joi.string().uri().optional(),
@@ -98,6 +99,10 @@ export const updateBlogPostSchema = Joi.object({
     keywords: Joi.array().items(Joi.string()).optional(),
     ogImage: Joi.string().uri().allow("").optional(),
   }).optional(),
+  
+  status: Joi.string()
+    .valid("draft", "published", "archived")
+    .optional(),
 
   isPublished: Joi.boolean().optional(),
   allowNewsletter: Joi.boolean().optional(),

@@ -175,6 +175,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
       stats
       seo
       createdAt
+      status
      `)
     .populate("category", "name slug")
     .populate("technologies", "name slug")
