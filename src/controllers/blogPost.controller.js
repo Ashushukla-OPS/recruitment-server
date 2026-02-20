@@ -9,8 +9,8 @@ class BlogPostController {
 
   createBlogPost = async (req, res, next) => {
     try {
-      console.log("Request Body:", req.body);
-      const blogPost = await this.blogService.createBlogPost(req.body);
+      console.log("Request Body:", req.body, "User ID:", req.userId);
+      const blogPost = await this.blogService.createBlogPost({ ...req.body, author: req.userId });
       console.log("Created Blog Post:", blogPost);
       successResponse(res, blogPost, "Blog created successfully", 201);
     } catch (error) {

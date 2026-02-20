@@ -43,7 +43,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
       return await BlogPostModel.find(query)
       .populate("category", "name")
       .populate("technologies", "name")
-      .populate("author")
+      .populate("author", "firstName lastName email")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -201,7 +201,8 @@ class MongoBlogPostRepository extends BlogPostRepository {
     return await BlogPostModel.findById(id)
       .populate("author", "firstName lastName email")
       .populate("category", "name")
-      .populate("technologies", "name");
+      .populate("technologies", "name")
+      .populate("author", "firstName lastName email");
 
 
   }
@@ -214,7 +215,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
   )
   .populate("category", "name")
   .populate("technologies", "name")
-  .populate("author");
+  .populate("author", "firstName lastName email");
 
   if (!blog) {
     throw new Error("Blog not found");
