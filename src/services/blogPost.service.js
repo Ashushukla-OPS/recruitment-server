@@ -164,8 +164,10 @@ class BlogPostService {
       "subtitle",
       "readingTime",
       "category",
+      "technologies",
       "content",
-      "isPublished"
+      "isPublished",
+      "status"
     ];
 
     for (const field of flatFields) {
