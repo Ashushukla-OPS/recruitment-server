@@ -4,6 +4,7 @@ import BlogPostModel from "../../models/blogPost.model.js";
 import { AppError } from "../../utils/errors.js";
 import CategoryModel from "../../models/jobCategory.model.js";
 import TechnologyModel from "../../models/skill.model.js";
+import UserModel from "../../models/user.model.js";
 
 class MongoBlogPostRepository extends BlogPostRepository {
 
@@ -39,7 +40,9 @@ class MongoBlogPostRepository extends BlogPostRepository {
 
   async findPaginated(filter, skip, limit) {
 
-    const query = { ...filter };
+    const query = { ...filter,
+      status: "published" 
+     };
       return await BlogPostModel.find(query)
       .populate("category", "name")
       .populate("technologies", "name")
@@ -56,15 +59,20 @@ class MongoBlogPostRepository extends BlogPostRepository {
    async searchBlogs(filters = {}, options = {}) {
   const { limit = 10, page = 1 } = options;
 
+  
+
   // Always derive skip from page
   const skip = (page - 1) * limit;
 
-  const query = {};
+  const query = {
+    status: "published" // Only search published blogs
+
+  };
 
   /* -------------------------------------------------- */
   /* CATEGORY RESOLVER (id / name / slug)               */
   /* -------------------------------------------------- */
-
+ 
   if (filters.category) {
     let categoryId = null;
 
@@ -158,6 +166,8 @@ class MongoBlogPostRepository extends BlogPostRepository {
       { technologies: { $in: techIds } }
     ];
   }
+  
+
 
   /* -------------------------------------------------- */
   /* EXECUTION                                          */
@@ -209,7 +219,7 @@ class MongoBlogPostRepository extends BlogPostRepository {
 
   async findBySlug(slug) {
     const blog = await BlogPostModel.findOneAndUpdate(
-    { slug: slug },                     
+    { slug: slug, status: "published" },                     
     { $inc: { "stats.views": 1 } },     
     { new: true }                       
   )
