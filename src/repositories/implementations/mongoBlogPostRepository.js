@@ -5,6 +5,8 @@ import { AppError } from "../../utils/errors.js";
 import CategoryModel from "../../models/jobCategory.model.js";
 import TechnologyModel from "../../models/skill.model.js";
 import UserModel from "../../models/user.model.js";
+import jobCategoryModel from "../../models/jobCategory.model.js";
+import skillModel from "../../models/skill.model.js";
 
 class MongoBlogPostRepository extends BlogPostRepository {
 
@@ -42,8 +44,10 @@ class MongoBlogPostRepository extends BlogPostRepository {
 
     const query = { ...filter,
       status: "published" 
-     };
+     }
+     
       return await BlogPostModel.find(query)
+      
       .populate("category", "name")
       .populate("technologies", "name")
       .populate("author", "firstName lastName email")
@@ -251,7 +255,9 @@ class MongoBlogPostRepository extends BlogPostRepository {
     return await BlogPostModel.aggregate([
       {
         $match: {
-          isPublished: true
+          status: { $regex: "^published$", $options: "i" }
+          
+
         }
       },
       {
@@ -272,11 +278,91 @@ class MongoBlogPostRepository extends BlogPostRepository {
           category: 1,
           author: 1,
           "stats.views": 1,
+          status: 1,
           publishedAt: 1
         }
       }
     ]);
   }
+
+  async getRecommendedBlogsBySlug(slug, limit = 3) {
+  const currentBlog = await BlogPostModel.findOne({
+    slug,
+    status: "published"
+  }).select("category technologies");
+
+  if (!currentBlog) {
+    throw new AppError("Blog not found", 404);
+  }
+
+  const categoryId = new mongoose.Types.ObjectId(currentBlog.category);
+  const techIds = (currentBlog.technologies || []).map(
+    id => new mongoose.Types.ObjectId(id)
+  );
+
+  const recommended = await BlogPostModel.aggregate([
+    {
+      $match: {
+        slug: { $ne: slug },
+        status: "published"
+      }
+    },
+    {
+      $addFields: {
+        categoryMatch: {
+          $cond: [
+            { $eq: ["$category", categoryId] },
+            1,
+            0
+          ]
+        },
+        techMatchCount: {
+          $size: {
+            $setIntersection: [
+              { $ifNull: ["$technologies", []] },
+              techIds
+            ]
+          }
+        }
+      }
+    },
+    {
+      $addFields: {
+        matchScore: {
+          $add: ["$categoryMatch", "$techMatchCount"]
+        }
+      }
+    },
+    {
+      $match: { matchScore: { $gt: 0 } }
+    },
+    {
+      $sort: { matchScore: -1, createdAt: -1 }
+    },
+    {
+      $limit: limit
+    },
+    {
+      $project: {
+        title: 1,
+        slug: 1,
+        subtitle: 1,
+        readingTime: 1,
+        "hero.imageUrl": 1,
+        category: 1,
+        technologies: 1,
+        createdAt: 1
+      }
+    }
+  ]);
+
+  await BlogPostModel.populate(recommended, [
+    { path: "category", select: "name slug" },
+    { path: "technologies", select: "name slug" }
+  ]);
+
+  return recommended;
+}
 
   async deleteById(id) {
     return await BlogPostModel.findByIdAndDelete(id);

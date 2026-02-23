@@ -144,6 +144,10 @@ class BlogPostService {
     return blogs;
   }
 
+  async getRecommendedBlogs(slug, limit = 3) {
+  return await this.blogRepo.getRecommendedBlogsBySlug(slug, limit);
+  }
+
   async updateBlogPost(id, data) {
 
     const existingBlog = await this.blogRepo.findById(id);
