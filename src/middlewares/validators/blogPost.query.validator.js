@@ -8,6 +8,7 @@ export const blogListQuerySchema = Joi.object({
 
   category: Joi.string().optional(),
   search: Joi.string().optional(),
+  type: Joi.string().valid("admin", "user").optional(),
 
   isPublished: Joi.boolean().optional(),
   technology: Joi.string()

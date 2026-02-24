@@ -59,6 +59,10 @@ class BlogPostService {
 
     const query = {};
 
+    if (options.type !== "admin") {
+    query.status = "published";
+  }
+
     if (category) {
       query.category = category;
     }

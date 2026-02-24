@@ -42,8 +42,8 @@ class MongoBlogPostRepository extends BlogPostRepository {
 
   async findPaginated(filter, skip, limit) {
 
-    const query = { ...filter,
-      status: "published" 
+    const query = { ...filter
+      // status: "published" 
      }
      
       return await BlogPostModel.find(query)

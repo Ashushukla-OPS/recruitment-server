@@ -21,8 +21,8 @@ class BlogPostController {
   getBlogPosts = async (req, res, next) => {
     try {
       const options = req.validatedQuery || {};
-
-      const data = await this.blogService.getBlogPosts(options);
+      const  type = req.query.type ; 
+      const data = await this.blogService.getBlogPosts({...options, type});
 
       res.status(200).json({
         success: true,
