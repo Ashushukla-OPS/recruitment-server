@@ -49,6 +49,7 @@ class BlogPostService {
     let {
       limit = 10,
       skip = 0,
+      page = 1,
       category,
       technology,
       search,
@@ -110,6 +111,7 @@ class BlogPostService {
         total,
         skip,
         limit,
+        page,
         hasNext: skip + limit < total,
         hasPrev: skip > 0
       }
