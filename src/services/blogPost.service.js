@@ -53,13 +53,14 @@ class BlogPostService {
       category,
       technology,
       search,
+      isAdminRoute,
       isPublished
     } = options;
 
 
     const query = {};
 
-    if (options.type !== "admin") {
+   if (!isAdminRoute) {
     query.status = "published";
   }
 

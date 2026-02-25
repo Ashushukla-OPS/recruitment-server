@@ -22,7 +22,8 @@ class BlogPostController {
     try {
       const options = req.validatedQuery || {};
       const  type = req.query.type ; 
-      const data = await this.blogService.getBlogPosts({...options, type});
+      const isAdminRoute = req.path.includes("admin");
+      const data = await this.blogService.getBlogPosts({...options, isAdminRoute});
 
       res.status(200).json({
         success: true,
