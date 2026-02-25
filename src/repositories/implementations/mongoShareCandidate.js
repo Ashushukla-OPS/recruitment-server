@@ -3,11 +3,15 @@ import shareCandidateModel from "../../models/shareCandidate.model.js";
 import IshareCandidate from "../contracts/IShareCandidate.js";
 import mongoose from 'mongoose';
 import {AppError} from "../../utils/errors.js";
+import MongoCandidateProfileRepository from "./mongoCandidateProfileRepository.js";
+
 
 class MongoShareCandidate extends IshareCandidate {
 
   // create group and generate share linkk
   async createCandidate(users) {
+     // MongoCandidateProfileRepository._getProfileAggregationPipeline(users.selectedUsers[0])
+
    try {
      const share = await shareCandidateModel.create({  //
       groupName: users.groupName,
@@ -176,110 +180,40 @@ class MongoShareCandidate extends IshareCandidate {
          throw new AppError('Invalid or expired link', 404);
       }
 
-      const profiles = await CandidateProfile.aggregate([
-        {
-          $match: {
-            userId: {
-              $in: share.selectedUsers.map(id => new mongoose.Types.ObjectId(id)),
-            },
-          },
-        },
+const profilesPromises = share.selectedUsers.map(async (user) => {  
+    // 1. Get the pipeline for this specific user
 
-        // Populate user
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'userId',
-            foreignField: '_id',
-            as: 'user',
-          },
-        },
-        { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+    const candidateRepo = new MongoCandidateProfileRepository();
+    const pipeline = candidateRepo._getProfileAggregationPipeline(user._id);
+    
+    // 2. Run the pipeline
+    const result = await CandidateProfile.aggregate(pipeline);
+    
+    // 3. Return the user object (it's inside an array, so we return index 0)
+    if(result && result.length >0){
+    
+    return result[0]; }
 
-        // Populate skills
-        {
-          $lookup: {
-            from: 'skills',
-            localField: 'skills',
-            foreignField: '_id',
-            as: 'skillDocs',
-          },
-        },
+    return{
+      userId: user._id,
+      user:{
+        id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
 
-        // Populate experiences
-        {
-          $lookup: {
-            from: 'experiences',
-            localField: '_id',
-            foreignField: 'candidateId',
-            as: 'experiences',
-          },
-        },
+    },
 
-        // Sort experiences
-        {
-          $addFields: {
-            experiences: {
-              $sortArray: {
-                input: '$experiences',
-                sortBy: { isCurrent: -1, startDate: -1 },
-              },
-            },
-          },
-        },
 
-        // Final shape
-        {
-          $project: {
-            _id: 1,
-            userId: 1,
-            availability: 1,
-            linkedinUrl: 1,
-            githubUrl: 1,
-            portfolioUrl: 1,
-            highestEducation: 1,
-            resumeFile: 1,
-            resumeScore: 1,
-            createdAt: 1,
-            updatedAt: 1,
+    resumeFile: null ,// or you can set it to a default value if needed
+    experiences: [],
+    skills:[],
+  };
+});
 
-            user: {
-              _id: '$user._id',
-              firstName: '$user.firstName',
-              lastName: '$user.lastName',
-              email: '$user.email',
-            },
-
-            skills: {
-              $map: {
-                input: '$skillDocs',
-                as: 'skill',
-                in: {
-                  _id: '$$skill._id',
-                  name: '$$skill.name',
-                },
-              },
-            },
-
-            experiences: {
-              $map: {
-                input: '$experiences',
-                as: 'exp',
-                in: {
-                  _id: '$$exp._id',
-                  company: '$$exp.company',
-                  title: '$$exp.title',
-                  location: '$$exp.location',
-                  description: '$$exp.description',
-                  startDate: '$$exp.startDate',
-                  endDate: '$$exp.endDate',
-                  isCurrent: '$$exp.isCurrent',
-                },
-              },
-            },
-          },
-        },
-      ]);
+// Wait for all the profiles to finish fetching!
+// Then filter out any 'null' or 'undefined' results just in case.
+const profiles = (await Promise.all(profilesPromises)).filter(Boolean);
 
       const finalData = profiles.length > 0 ? profiles : share.selectedUsers;
       // 3. Send response
@@ -287,7 +221,7 @@ class MongoShareCandidate extends IshareCandidate {
       return ({ 
             groupName: share.groupName,
             count: share.selectedUsers.length,
-            data: share.selectedUsers  
+            data: finalData
         }) 
       
       
