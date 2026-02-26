@@ -178,12 +178,17 @@ class MongoShareCandidate extends IshareCandidate {
 
       if (!share) {
          throw new AppError('Invalid or expired link', 404);
+
       }
+
+        
+      
+      const candidateRepo = new MongoCandidateProfileRepository();
+
 
 const profilesPromises = share.selectedUsers.map(async (user) => {  
     // 1. Get the pipeline for this specific user
 
-    const candidateRepo = new MongoCandidateProfileRepository();
     const pipeline = candidateRepo._getProfileAggregationPipeline(user._id);
     
     // 2. Run the pipeline
