@@ -69,12 +69,29 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
           createdAt: 1,
           updatedAt: 1,
 
+           contactInfo: {
+              phone: { $ifNull: ["$contactInfo.phone", "$user.phoneNumber", ""] },
+              address: { $ifNull: ["$contactInfo.address", "$user.address", ""] }
+            },
+
+
+          socialLinks:{
+            linkedin :{  $ifNull: ["$linkedinUrl", ""] },
+            github :{ $ifNull: ["$githubUrl", ""] },
+            portfolio :{ $ifNull: ["$portfolioUrl", ""] },
+            twitter: { $ifNull: ["$twitterUrl", ""] },
+           
+
+          },
+
           // User info
           user: {
             _id: "$user._id",
             firstName: "$user.firstName",
             lastName: "$user.lastName",
             email: "$user.email",
+            phoneNumber: "$user.phoneNumber",
+              address: "$user.address",
             // add avatar, role, etc. if needed
           },
 

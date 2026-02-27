@@ -174,7 +174,7 @@ class MongoShareCandidate extends IshareCandidate {
 
 
       const share = await shareCandidateModel.findById(shareId)
-      .populate('selectedUsers', 'firstName lastName email role');
+      .populate('selectedUsers', 'firstName lastName email role phoneNumber address'); // Populate the selectedUsers with their details
 
       if (!share) {
          throw new AppError('Invalid or expired link', 404);
@@ -206,13 +206,18 @@ const profilesPromises = share.selectedUsers.map(async (user) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      phoneNumber: user.phoneNumber,
+      address: user.address,
+      
 
     },
 
-
+   
+   socialLinks: { linkedin: "", github: "", portfolio: "", twitter: "" },
     resumeFile: null ,// or you can set it to a default value if needed
     experiences: [],
     skills:[],
+    contactInfo: { phone: user.phoneNumber || "", address: user.address || "" }
   };
 });
 
