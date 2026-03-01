@@ -13,6 +13,7 @@ import { sendResetPasswordEmail } from '../services/sendMailServices/sendResetPa
 import { sendApplicationStatusUpdateEmail } from '../services/sendMailServices/sendApplicationStatusUpdateEmail.js';
 import { sendCancelledInterviewEmail } from '../services/sendMailServices/sendCancelledInterviewEmail.js';
 import { sendCancelledInterviewerEmail } from '../services/sendMailServices/sendCancelledInterviewerEmail.js';
+import { sendBlogPublishedEmail } from '../services/sendMailServices/sendBlogPublishedEmail.js';
 
 
 // NO QueueScheduler needed in BullMQ v5+
@@ -54,7 +55,11 @@ const worker = new Worker(
 
       else if (job.name === "cancel-interview-interviewer") {
         await sendCancelledInterviewerEmail(job.data);
-      } 
+      }
+      else if (job.name === "blog-published") {
+        await sendBlogPublishedEmail(job.data);
+        
+      }
 
       
       else {
@@ -68,7 +73,8 @@ const worker = new Worker(
   {
     connection,
     concurrency: 5, // Process up to 5 emails concurrently
-  }
+  },
+  
 );
 
 // Worker event listeners
