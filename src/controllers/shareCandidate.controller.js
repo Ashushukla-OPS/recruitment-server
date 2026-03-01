@@ -168,6 +168,7 @@ class ShareCandidateController {
 
         const response = await this.shareCandidateService.shareShareUser(shareId)
        return res.status(200).json({
+        success: true,
        message: 'Shared candidates fetched successfully',
        groupName: response.groupName,
        count: response.count,

@@ -8,7 +8,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
 
 
     const matchCondition = Array.isArray(userIds)
-    ? {userId : { $in: userIds.map(id => new mongoose.Types.ObjectId(userIds))}}
+    ? {userId : { $in: userIds.map(id => new mongoose.Types.ObjectId(id))}}
     : { userId: new mongoose.Types.ObjectId(userIds) };
 
     const pipeline = [
