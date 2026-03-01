@@ -1,4 +1,4 @@
-class IshareCandidate {
+class IShareCandidate {
     async createCandidate(data){
         throw Error("Method not implemented")
     }
@@ -7,7 +7,7 @@ class IshareCandidate {
     }
    
     // for update ,get, delete group
-    async getCandiateById(id){
+    async getCandidateById(id){
         throw Error ("method not implemented")
     }
 
@@ -36,4 +36,4 @@ class IshareCandidate {
 
 }
 
-export default IshareCandidate
+export default IShareCandidate

@@ -1,29 +1,26 @@
 import { CandidateProfile } from "../../models/candidateProfile.model.js";
 import shareCandidateModel from "../../models/shareCandidate.model.js";
-import IshareCandidate from "../contracts/IShareCandidate.js";
+import IShareCandidate from "../contracts/IShareCandidate.js";
 import mongoose from 'mongoose';
 import {AppError} from "../../utils/errors.js";
 import MongoCandidateProfileRepository from "./mongoCandidateProfileRepository.js";
 
 
-class MongoShareCandidate extends IshareCandidate {
+class MongoShareCandidate extends IShareCandidate {
 
   // create group and generate share linkk
   async createCandidate(users) {
-     // MongoCandidateProfileRepository._getProfileAggregationPipeline(users.selectedUsers[0])
 
    try {
-     const share = await shareCandidateModel.create({  //
+     const share = await shareCandidateModel.create({  
       groupName: users.groupName,
-      selectedUsers: users.selectedUsers, // Assuming this is an array of user IDs
+      selectedUsers: users.selectedUsers, 
     });
 
     const shareLink = `hire.sheriyans.com/api/share/${share._id}`; // Construct the shareable link using the share ID
     return {
-      shareLink, // You can also return the share ID if needed
-      group: share  // Return the created share document
-
-
+      shareLink, 
+      group: share 
    } 
   } 
   catch (error) {
@@ -62,7 +59,6 @@ class MongoShareCandidate extends IshareCandidate {
             groupName: 1,
             createdAt: 1,
             updatedAt: 1,
-            // 👇 THIS IS THE NEW PART
             // It calculates the size of the 'selectedUsers' array instantly
             memberCount: { $size: { $ifNull: ["$selectedUsers", []] } } 
           }
@@ -185,20 +181,23 @@ class MongoShareCandidate extends IshareCandidate {
       
       const candidateRepo = new MongoCandidateProfileRepository();
 
+      const userIds = share.selectedUsers.map(user => user._id)
 
-const profilesPromises = share.selectedUsers.map(async (user) => {  
-    // 1. Get the pipeline for this specific user
+     const pipeline = candidateRepo._getProfileAggregationPipeline(userIds);
 
-    const pipeline = candidateRepo._getProfileAggregationPipeline(user._id);
-    
-    // 2. Run the pipeline
-    const result = await CandidateProfile.aggregate(pipeline);
-    
-    // 3. Return the user object (it's inside an array, so we return index 0)
-    if(result && result.length >0){
-    
-    return result[0]; }
+     const fetchedProfiles = await CandidateProfile.aggregate(pipeline);
 
+     const completeProfiles = share.selectedUsers.map((user) => {
+        const foundProfile = fetchedProfiles.find(
+          (p) => p.userId.toString() === user._id.toString()
+        );
+
+        if (foundProfile) {
+          return foundProfile;
+        }
+    
+    
+ 
     return{
       userId: user._id,
       user:{
@@ -221,24 +220,23 @@ const profilesPromises = share.selectedUsers.map(async (user) => {
   };
 });
 
-// Wait for all the profiles to finish fetching!
-// Then filter out any 'null' or 'undefined' results just in case.
-const profiles = (await Promise.all(profilesPromises)).filter(Boolean);
+//const profiles = (await Promise.all(profilesPromises)).filter(Boolean);
 
-      const finalData = profiles.length > 0 ? profiles : share.selectedUsers;
-      // 3. Send response
+    
     
       return ({ 
             groupName: share.groupName,
-            count: share.selectedUsers.length,
-            data: finalData
+            count :completeProfiles.length,
+
+
+           data: completeProfiles
         }) 
       
       
       // Return count and data in the response because the frontend needs both to display the data and show the count of shared candidates.
     } catch (error) {
       console.error(error);
-      throw new AppError(  `Failed to update test attempt: ${error.message}`,   500,  error );
+      throw new AppError(  `Failed to fetch shared candidates: ${error.message}`,   500,  error );
     }
   }
 }
