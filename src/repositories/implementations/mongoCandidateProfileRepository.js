@@ -4,11 +4,17 @@ import { CandidateProfile } from "../../models/candidateProfile.model.js";
 import { AppError } from "../../utils/errors.js";
 
 class MongoCandidateProfileRepository extends ICandidateProfileRepository {
-  _getProfileAggregationPipeline(userId) {
-    return [
+  _getProfileAggregationPipeline(userIds) {
+
+
+    const matchCondition = Array.isArray(userIds)
+    ? {userId : { $in: userIds.map(id => new mongoose.Types.ObjectId(id))}}
+    : { userId: new mongoose.Types.ObjectId(userIds) };
+
+    const pipeline = [
       // 1. Find the candidate profile by userId
       {
-        $match: { userId: new mongoose.Types.ObjectId(userId) },
+        $match: matchCondition,
       },
 
       // 2. Populate basic user info
@@ -69,12 +75,29 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
           createdAt: 1,
           updatedAt: 1,
 
+           contactInfo: {
+              phone: { $ifNull: ["$contactInfo.phone", "$user.phoneNumber", ""] },
+              address: { $ifNull: ["$contactInfo.address", "$user.address", ""] }
+            },
+
+
+          socialLinks:{
+            linkedin :{  $ifNull: ["$linkedinUrl", ""] },
+            github :{ $ifNull: ["$githubUrl", ""] },
+            portfolio :{ $ifNull: ["$portfolioUrl", ""] },
+            twitter: { $ifNull: ["$twitterUrl", ""] },
+           
+
+          },
+
           // User info
           user: {
             _id: "$user._id",
             firstName: "$user.firstName",
             lastName: "$user.lastName",
             email: "$user.email",
+            phoneNumber: "$user.phoneNumber",
+              address: "$user.address",
             // add avatar, role, etc. if needed
           },
 
@@ -110,9 +133,14 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
         },
       },
 
-      { $limit: 1 },
+      
     ];
+
+    if( !Array.isArray(userIds)){
+      pipeline.push({ $limit: 1 }) // We only want one profile if userIds is a single ID
   }
+    return pipeline;
+}
 
   async createProfile(profileData) {
     try {
@@ -240,7 +268,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
       );
     }
   }
-  async getCandidatebyId(Id){
+  async getCandidateById(Id){
     if(!Id) throw new AppError("Candidate Id not found",404)
 
     const candidate = await CandidateProfile.findById(Id);
