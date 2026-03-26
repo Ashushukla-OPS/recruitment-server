@@ -21,18 +21,18 @@ class UserService {
     await this.cacheRepository.set(
       `refresh:${userId}`,
       refreshToken,
-      7 * 24 * 3600
+      7 * 24 * 3600,
     );
   }
-  
+
   // Helper: Safe role object for cache & JWT
   _getSafeRole(user) {
     return user.role
       ? {
-        _id: user.role._id,
-        name: user.role.name,
-        description: user.role.description,
-      }
+          _id: user.role._id,
+          name: user.role.name,
+          description: user.role.description,
+        }
       : null;
   }
 
@@ -68,7 +68,7 @@ class UserService {
         await this.cacheRepository.set(
           cacheKey,
           JSON.stringify(existingUser),
-          3600
+          3600,
         );
       }
     }
@@ -96,12 +96,12 @@ class UserService {
     await this.cacheRepository.set(
       `user:id:${userWithRole._id}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
     await this.cacheRepository.set(
       cacheKey,
       JSON.stringify({ ...safeUser, password: user.password }),
-      3600
+      3600,
     );
 
     const jwtPayload = {
@@ -135,7 +135,7 @@ class UserService {
     //   // throw new AppError("Failed to send verification email", 500);
     // }
 
-    // Adding into the queue for sending verification mail 
+    // Adding into the queue for sending verification mail
     try {
       emailQueue.add(
         "verification-mail",
@@ -152,11 +152,9 @@ class UserService {
           },
           removeOnComplete: true,
           removeOnFail: false,
-        }
+        },
       );
-      logger.info(
-        `Welcome email job queued for ${safeUser?.email}`
-      );
+      logger.info(`Welcome email job queued for ${safeUser?.email}`);
     } catch (error) {
       logger.warn("Failed to queue Verification email", {
         email: safeUser.email,
@@ -252,7 +250,12 @@ class UserService {
     const user = await this.userRepository.findUserById(payload.id);
     if (!user) throw new AppError("User not found", 404);
 
-    const jwtPayload = { id: user._id };
+    const jwtPayload = {
+      id: user._id,
+      email: user.email,
+      isVerified: user.isVerified,
+    };
+
     if (user.role) {
       jwtPayload.role = this._getSafeRole(user);
     }
@@ -265,7 +268,7 @@ class UserService {
 
     await this.saveRefreshToken(user._id, newRefreshToken);
 
-    return { token, refreshToken: newRefreshToken };
+    return { accessToken: token, refreshToken: newRefreshToken };
   }
 
   async getUser(id) {
@@ -284,8 +287,8 @@ class UserService {
     return safeUser;
   }
 
-  async getAllUsers(page = 1, limit = 10,search = "") {
-    const result = await this.userRepository.findAllUsers(page, limit,search);
+  async getAllUsers(page = 1, limit = 10, search = "") {
+    const result = await this.userRepository.findAllUsers(page, limit, search);
     return result;
   }
   async updateUser(id, userData) {
@@ -295,7 +298,7 @@ class UserService {
     await this.cacheRepository.set(
       `user:id:${id}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
 
     if (userData.email && userData.email !== user.email) {
@@ -304,7 +307,7 @@ class UserService {
     await this.cacheRepository.set(
       `user:email:${user.email}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
 
     return safeUser;
@@ -321,7 +324,7 @@ class UserService {
     await this.cacheRepository.set(
       `user:id:${userId}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
 
     const oldEmailKey = updates.email ? `user:email:${updates.email}` : null;
@@ -329,7 +332,7 @@ class UserService {
     await this.cacheRepository.set(
       `user:email:${updated.email}`,
       JSON.stringify({ ...safeUser, password: updated.password }),
-      3600
+      3600,
     );
 
     if (oldEmailKey && updates.email !== updated.email) {
@@ -395,21 +398,17 @@ class UserService {
     await this.cacheRepository.set(
       `user:id:${userId}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
 
     await this.cacheRepository.set(
       `user:email:${updatedUser.email}`,
       JSON.stringify(safeUser),
-      3600
+      3600,
     );
 
     return safeUser;
   }
-
-
-
-
 }
 
 export default UserService;
