@@ -14,7 +14,7 @@ class TokenController {
     try {
       // const userId = req.userId;
 
-      const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+      const token = req.cookies?.token;
       console.log("get the token from cookie check the user id  ===>", token)
 
       let decode = await jwt.verify(token, JWT_SECRET)

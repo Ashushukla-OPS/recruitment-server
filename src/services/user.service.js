@@ -268,7 +268,7 @@ class UserService {
 
     await this.saveRefreshToken(user._id, newRefreshToken);
 
-    return { accessToken: token, refreshToken: newRefreshToken };
+    return { token, refreshToken: newRefreshToken };
   }
 
   async getUser(id) {

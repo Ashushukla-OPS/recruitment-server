@@ -16,29 +16,50 @@ class UserController {
   }
 
   async getMe(req, res, next) {
-    try {
-      const userId = req.userId;
-      const user = await this.userService.getUser(userId);
+  try {
+    const userId = req.userId;
 
-      return res.status(200).json({
-        success: true,
-        data: {
-          id: user.id || user._id,
-          email: user.email,
-          role: {
-            _id: user.role._id,
-            name: user.role.name,
-            description: user.role.description,
-          },
-          firstName: user.firstName,
-          lastName: user.lastName,
-          phoneNumber: user.phoneNumber,
-        },
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
       });
-    } catch (err) {
-      next(err);
     }
+
+    const user = await this.userService.getUser(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: user.id || user._id,
+        email: user.email,
+
+        // 🔥 FIX: safe role handling
+        role: user.role
+          ? {
+              _id: user.role._id,
+              name: user.role.name,
+              description: user.role.description,
+            }
+          : null,
+
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber,
+      },
+    });
+  } catch (err) {
+    console.log("GET ME ERROR:", err);
+    next(err);
   }
+}
 
   async updateMe(req, res, next) {
     try {
