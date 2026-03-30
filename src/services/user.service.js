@@ -162,9 +162,9 @@ class UserService {
       });
     }
 
-    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "24h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
-      expiresIn: REFRESH_EXPIRES_IN,
+      expiresIn: "7d",
     });
 
     await this.saveRefreshToken(userWithRole._id, refreshToken);
@@ -219,9 +219,9 @@ class UserService {
       isVerified: safeUser?.isVerified,
     };
 
-    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "24h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
-      expiresIn: REFRESH_EXPIRES_IN,
+      expiresIn: "7d",
     });
     await this.saveRefreshToken(userWithRole._id, refreshToken);
 
@@ -260,10 +260,10 @@ class UserService {
       jwtPayload.role = this._getSafeRole(user);
     }
 
-    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "24h" });
 
     const newRefreshToken = jwt.sign({ id: user._id }, REFRESH_SECRET, {
-      expiresIn: REFRESH_EXPIRES_IN,
+      expiresIn: "7d",
     });
 
     await this.saveRefreshToken(user._id, newRefreshToken);

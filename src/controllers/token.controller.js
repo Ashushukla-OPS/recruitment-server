@@ -33,13 +33,13 @@ class TokenController {
 
       res.cookie("token", response.token, {
         ...this.cookieOptions,
-        maxAge: 60 * 60 * 1000,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
 
       });
 
       res.cookie("refreshToken", response.refreshToken, {
         ...this.cookieOptions,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
       res.status(201).json({
