@@ -32,11 +32,18 @@ import ViolationRoutes from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js";
 import categoryRoutes from "./routes/category.routes.js";
+
 import productRoutes from "./routes/product.routes.js";
+import googleAuthRoutes from "./routes/googleAuth.routes.js";
+import passport from "./config/passport.js";
+
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
+
+app.use(passport.initialize());
+
 app.use(cors(corsOptions));
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
@@ -75,6 +82,7 @@ app.use("/api/blogs", blogPostRoutes);
 app.use("/api/categories", categoryRoutes);
 
 app.use("/api/product", productRoutes);
+app.use("/api/auth", googleAuthRoutes);
 
 app.use(errorHandler);
 export default app;
