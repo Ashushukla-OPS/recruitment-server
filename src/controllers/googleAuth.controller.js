@@ -1,26 +1,32 @@
 import jwt from "jsonwebtoken";
-import { handleGoogleLogin } from "../services/googleAuth.service.js";
 
-export const googleCallback = async (req, res) => {
+export const googleAuthCallback = (req, res) => {
   try {
     const user = req.user;
 
-    const dbUser = await handleGoogleLogin(user);
-
     const token = jwt.sign(
       {
-        id: dbUser._id,
-        email: dbUser.email,
+        id:         user._id,
+        email:      user.email,
+        firstName:  user.firstName,
+        lastName:   user.lastName,
+        isVerified: user.isVerified,
+        role:       user.roleId,   
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" },
+      { expiresIn: "7d" }
     );
 
-    const redirectUrl = `http://localhost:3000`;
-    return res.redirect(redirectUrl);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    res.redirect(`${process.env.CLIENT_URL}/auth/success?token=${token}`);
+  } catch (err) {
+    res.status(500).json({ message: "Auth failed", error: err.message });
   }
+};
+
+export const authFailed = (req, res) => {
+  res.status(401).json({ success: false, message: "Google authentication failed" });
+};
+
+export const getMe = (req, res) => {
+  res.status(200).json({ success: true, user: req.user });
 };

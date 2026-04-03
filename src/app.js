@@ -34,15 +34,24 @@ import tokenRoutes from "./routes/token.route.js";
 import categoryRoutes from "./routes/category.routes.js";
 
 import productRoutes from "./routes/product.routes.js";
+import session from "express-session";        
+import passport from "passport";              
+import "../src/config/passport.js";           
 import googleAuthRoutes from "./routes/googleAuth.routes.js";
-import passport from "./config/passport.js";
 
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+}));
+
 app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(cors(corsOptions));
 app.use("/api/users", userRoutes);
