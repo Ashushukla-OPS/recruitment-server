@@ -1,5 +1,5 @@
 import axios from "axios";
-import { logoUrl } from "./constants.js";
+import { email_style, logoUrl } from "./constants.js";
 
 const FRONTEND_URL = "https://hire.sheryians.com";
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
@@ -17,6 +17,7 @@ export async function sendResetPasswordEmail(data) {
       to: [{ email: data.to, name: data.name || "User" }],
       subject: "Reset Your Password",
       htmlContent: `
+      ${email_style}
 <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; padding: 40px 10px;">
   <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
     
@@ -28,11 +29,12 @@ export async function sendResetPasswordEmail(data) {
              alt="S" 
              width="38" 
              height="38" 
+             class="logo-img"
              style="max-height: 38px; 
              width: 40px; 
              display: block; 
              border: 0;
-             margin-right: 8px;
+             margin-right: 0px;
              " />
           </td>
           <td style="vertical-align: middle;">

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { logoUrl } from "./constants.js";
+import { email_style, logoUrl } from "./constants.js";
 
 const FRONTEND_URL = "https://hire.sheryians.com";
 
@@ -27,6 +27,7 @@ export const sendApplicationStatusUpdateEmail = async ({
       subject: `Application Status Update: ${jobTitle}`,
 
       htmlContent: `
+      ${email_style}
 <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; padding: 40px 10px;">
   <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
     
@@ -34,7 +35,9 @@ export const sendApplicationStatusUpdateEmail = async ({
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: auto;">
         <tr>
           <td style="vertical-align: middle;">
-            <img src="${logoUrl}" alt="Sheryians Logo" style="max-height: 35px; width: auto; display: block; margin-right: 8px;" />
+            <img src="${logoUrl}" alt="Sheryians Logo" 
+            class="logo-img"
+            style="max-height: 35px; width: auto; display: block; margin-right: 8px;" />
           </td>
           <td style="vertical-align: middle;">
             <span style="color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; line-height: 1;">Sheryians.</span>
