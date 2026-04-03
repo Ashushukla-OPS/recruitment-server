@@ -455,7 +455,7 @@ class UserService {
     logger.info(`Blast queued for ${successCount} users`);
 
     return {
-      message: `Blast queued for ${successCount} users 🚀`,
+      message: `Blast queued for ${successCount} users.`,
     };
   } catch (error) {
     logger.error("Blast queue failed", error);
