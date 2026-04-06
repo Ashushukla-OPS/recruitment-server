@@ -1,13 +1,13 @@
 import express from "express";
 import passport from "passport";
-import { googleAuthCallback, authFailed, getMe } from "../controllers/googleAuth.controller.js";
+import AuthController from "../controllers/googleAuth.controller.js";
 import isAuthenticated from "../middlewares/isAuthenticated.js";
 
 const router = express.Router();
 
 router.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile", "email"] }),
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 router.get(
@@ -16,11 +16,11 @@ router.get(
     session: false,
     failureRedirect: "/api/auth/failed",
   }),
-  googleAuthCallback,
+  AuthController.googleAuthCallback
 );
 
-router.get("/failed", authFailed);
+router.get("/failed", AuthController.authFailed);
 
-router.get("/me", isAuthenticated, getMe);
+router.get("/me", isAuthenticated, AuthController.getMe);
 
 export default router;
