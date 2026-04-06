@@ -37,7 +37,7 @@ class AuthController {
 
       res.cookie("token", tokens.token, {
         ...this.cookieOptions,
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        maxAge: 15* 60 * 1000, // 24 hours
       });
 
       res.cookie("refreshToken", tokens.refreshToken, {
@@ -58,7 +58,7 @@ class AuthController {
 
     res.cookie("token", result.token, {
   ...this.cookieOptions,
-  maxAge: 24 * 60 * 60 * 1000,  // 24 hours
+  maxAge: 15* 60 * 1000,  // 24 hours
 
 });
 
@@ -82,7 +82,7 @@ class AuthController {
 
      res.cookie("token", result.token, {
   ...this.cookieOptions,
- maxAge: 24 * 60 * 60 * 1000,   // 24 hours
+ maxAge: 15* 60 * 1000,   // 24 hours
 
 });
 
