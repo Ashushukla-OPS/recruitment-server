@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 
 class AuthController {
   static googleAuthCallback(req, res) {
+    
     try {
       const user = req.user;
 
