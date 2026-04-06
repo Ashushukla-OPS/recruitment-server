@@ -164,7 +164,7 @@ class UserService {
 
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "24h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
-      expiresIn: "7d",
+      expiresIn: REFRESH_EXPIRES_IN,
     });
 
     await this.saveRefreshToken(userWithRole._id, refreshToken);
@@ -221,7 +221,7 @@ class UserService {
 
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "24h" });
     const refreshToken = jwt.sign({ id: userWithRole._id }, REFRESH_SECRET, {
-      expiresIn: "7d",
+      expiresIn: REFRESH_EXPIRES_IN,
     });
     await this.saveRefreshToken(userWithRole._id, refreshToken);
 
@@ -263,7 +263,7 @@ class UserService {
     const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: "24h" });
 
     const newRefreshToken = jwt.sign({ id: user._id }, REFRESH_SECRET, {
-      expiresIn: "7d",
+      expiresIn: REFRESH_EXPIRES_IN,
     });
 
     await this.saveRefreshToken(user._id, newRefreshToken);
