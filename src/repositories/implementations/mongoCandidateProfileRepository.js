@@ -69,6 +69,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
           linkedinUrl: 1,
           githubUrl: 1,
           portfolioUrl: 1,
+          leetcodeUrl:1,
           highestEducation: 1,
           resumeFile: 1,
           resumeScore: 1,
