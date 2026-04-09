@@ -6,8 +6,7 @@ const authService = new AuthService();
 
 export const authenticateJWT = async (req, res, next) => {
   try {
-    const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies?.token;
     if (!token) {
       throw new AppError("Access denied. No token provided.", 401);
     }
@@ -20,8 +19,12 @@ export const authenticateJWT = async (req, res, next) => {
     }
 
     const decoded = authService.verifyToken(token);
-    console.log(decoded);
+<<<<<<< updatepassword/vaibhav
     if (!decoded.isVerified || decoded.isVerified === false) {
+=======
+    console.log(decoded);
+    if (decoded.isVerified === false) {
+>>>>>>> dev
       throw new AppError("User is not verified", 401);
     }
     req.userId = decoded.id;
