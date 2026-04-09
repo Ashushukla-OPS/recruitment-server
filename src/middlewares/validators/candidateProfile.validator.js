@@ -16,6 +16,9 @@ const createProfileSchema = Joi.object({
   githubUrl: Joi.string().uri().optional().allow('').messages({
     "string.uri": "GitHub URL must be a valid URL",
   }),
+   leetcodeUrl: Joi.string().uri().optional().allow('').messages({
+    "string.uri": "LeetcodeUrl URL must be a valid URL",
+  }),
   portfolioUrl: Joi.string().uri().optional().allow('').messages({
     "string.uri": "Portfolio URL must be a valid URL",
   }),
