@@ -19,12 +19,7 @@ export const authenticateJWT = async (req, res, next) => {
     }
 
     const decoded = authService.verifyToken(token);
-<<<<<<< updatepassword/vaibhav
     if (!decoded.isVerified || decoded.isVerified === false) {
-=======
-    console.log(decoded);
-    if (decoded.isVerified === false) {
->>>>>>> dev
       throw new AppError("User is not verified", 401);
     }
     req.userId = decoded.id;
