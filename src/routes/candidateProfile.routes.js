@@ -21,7 +21,7 @@ router.post(
 );
 
 router.get("/get-profile", authenticateJWT, candidateProfileController.getProfile);
-
+router.get("/get-profile/:Id", authenticateJWT, candidateProfileController.getProfileById);
 router.patch("/update-profile", authenticateJWT, updateProfileValidator, candidateProfileController.updateProfile);
 
 router.delete("/delete-profile", authenticateJWT, candidateProfileController.deleteProfile);
