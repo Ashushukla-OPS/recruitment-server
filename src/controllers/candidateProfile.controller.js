@@ -35,7 +35,7 @@ class CandidateProfileController {
   });
 
   getProfileById = asyncHandler(async (req, res) => {
-    console.log("Check Cheking");
+   
     
     const profile = await this.candidateProfileService.getProfileByUserId(
       req.params.Id
