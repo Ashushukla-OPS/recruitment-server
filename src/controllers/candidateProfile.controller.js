@@ -34,6 +34,19 @@ class CandidateProfileController {
     });
   });
 
+  getProfileById = asyncHandler(async (req, res) => {
+   
+    
+    const profile = await this.candidateProfileService.getProfileByUserId(
+      req.params.Id
+    );
+
+    res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  });
+
   updateProfile = asyncHandler(async (req, res) => {
     const profileData = req.body;
     console.log(profileData);
