@@ -145,6 +145,5 @@ const validate = (schema) => (req, _res, next) => {
   }
   next();
 };
-
 export const createQuestionsValidator = validate(createApplicationQuestionsSchema);
 export const updateQuestionValidator = validate(updateQuestionDataSchema);

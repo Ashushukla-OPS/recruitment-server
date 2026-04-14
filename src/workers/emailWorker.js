@@ -13,53 +13,40 @@ import { sendResetPasswordEmail } from '../services/sendMailServices/sendResetPa
 import { sendApplicationStatusUpdateEmail } from '../services/sendMailServices/sendApplicationStatusUpdateEmail.js';
 import { sendCancelledInterviewEmail } from '../services/sendMailServices/sendCancelledInterviewEmail.js';
 import { sendCancelledInterviewerEmail } from '../services/sendMailServices/sendCancelledInterviewerEmail.js';
-import { sendBlogPublishedEmail } from '../services/sendMailServices/sendBlogPublishedEmail.js';
 
 
 // NO QueueScheduler needed in BullMQ v5+
 // BullMQ automatically handles delayed jobs, retries, etc. when Worker is active
 
 const worker = new Worker(
-  'email',
+  "email",
   async (job) => {
     logger.info(`Processing job ${job.id} - ${job.name}`);
 
     try {
-      if (job.name === 'welcome-candidate') {
+      if (job.name === "welcome-candidate") {
         await sendWelcomeEmail(job.data);
-      } 
-      else if (job.name === 'verification-mail') {
+      } else if (job.name === "verification-mail") {
         await sendVerificationEmail(job.data);
-      } 
-      else if (job.name === 'enroll-candidate') {
+      } else if (job.name === "enroll-candidate") {
         await sendEnrollEmail(job.data);
-      } 
-      else if (job.name === 'schedule-interview') {
+      } else if (job.name === "schedule-interview") {
         // Send to both candidate and interviewer
         await sendScheduleInterviewEmail(job.data);
         await sendScheduleInterviewerEmail(job.data);
-      } 
-      else if (job.name === 'reschedule-interview') {
+      } else if (job.name === "reschedule-interview") {
         // Send to both candidate and interviewer
         await sendRescheduledInterviewEmail(job.data);
         await sendRescheduledInterviewerEmail(job.data);
-      } 
-      else if (job.name === 'reset-password') {
+      } else if (job.name === "reset-password") {
         await sendResetPasswordEmail(job.data);
       } else if (job.name === "application-status-update") {
         await sendApplicationStatusUpdateEmail(job.data);
-      } 
-      else if (job.name === "cancel-interview") {
+      } else if (job.name === "cancel-interview") {
         await sendCancelledInterviewEmail(job.data);
-      }
-
-      else if (job.name === "cancel-interview-interviewer") {
+      } else if (job.name === "cancel-interview-interviewer") {
         await sendCancelledInterviewerEmail(job.data);
-      }
-      else if (job.name === "blog-published") {
-        await sendBlogPublishedEmail(job.data);
-        
-      }
+      } 
 
       
       else {
@@ -73,21 +60,22 @@ const worker = new Worker(
   {
     connection,
     concurrency: 5, // Process up to 5 emails concurrently
-  },
-  
+  }
 );
 
 // Worker event listeners
-worker.on('completed', (job) => {
+worker.on("completed", (job) => {
   logger.info(`Job ${job.id} (${job.name}) completed successfully`);
 });
 
-worker.on('failed', (job, err) => {
-  logger.error(`Job ${job?.id} (${job?.name}) failed: ${err.message}`, { error: err });
+worker.on("failed", (job, err) => {
+  logger.error(`Job ${job?.id} (${job?.name}) failed: ${err.message}`, {
+    error: err,
+  });
 });
 
-worker.on('error', (err) => {
-  logger.error('Worker encountered an error:', { error: err });
+worker.on("error", (err) => {
+  logger.error("Worker encountered an error:", { error: err });
 });
 
-logger.info('BullMQ Email Worker started — ready to process email jobs!');
+logger.info("BullMQ Email Worker started — ready to process email jobs!");

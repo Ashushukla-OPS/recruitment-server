@@ -24,7 +24,8 @@ const CandidateProfileSchema = new Schema(
     linkedinUrl: String,
     githubUrl: String,
     portfolioUrl: String,
-
+    leetcodeUrl: String,
+    
     highestEducation: { type: String },
     resumeFile: { type: String },
     resumeScore: { type: Number },

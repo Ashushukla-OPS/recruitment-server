@@ -1,4 +1,4 @@
-
+import mongoose, { mongo } from 'mongoose';
 import ShareCandidateService from '../services/shareCandidate.service.js';
 class ShareCandidateController {
   constructor (){
@@ -15,6 +15,17 @@ class ShareCandidateController {
         message: "Group name is required"
       })
      }
+
+     if(!users || !Array.isArray(users) || users.length === 0){
+
+      return res.status(400).json({
+        success: false,
+        message: "At least one user must be selected"
+      });
+
+     }
+
+
 
       const response = await this.shareCandidateService.createShareUsers({
         groupName,
@@ -52,6 +63,15 @@ class ShareCandidateController {
   getSingleGroup = async(req,res,next)=>{
     try{
       const {id} = req.params;
+
+      if(!mongoose.Types.ObjectId.isValid(id)){
+        return res.status(400).json({
+          success: false,
+          message: "Invalid group ID"
+        })
+
+        
+      }
       const group = await this.shareCandidateService.getSingleGroup(id);
       res.status(200).json({
         success: true,
@@ -148,6 +168,7 @@ class ShareCandidateController {
 
         const response = await this.shareCandidateService.shareShareUser(shareId)
        return res.status(200).json({
+        success: true,
        message: 'Shared candidates fetched successfully',
        groupName: response.groupName,
        count: response.count,
