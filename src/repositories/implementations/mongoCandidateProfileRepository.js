@@ -168,7 +168,7 @@ class MongoCandidateProfileRepository extends ICandidateProfileRepository {
       return await CandidateProfile.findByIdAndUpdate(
         id,
         { $set: profileData },
-        { new: true }
+        { new: true, runValidators: true, context: "query" }
       );
     } catch (error) {
       throw new AppError(`Failed to update profile: ${error.message}`, 500);
