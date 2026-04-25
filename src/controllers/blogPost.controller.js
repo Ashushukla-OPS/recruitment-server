@@ -9,9 +9,7 @@ class BlogPostController {
 
   createBlogPost = async (req, res, next) => {
     try {
-      console.log("Request Body:", req.body);
-      const blogPost = await this.blogService.createBlogPost(req.body);
-      console.log("Created Blog Post:", blogPost);
+      const blogPost = await this.blogService.createBlogPost({ ...req.body, author: req.userId });
       successResponse(res, blogPost, "Blog created successfully", 201);
     } catch (error) {
       next(error);
@@ -21,8 +19,9 @@ class BlogPostController {
   getBlogPosts = async (req, res, next) => {
     try {
       const options = req.validatedQuery || {};
-
-      const data = await this.blogService.getBlogPosts(options);
+      const  type = req.query.type ; 
+      const isAdminRoute = req.path.includes("admin");
+      const data = await this.blogService.getBlogPosts({...options, isAdminRoute});
 
       res.status(200).json({
         success: true,
@@ -48,6 +47,27 @@ class BlogPostController {
       next(error)
     }
   };
+
+  getRecommendedBlogs = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const { limit = 3 } = req.query;
+
+    const blogs = await this.blogService.getRecommendedBlogs(
+      slug,
+      Number(limit)
+    );
+
+    res.status(200).json({
+      success: true,
+      data: blogs,
+      message: "Recommended blogs fetched successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
   searchBlogs = async (req, res, next) => {
     try {

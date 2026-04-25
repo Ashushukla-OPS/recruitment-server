@@ -10,6 +10,8 @@ export const updateBlogPostSchema = Joi.object({
 
   category: Joi.array().items(Joi.string()),
 
+  technologies: Joi.array().items(Joi.string()),
+
   hero: Joi.object({
     imageUrl: Joi.string().uri(),
     caption: Joi.string().allow(""),
@@ -25,7 +27,12 @@ export const updateBlogPostSchema = Joi.object({
     ogImage: Joi.string().uri().allow("")
   }),
 
-  isPublished: Joi.boolean()
+  isPublished: Joi.boolean(),
+
+   status: Joi.string()
+    .valid("draft", "published", "archived")
+    .optional()
+
 
 })
 .unknown(false);   
