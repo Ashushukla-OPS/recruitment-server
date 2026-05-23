@@ -4,11 +4,13 @@ import cookieParser from "cookie-parser";
 import config from "./config/environment.js"; 
 import userRoute from "./routes/user.route.js";
 import { ApiError } from "./utils/ApiError.js";
+import {UserValidator} from './middlewares/validator/user.validator.js'
+import validate from "./middlewares/validationMiddleware/validation.middleware.js"
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173" || "http://localhost:3000",
+    origin:["http://localhost:5173", "http://localhost:3000"],
     credentials: true,
   })
 );
@@ -18,7 +20,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 app.use(cookieParser()); 
 
-app.use("/api/v1/users", userRoute);
+app.use("/api/v1/users",validate(UserValidator), userRoute);
 
 app.use((err, req, res, next) => {
 
