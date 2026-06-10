@@ -19,6 +19,7 @@ import { authenticateJWT } from "./middlewares/auth.middleware.js";
 import testRoutes from "./routes/test.routes.js";
 import testEnrollmentRoutes from "./routes/TestEnrollment.routes.js";
 import testAttemptRoutes from "./routes/testAttempts.routes.js";
+import readerRoutes from './routes/reader.routes.js';   
 import awsRouter from './routes/aws.route.js'
 import resendMailRoutes from "./routes/resendMail.routes.js";
 import ScheduleInterviewRoutes from "./routes/scheduleInterview.routes.js";
@@ -27,7 +28,8 @@ import savedJobRoutes from "./routes/savedJob.routes.js";
 import passwordRoutes from "./routes/password.routes.js";
 import jobApplicationQuesition from "./routes/jobApplicationQuesition.route.js";
 // import deleteTestsRoutes from "./routes/delete-tests.routes.js";
-
+import adminProfileRoutes from "./routes/adminProfile.routes.js";
+import candidateRoutes from "./routes/candidate.routes.js";
 import ViolationRoutes  from "./routes/testViolation.routes.js";
 import shareCandidate from "./routes/shareCandidate.routes.js";
 import tokenRoutes from "./routes/token.route.js"
@@ -77,6 +79,22 @@ app.use("/api", readerRoutes);
 
 
 app.use("/api/categories", categoryRoutes);
+
+
+
+
+
+
+
+
+
+//candidate
+app.use("/api/candidate",candidateRoutes)
+
+
+
+
+
 
 
 app.use(errorHandler);
