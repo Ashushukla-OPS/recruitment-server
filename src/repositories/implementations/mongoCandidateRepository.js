@@ -1,4 +1,4 @@
-import ICandidateRepository from "../contracts/candidateRepository.js" 
+import ICandidateRepository from "../contracts/IcandidateRepository.js" 
 import CandidateModel from "../../models/candidate.model.js"
 
 class MongoCandidateRepository extends ICandidateRepository{
@@ -7,14 +7,15 @@ class MongoCandidateRepository extends ICandidateRepository{
     return candidate;
   }
  async getCandidateByEmail(email){
-   return await CandidateModel.findOne({email})
+   return await CandidateModel.findOne({email}).lean()
  }
- async getAllCandidates(){
-    const candidates = await CandidateModel.find()
-    return candidates
+ async getAllCandidates(skip,limit){
+    const candidates = await CandidateModel.find().skip(skip).limit(limit).lean()
+    const total = await CandidateModel.countDocuments()
+    return {candidates,total}
  }  
  async getCandidateById(id){
-    const candidate = await CandidateModel.findById(id)
+    const candidate = await CandidateModel.findById(id).lean()
     return candidate
  }
  async updateCandidate(id,updateData){
@@ -25,6 +26,9 @@ class MongoCandidateRepository extends ICandidateRepository{
     const candidate = await CandidateModel.findByIdAndDelete(id)
     return candidate
  }  
+ async getCandidateByPhone(phone) {
+   return await CandidateModel.findOne({ phone }).lean()
+}
 }
 
 export default MongoCandidateRepository

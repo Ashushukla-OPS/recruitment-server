@@ -15,7 +15,6 @@ const candidateSchema= mongoose.Schema({
 },
  resume:{
     type:String,
-   
     trim:true
 },
  skills:{
